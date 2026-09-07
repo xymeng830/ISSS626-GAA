@@ -1,0 +1,309 @@
+---
+title: "Hands-on Exercise 03: Spatio-Temporal Point Patterns Analysis"
+author: "Meng Xinyu"
+date: "`r Sys.Date()`"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+editor: visual
+---
+
+# **6  Spatio-Temporal Point Patterns Analysis**
+
+```{r}
+pacman::p_load(sf, spatstat, sparr, tmap, stpp, tidyverse)
+```
+
+```{r}
+idn <- st_read("data/rawdata/idn_admin4.shp")
+colnames(idn)
+```
+
+```{r}
+kbb_raw <- idn %>%
+  filter(adm1_name == "Kepulauan Bangka Belitung")
+
+st_write(kbb_raw,
+         "data/rawdata/Kepulauan_Bangka_Belitung.shp",
+         delete_dsn = TRUE)
+```
+
+## **6.1 Importing and Preparing Study Area**
+
+### **6.1.1 Importing study area**
+
+```{r}
+kbb_sf <- st_read(dsn = "data/rawdata",
+                  layer = "Kepulauan_Bangka_Belitung") %>%
+  st_union() %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 32748)
+```
+
+### **6.1.2 Converting OWIN**
+
+```{r}
+kbb_owin <- as.owin(kbb_sf)
+kbb_owin
+```
+
+```{r}
+class(kbb_owin)
+```
+
+## **6.2 Importing and Preparing Forest Fire data**
+
+```{r}
+fire <- read_csv("data/rawdata/fire_archive_M-C61_800295.csv")
+colnames(fire)
+```
+
+```{r}
+fire_sf <- read_csv("data/rawdata/fire_archive_M-C61_800295.csv") %>%
+  st_as_sf(coords = c("longitude", "latitude"),
+           crs = 4326) %>%
+  st_transform(crs = 32748)
+```
+
+## **6.3 Visualising the Fire Points**
+
+### **6.3.1 Overall plot**
+
+```{r}
+tm_shape(kbb_sf)+
+  tm_polygons() +
+tm_shape(fire_sf) +
+  tm_dots()
+```
+
+```{r}
+fire_sf <- fire_sf %>%
+  mutate(DayofYear = yday(acq_date)) %>%
+  mutate(Month_num = month(acq_date)) %>%
+  mutate(Month_fac = month(acq_date,
+                           label = TRUE,
+                           abbr = FALSE))
+```
+
+### **6.3.2 Visuaising geographic distribution of forest fires by month**
+
+```{r}
+tm_shape(kbb_sf)+
+  tm_polygons() +
+tm_shape(fire_sf) +
+  tm_dots(size = 0.1) +
+tm_facets(by="Month_fac", 
+            free.coords=FALSE, 
+            drop.units = TRUE)
+```
+
+## **6.4 Computing STKDE by Month**
+
+### **6.4.1 Extracting forest fires by month**
+
+```{r}
+fire_month <- fire_sf %>% 
+  select(Month_num)
+```
+
+### **6.4.2 Creating ppp**
+
+```{r}
+fire_month_ppp <- as.ppp(fire_month)
+fire_month_ppp
+```
+
+```{r}
+summary(fire_month_ppp)
+```
+
+```{r}
+fire_month_ppp <- rjitter(fire_month_ppp, retry = TRUE, nsim = 1, drop = TRUE)
+```
+
+```{r}
+any(duplicated(fire_month_ppp))
+```
+
+### **6.4.3 Including Owin object**
+
+```{r}
+fire_month_owin <- fire_month_ppp[kbb_owin]
+summary(fire_month_owin)
+```
+
+```{r}
+plot(fire_month_owin)
+```
+
+### **6.4.4 Computing Spatio-temporal KDE**
+
+```{r}
+st_kde <- spattemp.density(fire_month_owin)
+summary(st_kde)
+```
+
+### **6.4.5 Plotting the spatio-temporal KDE object**
+
+```{r}
+tims <- c(7,8,9,10,11,12)
+par(mfcol=c(2,3))
+for(i in tims){ 
+  plot(st_kde, i, 
+       override.par=FALSE, 
+       fix.range=TRUE, 
+       main=paste("KDE at month",i))
+}
+```
+
+## **6.5 Computing STKDE by Day of Year**
+
+### **6.5.1 Creating ppp object**
+
+```{r}
+fire_yday_ppp <- fire_sf %>% 
+  select(DayofYear) %>%
+  as.ppp()
+```
+
+### **6.5.2 Including Owin object**
+
+```{r}
+fire_yday_owin <- fire_yday_ppp[kbb_owin]
+summary(fire_yday_owin)
+```
+
+### **6.5.3**
+
+```{r}
+kde_yday <- spattemp.density(
+  fire_yday_owin)
+summary(kde_yday)
+```
+
+```{r}
+tims <- c(250, 251, 252, 253, 254, 255)
+par(mfcol = c(2, 3))
+for(i in tims){
+  plot(kde_yday, i,
+       override.par = FALSE,
+       fix.range = TRUE,
+       main = paste("KDE at day", i))
+}
+```
+
+## **6.6 Computing STKDE by Day of Year: Improved method**
+
+```{r}
+set.seed(1234)
+BOOT.spattemp(fire_yday_owin) 
+```
+
+### **6.6.1 Computing spatio-temporal KDE**
+
+```{r}
+kde_yday <- spattemp.density(fire_yday_owin,
+                             h = 9000,
+                             lambda = 19)
+summary(kde_yday)
+```
+
+### **6.6.2 Plotting the output spatio-temporal KDE**
+
+```{r}
+tims <- c(250, 251, 252, 253, 254, 255)
+par(mfcol = c(2, 3))
+for(i in tims){
+  plot(kde_yday, i,
+       override.par = FALSE,
+       fix.range = TRUE,
+       main = paste("KDE at day", i))
+}
+```
+
+## **6.7 Spatio-temporal Point Patterns Analysis: stpp methods**
+
+### **6.7.1 Preparing spatio-temporal point process object of stpp**
+
+```{r}
+coords <- st_coordinates(fire_sf)
+```
+
+```{r}
+fire_df <- data.frame(
+  x = coords[, 1],  
+  y = coords[, 2],
+  t = fire_sf$`DayofYear`)
+```
+
+```{r}
+fire_stpp <- as.3dpoints(fire_df)
+```
+
+```{r}
+class(fire_stpp)
+```
+
+```{r}
+plot(fire_stpp)
+```
+
+### **6.7.2 Computing spatio-temporal k-function**
+
+```{r}
+   fire_sf <- fire_sf[kbb_sf, ]
+   nrow(fire_sf)  
+```
+
+```{r}
+kbb_sf <- st_read(dsn = "data/rawdata", layer = "Kepulauan_Bangka_Belitung") %>%
+  st_union() %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 32748)
+```
+
+```{r}
+fire_sf <- read_csv("data/rawdata/fire_archive_M-C61_800295.csv") %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+  st_transform(crs = 32748)
+
+fire_sf <- fire_sf[kbb_sf, ]              
+nrow(fire_sf)                             
+
+fire_sf <- fire_sf %>%
+  mutate(DayofYear = yday(acq_date),
+         Month_num = month(acq_date),
+         Month_fac = month(acq_date, label = TRUE, abbr = FALSE))
+```
+
+```{r}
+# Step 1: extract coordinates from the fire point events
+coords <- st_coordinates(fire_sf)
+
+# Step 2: build a data frame of x, y, and time (t must be integer)
+fire_df <- data.frame(
+  x = coords[, 1],
+  y = coords[, 2],
+  t = fire_sf$DayofYear)
+
+# Step 3: create the stpp spatio-temporal object
+fire_stpp <- as.3dpoints(fire_df)
+
+class(fire_stpp)
+```
+
+```{r}
+plot(fire_stpp)
+
+kbb_stik <- STIKhat(fire_stpp)
+
+plotK(kbb_stik)
+```
+
+# What I Learned
+
+In this exercise, I learned how to conduct spatio-temporal point pattern analysis in R, using 2023 forest fire events in Kepulauan Bangka Belitung, Indonesia as the case study. I prepared the data by importing the study area shapefile, reprojecting it to UTM Zone 48S (EPSG:32748), and converting it into an owin window, then turned the fire CSV into an sf point object and derived temporal marks such as month and day-of-year using lubridate. I learned the difference between first-order and second-order spatio-temporal analysis: for the first, I used spattemp.density() from the sparr package to estimate spatio-temporal kernel density, with BOOT.spattemp() providing objective spatial and temporal bandwidths; for the second, I built a stpp object with as.3dpoints() and computed the space-time inhomogeneous K-function using STIKhat(). Finally, I learned to interpret the resulting plot, recognising that high values at short spatial and temporal distances indicate that fires cluster closely in both space and time rather than occurring randomly across the region and the year.

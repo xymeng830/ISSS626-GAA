@@ -5,3 +5,10 @@
 
 /.quarto/
 **/*.quarto_ipynb
+
+**/data/
+**/rawdata/
+_site/
+_freeze/
+*_files/
+.Rproj.user

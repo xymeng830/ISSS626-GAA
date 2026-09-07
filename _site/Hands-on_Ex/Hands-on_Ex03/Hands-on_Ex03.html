@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Meng Xinyu">
+<meta name="dcterms.date" content="2026-09-07">
+
+<title>Hands-on Exercise 03: Spatio-Temporal Point Patterns Analysis – ISSS626 Geospatial Analytics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-4eaa7e2902977deb636442ed8e0cf898.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">ISSS626 Geospatial Analytics</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Hands-on Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html">
+ <span class="dropdown-text">Hands-on Ex01</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html">
+ <span class="dropdown-text">Hands-on Ex02</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03.html">
+ <span class="dropdown-text">Hands-on Ex03</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">In-class Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex01/In-class_Ex01.qmd">
+ <span class="dropdown-text">In-class Ex01</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Take-home Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01.qmd">
+ <span class="dropdown-text">Take-home Ex01</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#spatio-temporal-point-patterns-analysis" id="toc-spatio-temporal-point-patterns-analysis" class="nav-link active" data-scroll-target="#spatio-temporal-point-patterns-analysis"><strong>6&nbsp; Spatio-Temporal Point Patterns Analysis</strong></a>
+  <ul>
+  <li><a href="#importing-and-preparing-study-area" id="toc-importing-and-preparing-study-area" class="nav-link" data-scroll-target="#importing-and-preparing-study-area"><strong>6.1 Importing and Preparing Study Area</strong></a>
+  <ul class="collapse">
+  <li><a href="#importing-study-area" id="toc-importing-study-area" class="nav-link" data-scroll-target="#importing-study-area"><strong>6.1.1 Importing study area</strong></a></li>
+  <li><a href="#converting-owin" id="toc-converting-owin" class="nav-link" data-scroll-target="#converting-owin"><strong>6.1.2 Converting OWIN</strong></a></li>
+  </ul></li>
+  <li><a href="#importing-and-preparing-forest-fire-data" id="toc-importing-and-preparing-forest-fire-data" class="nav-link" data-scroll-target="#importing-and-preparing-forest-fire-data"><strong>6.2 Importing and Preparing Forest Fire data</strong></a></li>
+  <li><a href="#visualising-the-fire-points" id="toc-visualising-the-fire-points" class="nav-link" data-scroll-target="#visualising-the-fire-points"><strong>6.3 Visualising the Fire Points</strong></a>
+  <ul class="collapse">
+  <li><a href="#overall-plot" id="toc-overall-plot" class="nav-link" data-scroll-target="#overall-plot"><strong>6.3.1 Overall plot</strong></a></li>
+  <li><a href="#visuaising-geographic-distribution-of-forest-fires-by-month" id="toc-visuaising-geographic-distribution-of-forest-fires-by-month" class="nav-link" data-scroll-target="#visuaising-geographic-distribution-of-forest-fires-by-month"><strong>6.3.2 Visuaising geographic distribution of forest fires by month</strong></a></li>
+  </ul></li>
+  <li><a href="#computing-stkde-by-month" id="toc-computing-stkde-by-month" class="nav-link" data-scroll-target="#computing-stkde-by-month"><strong>6.4 Computing STKDE by Month</strong></a>
+  <ul class="collapse">
+  <li><a href="#extracting-forest-fires-by-month" id="toc-extracting-forest-fires-by-month" class="nav-link" data-scroll-target="#extracting-forest-fires-by-month"><strong>6.4.1 Extracting forest fires by month</strong></a></li>
+  <li><a href="#creating-ppp" id="toc-creating-ppp" class="nav-link" data-scroll-target="#creating-ppp"><strong>6.4.2 Creating ppp</strong></a></li>
+  <li><a href="#including-owin-object" id="toc-including-owin-object" class="nav-link" data-scroll-target="#including-owin-object"><strong>6.4.3 Including Owin object</strong></a></li>
+  <li><a href="#computing-spatio-temporal-kde" id="toc-computing-spatio-temporal-kde" class="nav-link" data-scroll-target="#computing-spatio-temporal-kde"><strong>6.4.4 Computing Spatio-temporal KDE</strong></a></li>
+  <li><a href="#plotting-the-spatio-temporal-kde-object" id="toc-plotting-the-spatio-temporal-kde-object" class="nav-link" data-scroll-target="#plotting-the-spatio-temporal-kde-object"><strong>6.4.5 Plotting the spatio-temporal KDE object</strong></a></li>
+  </ul></li>
+  <li><a href="#computing-stkde-by-day-of-year" id="toc-computing-stkde-by-day-of-year" class="nav-link" data-scroll-target="#computing-stkde-by-day-of-year"><strong>6.5 Computing STKDE by Day of Year</strong></a>
+  <ul class="collapse">
+  <li><a href="#creating-ppp-object" id="toc-creating-ppp-object" class="nav-link" data-scroll-target="#creating-ppp-object"><strong>6.5.1 Creating ppp object</strong></a></li>
+  <li><a href="#including-owin-object-1" id="toc-including-owin-object-1" class="nav-link" data-scroll-target="#including-owin-object-1"><strong>6.5.2 Including Owin object</strong></a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"><strong>6.5.3</strong></a></li>
+  </ul></li>
+  <li><a href="#computing-stkde-by-day-of-year-improved-method" id="toc-computing-stkde-by-day-of-year-improved-method" class="nav-link" data-scroll-target="#computing-stkde-by-day-of-year-improved-method"><strong>6.6 Computing STKDE by Day of Year: Improved method</strong></a>
+  <ul class="collapse">
+  <li><a href="#computing-spatio-temporal-kde-1" id="toc-computing-spatio-temporal-kde-1" class="nav-link" data-scroll-target="#computing-spatio-temporal-kde-1"><strong>6.6.1 Computing spatio-temporal KDE</strong></a></li>
+  <li><a href="#plotting-the-output-spatio-temporal-kde" id="toc-plotting-the-output-spatio-temporal-kde" class="nav-link" data-scroll-target="#plotting-the-output-spatio-temporal-kde"><strong>6.6.2 Plotting the output spatio-temporal KDE</strong></a></li>
+  </ul></li>
+  <li><a href="#spatio-temporal-point-patterns-analysis-stpp-methods" id="toc-spatio-temporal-point-patterns-analysis-stpp-methods" class="nav-link" data-scroll-target="#spatio-temporal-point-patterns-analysis-stpp-methods"><strong>6.7 Spatio-temporal Point Patterns Analysis: stpp methods</strong></a>
+  <ul class="collapse">
+  <li><a href="#preparing-spatio-temporal-point-process-object-of-stpp" id="toc-preparing-spatio-temporal-point-process-object-of-stpp" class="nav-link" data-scroll-target="#preparing-spatio-temporal-point-process-object-of-stpp"><strong>6.7.1 Preparing spatio-temporal point process object of stpp</strong></a></li>
+  <li><a href="#computing-spatio-temporal-k-function" id="toc-computing-spatio-temporal-k-function" class="nav-link" data-scroll-target="#computing-spatio-temporal-k-function"><strong>6.7.2 Computing spatio-temporal k-function</strong></a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I Learned</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Hands-on Exercise 03: Spatio-Temporal Point Patterns Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Meng Xinyu </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 7, 2026</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">September 7, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="spatio-temporal-point-patterns-analysis" class="level1">
+<h1><strong>6&nbsp; Spatio-Temporal Point Patterns Analysis</strong></h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spatstat, sparr, tmap, stpp, tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>idn <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/rawdata/idn_admin4.shp"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `idn_admin4' from data source 
+  `/Users/mengxinyu/ISSS626-GAA/Hands-on_Ex/Hands-on_Ex03/data/rawdata/idn_admin4.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 81912 features and 36 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 95.01079 ymin: -11.00762 xmax: 141.0194 ymax: 6.07693
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(idn)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "adm4_name"  "adm4_name1" "adm4_name2" "adm4_name3" "adm4_pcode"
+ [6] "adm3_name"  "adm3_name1" "adm3_name2" "adm3_name3" "adm3_pcode"
+[11] "adm2_name"  "adm2_name1" "adm2_name2" "adm2_name3" "adm2_pcode"
+[16] "adm1_name"  "adm1_name1" "adm1_name2" "adm1_name3" "adm1_pcode"
+[21] "adm0_name"  "adm0_name1" "adm0_name2" "adm0_name3" "adm0_pcode"
+[26] "valid_on"   "valid_to"   "area_sqkm"  "version"    "lang"      
+[31] "lang1"      "lang2"      "lang3"      "adm4_ref_n" "center_lat"
+[36] "center_lon" "geometry"  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>kbb_raw <span class="ot">&lt;-</span> idn <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(adm1_name <span class="sc">==</span> <span class="st">"Kepulauan Bangka Belitung"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(kbb_raw,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">"data/rawdata/Kepulauan_Bangka_Belitung.shp"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">delete_dsn =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Deleting source `data/rawdata/Kepulauan_Bangka_Belitung.shp' using driver `ESRI Shapefile'
+Writing layer `Kepulauan_Bangka_Belitung' to data source 
+  `data/rawdata/Kepulauan_Bangka_Belitung.shp' using driver `ESRI Shapefile'
+Writing 391 features with 36 fields and geometry type Multi Polygon.</code></pre>
+</div>
+</div>
+<section id="importing-and-preparing-study-area" class="level2">
+<h2 class="anchored" data-anchor-id="importing-and-preparing-study-area"><strong>6.1 Importing and Preparing Study Area</strong></h2>
+<section id="importing-study-area" class="level3">
+<h3 class="anchored" data-anchor-id="importing-study-area"><strong>6.1.1 Importing study area</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>kbb_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/rawdata"</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">layer =</span> <span class="st">"Kepulauan_Bangka_Belitung"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">"ZM"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `Kepulauan_Bangka_Belitung' from data source 
+  `/Users/mengxinyu/ISSS626-GAA/Hands-on_Ex/Hands-on_Ex03/data/rawdata' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 391 features and 36 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 105.1084 ymin: -3.416903 xmax: 108.848 ymax: -1.501757
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+</section>
+<section id="converting-owin" class="level3">
+<h3 class="anchored" data-anchor-id="converting-owin"><strong>6.1.2 Converting OWIN</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>kbb_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(kbb_sf)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>kbb_owin</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>window: polygonal boundary
+enclosing rectangle: [512053.7, 928107.3] x [9621818, 9833989] units</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(kbb_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "owin"</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="importing-and-preparing-forest-fire-data" class="level2">
+<h2 class="anchored" data-anchor-id="importing-and-preparing-forest-fire-data"><strong>6.2 Importing and Preparing Forest Fire data</strong></h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fire <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/rawdata/fire_archive_M-C61_800295.csv"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(fire)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "latitude"   "longitude"  "brightness" "scan"       "track"     
+ [6] "acq_date"   "acq_time"   "satellite"  "instrument" "confidence"
+[11] "version"    "bright_t31" "frp"        "daynight"   "type"      </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/rawdata/fire_archive_M-C61_800295.csv"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="visualising-the-fire-points" class="level2">
+<h2 class="anchored" data-anchor-id="visualising-the-fire-points"><strong>6.3 Visualising the Fire Points</strong></h2>
+<section id="overall-plot" class="level3">
+<h3 class="anchored" data-anchor-id="overall-plot"><strong>6.3.1 Overall plot</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf)<span class="sc">+</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex03_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DayofYear =</span> <span class="fu">yday</span>(acq_date)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month_num =</span> <span class="fu">month</span>(acq_date)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month_fac =</span> <span class="fu">month</span>(acq_date,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                           <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                           <span class="at">abbr =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="visuaising-geographic-distribution-of-forest-fires-by-month" class="level3">
+<h3 class="anchored" data-anchor-id="visuaising-geographic-distribution-of-forest-fires-by-month"><strong>6.3.2 Visuaising geographic distribution of forest fires by month</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf)<span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_facets</span>(<span class="at">by=</span><span class="st">"Month_fac"</span>, </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">free.coords=</span><span class="cn">FALSE</span>, </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">drop.units =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex03_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="computing-stkde-by-month" class="level2">
+<h2 class="anchored" data-anchor-id="computing-stkde-by-month"><strong>6.4 Computing STKDE by Month</strong></h2>
+<section id="extracting-forest-fires-by-month" class="level3">
+<h3 class="anchored" data-anchor-id="extracting-forest-fires-by-month"><strong>6.4.1 Extracting forest fires by month</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fire_month <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Month_num)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="creating-ppp" class="level3">
+<h3 class="anchored" data-anchor-id="creating-ppp"><strong>6.4.2 Creating ppp</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fire_month_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(fire_month)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>fire_month_ppp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern: 53128 points
+marks are numeric, of storage type  'double'
+window: rectangle = [-568058, 4774682] x [8738630, 10624406] units</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_ppp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  53128 points
+Average intensity 5.273138e-09 points per square unit
+
+*Pattern contains duplicated points*
+
+Coordinates are given to 14 decimal places
+
+marks are numeric, of type 'double'
+Summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.000   8.000   9.000   8.717  10.000  12.000 
+
+Window: rectangle = [-568058, 4774682] x [8738630, 10624406] units
+                    (5343000 x 1886000 units)
+Window area = 1.00752e+13 square units</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fire_month_ppp <span class="ot">&lt;-</span> <span class="fu">rjitter</span>(fire_month_ppp, <span class="at">retry =</span> <span class="cn">TRUE</span>, <span class="at">nsim =</span> <span class="dv">1</span>, <span class="at">drop =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(fire_month_ppp))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+</div>
+</section>
+<section id="including-owin-object" class="level3">
+<h3 class="anchored" data-anchor-id="including-owin-object"><strong>6.4.3 Including Owin object</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>fire_month_owin <span class="ot">&lt;-</span> fire_month_ppp[kbb_owin]</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  903 points
+Average intensity 5.404034e-08 points per square unit
+
+Coordinates are given to 10 decimal places
+
+marks are numeric, of type 'double'
+Summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.000   8.000   9.000   8.645  10.000  12.000 
+
+Window: polygonal boundary
+278 separate polygons (no holes)
+             vertices        area relative.area
+polygon 1       16176 1.15467e+10      6.91e-01
+polygon 2          20 1.26644e+04      7.58e-07
+polygon 3          23 9.26148e+04      5.54e-06
+polygon 4          30 3.37145e+04      2.02e-06
+polygon 5          54 3.25210e+05      1.95e-05
+polygon 6          36 1.30251e+06      7.79e-05
+polygon 7         133 1.16489e+06      6.97e-05
+polygon 8          70 1.91331e+05      1.15e-05
+polygon 9         117 1.51938e+05      9.09e-06
+polygon 10         96 1.14343e+05      6.84e-06
+polygon 11         24 4.57388e+03      2.74e-07
+polygon 12         25 1.18350e+04      7.08e-07
+polygon 13        131 1.52336e+05      9.12e-06
+polygon 14         41 1.08051e+04      6.47e-07
+polygon 15         54 3.46933e+05      2.08e-05
+polygon 16         72 2.15827e+05      1.29e-05
+polygon 17         27 1.89588e+03      1.13e-07
+polygon 18         80 1.05646e+05      6.32e-06
+polygon 19         24 4.30354e+03      2.58e-07
+polygon 20        120 1.64767e+05      9.86e-06
+polygon 21         43 1.15924e+04      6.94e-07
+polygon 22         19 3.54741e+03      2.12e-07
+polygon 23        330 3.08593e+06      1.85e-04
+polygon 24        191 2.36948e+06      1.42e-04
+polygon 25         82 8.83099e+04      5.28e-06
+polygon 26         49 6.13131e+04      3.67e-06
+polygon 27        129 7.65905e+04      4.58e-06
+polygon 28          5 1.73957e+04      1.04e-06
+polygon 29       6444 4.61702e+09      2.76e-01
+polygon 30          4 6.36011e+03      3.81e-07
+polygon 31         16 1.18305e+05      7.08e-06
+polygon 32          5 2.11524e+04      1.27e-06
+polygon 33         12 3.54495e+04      2.12e-06
+polygon 34         13 6.20225e+04      3.71e-06
+polygon 35          8 1.23192e+04      7.37e-07
+polygon 36          5 1.08324e+04      6.48e-07
+polygon 37          5 9.14466e+03      5.47e-07
+polygon 38          6 9.61182e+03      5.75e-07
+polygon 39         31 1.54535e+06      9.25e-05
+polygon 40          9 2.89833e+04      1.73e-06
+polygon 41         11 2.76319e+04      1.65e-06
+polygon 42         12 8.99519e+04      5.38e-06
+polygon 43         15 5.42899e+04      3.25e-06
+polygon 44          9 1.59051e+04      9.52e-07
+polygon 45          6 1.35402e+04      8.10e-07
+polygon 46          4 4.29114e+03      2.57e-07
+polygon 47         23 1.76941e+05      1.06e-05
+polygon 48         46 4.35817e+04      2.61e-06
+polygon 49          5 6.83234e+03      4.09e-07
+polygon 50          5 6.67681e+03      4.00e-07
+polygon 51          5 2.24960e+03      1.35e-07
+polygon 52          7 2.62410e+04      1.57e-06
+polygon 53          9 1.19871e+04      7.17e-07
+polygon 54          8 2.25166e+04      1.35e-06
+polygon 55          6 1.21530e+04      7.27e-07
+polygon 56          5 8.76372e+03      5.24e-07
+polygon 57          9 2.28011e+04      1.36e-06
+polygon 58          6 9.21520e+03      5.51e-07
+polygon 59         49 1.00152e+05      5.99e-06
+polygon 60          5 4.45701e+03      2.67e-07
+polygon 61          4 2.90445e+03      1.74e-07
+polygon 62          4 3.68660e+03      2.21e-07
+polygon 63         69 9.91665e+04      5.93e-06
+polygon 64          5 3.03755e+03      1.82e-07
+polygon 65          6 1.05159e+04      6.29e-07
+polygon 66         12 9.48324e+03      5.68e-07
+polygon 67         13 6.95065e+04      4.16e-06
+polygon 68         34 2.01268e+05      1.20e-05
+polygon 69        229 1.23405e+06      7.39e-05
+polygon 70          4 2.60396e+03      1.56e-07
+polygon 71          7 8.47987e+03      5.07e-07
+polygon 72          5 8.09566e+03      4.84e-07
+polygon 73         95 2.08272e+05      1.25e-05
+polygon 74         18 7.79534e+04      4.67e-06
+polygon 75         24 1.58871e+04      9.51e-07
+polygon 76          4 8.84551e+02      5.29e-08
+polygon 77         44 4.25752e+04      2.55e-06
+polygon 78          5 4.40652e+03      2.64e-07
+polygon 79          4 2.45347e+03      1.47e-07
+polygon 80          5 4.70738e+03      2.82e-07
+polygon 81        217 2.22673e+06      1.33e-04
+polygon 82         65 5.45704e+04      3.27e-06
+polygon 83          7 4.52332e+03      2.71e-07
+polygon 84          6 1.47384e+04      8.82e-07
+polygon 85          6 1.35523e+04      8.11e-07
+polygon 86         52 9.01072e+04      5.39e-06
+polygon 87          4 1.53570e+03      9.19e-08
+polygon 88         32 4.34407e+04      2.60e-06
+polygon 89        147 5.46546e+05      3.27e-05
+polygon 90         36 7.39284e+04      4.42e-06
+polygon 91         42 9.17464e+04      5.49e-06
+polygon 92        141 1.10139e+06      6.59e-05
+polygon 93         96 2.55417e+05      1.53e-05
+polygon 94         81 3.75480e+04      2.25e-06
+polygon 95         74 9.11239e+05      5.45e-05
+polygon 96          5 4.23910e+03      2.54e-07
+polygon 97         48 1.10206e+05      6.60e-06
+polygon 98          6 1.00635e+04      6.02e-07
+polygon 99         33 2.35528e+04      1.41e-06
+polygon 100       120 3.80491e+05      2.28e-05
+polygon 101        20 3.14002e+04      1.88e-06
+polygon 102        42 1.21240e+05      7.26e-06
+polygon 103        24 3.83264e+04      2.29e-06
+polygon 104        88 4.56947e+05      2.73e-05
+polygon 105        20 1.78311e+04      1.07e-06
+polygon 106        20 2.39230e+04      1.43e-06
+polygon 107         5 6.65848e+03      3.98e-07
+polygon 108         5 5.41794e+03      3.24e-07
+polygon 109        53 4.55018e+05      2.72e-05
+polygon 110       263 1.76197e+07      1.05e-03
+polygon 111         4 6.79553e+03      4.07e-07
+polygon 112        17 5.84071e+03      3.50e-07
+polygon 113        25 2.16665e+05      1.30e-05
+polygon 114         9 7.99698e+03      4.79e-07
+polygon 115         8 3.28857e+03      1.97e-07
+polygon 116        10 1.13477e+04      6.79e-07
+polygon 117        45 1.05244e+05      6.30e-06
+polygon 118         7 4.67575e+03      2.80e-07
+polygon 119      1477 4.81100e+07      2.88e-03
+polygon 120       650 1.19875e+08      7.17e-03
+polygon 121        68 3.72768e+06      2.23e-04
+polygon 122        10 1.01915e+05      6.10e-06
+polygon 123        19 8.26882e+04      4.95e-06
+polygon 124        17 4.00986e+04      2.40e-06
+polygon 125        11 4.05800e+04      2.43e-06
+polygon 126       111 1.46838e+06      8.79e-05
+polygon 127       112 3.73963e+06      2.24e-04
+polygon 128        19 1.91739e+04      1.15e-06
+polygon 129        73 3.61915e+06      2.17e-04
+polygon 130        10 3.05705e+04      1.83e-06
+polygon 131         6 1.62985e+04      9.75e-07
+polygon 132       127 2.10345e+05      1.26e-05
+polygon 133         8 2.09365e+04      1.25e-06
+polygon 134         9 2.23158e+04      1.34e-06
+polygon 135        11 1.96459e+04      1.18e-06
+polygon 136       145 7.13727e+06      4.27e-04
+polygon 137       190 1.81834e+05      1.09e-05
+polygon 138        75 2.06444e+06      1.24e-04
+polygon 139        39 2.64974e+04      1.59e-06
+polygon 140      2813 2.13023e+08      1.27e-02
+polygon 141        26 2.21137e+05      1.32e-05
+polygon 142         6 6.87472e+03      4.11e-07
+polygon 143        31 1.67778e+06      1.00e-04
+polygon 144         7 9.00061e+03      5.39e-07
+polygon 145        12 6.30884e+04      3.78e-06
+polygon 146       202 2.25185e+07      1.35e-03
+polygon 147        46 2.39825e+06      1.44e-04
+polygon 148        50 1.07270e+04      6.42e-07
+polygon 149         8 4.61444e+04      2.76e-06
+polygon 150         7 3.16310e+04      1.89e-06
+polygon 151         5 6.49748e+03      3.89e-07
+polygon 152        12 2.17426e+04      1.30e-06
+polygon 153         5 7.19829e+03      4.31e-07
+polygon 154        11 6.58154e+05      3.94e-05
+polygon 155       160 1.11858e+06      6.69e-05
+polygon 156       106 3.97298e+05      2.38e-05
+polygon 157        14 3.77575e+05      2.26e-05
+polygon 158        27 1.21313e+06      7.26e-05
+polygon 159       360 7.99522e+04      4.78e-06
+polygon 160        56 6.47301e+04      3.87e-06
+polygon 161       360 7.21524e+04      4.32e-06
+polygon 162       360 3.31507e+04      1.98e-06
+polygon 163       360 3.90012e+04      2.33e-06
+polygon 164        59 5.31603e+06      3.18e-04
+polygon 165        48 1.76671e+06      1.06e-04
+polygon 166        35 5.03510e+04      3.01e-06
+polygon 167        58 1.83939e+04      1.10e-06
+polygon 168        21 5.33448e+03      3.19e-07
+polygon 169       249 3.09426e+06      1.85e-04
+polygon 170        28 1.99132e+05      1.19e-05
+polygon 171        21 4.52072e+05      2.71e-05
+polygon 172        14 5.66642e+04      3.39e-06
+polygon 173        12 1.09826e+05      6.57e-06
+polygon 174        15 1.37135e+06      8.21e-05
+polygon 175         6 1.22311e+05      7.32e-06
+polygon 176        47 2.41118e+05      1.44e-05
+polygon 177         7 2.79839e+04      1.67e-06
+polygon 178        46 1.72672e+06      1.03e-04
+polygon 179        13 6.36559e+04      3.81e-06
+polygon 180        11 7.02064e+05      4.20e-05
+polygon 181        47 9.13823e+05      5.47e-05
+polygon 182        62 3.95150e+06      2.36e-04
+polygon 183         9 4.34654e+05      2.60e-05
+polygon 184        14 4.20828e+04      2.52e-06
+polygon 185        20 5.14005e+03      3.08e-07
+polygon 186        31 7.44742e+05      4.46e-05
+polygon 187        18 4.11233e+05      2.46e-05
+polygon 188        25 7.73779e+03      4.63e-07
+polygon 189         8 3.86018e+04      2.31e-06
+polygon 190       210 7.46360e+06      4.47e-04
+polygon 191         4 9.19985e+03      5.51e-07
+polygon 192        14 2.75390e+05      1.65e-05
+polygon 193         9 9.63810e+03      5.77e-07
+polygon 194         9 6.16370e+04      3.69e-06
+polygon 195        10 1.04977e+05      6.28e-06
+polygon 196         8 8.75224e+04      5.24e-06
+polygon 197         5 1.84010e+04      1.10e-06
+polygon 198         5 3.30308e+03      1.98e-07
+polygon 199        13 3.15608e+04      1.89e-06
+polygon 200        67 3.93597e+05      2.36e-05
+polygon 201         4 2.83736e+03      1.70e-07
+polygon 202        16 4.91732e+03      2.94e-07
+polygon 203         4 1.26776e+03      7.59e-08
+polygon 204         8 1.67293e+04      1.00e-06
+polygon 205        12 2.45852e+04      1.47e-06
+polygon 206        12 5.95782e+04      3.57e-06
+polygon 207        50 5.34706e+03      3.20e-07
+polygon 208        38 1.08273e+04      6.48e-07
+polygon 209        36 1.59140e+04      9.52e-07
+polygon 210        21 1.90132e+03      1.14e-07
+polygon 211        34 3.85385e+06      2.31e-04
+polygon 212        44 7.02208e+03      4.20e-07
+polygon 213        46 5.81229e+03      3.48e-07
+polygon 214        31 4.14222e+03      2.48e-07
+polygon 215        16 4.56058e+05      2.73e-05
+polygon 216        29 1.42452e+04      8.53e-07
+polygon 217        38 2.65576e+04      1.59e-06
+polygon 218        27 4.58869e+03      2.75e-07
+polygon 219        96 5.26088e+05      3.15e-05
+polygon 220        61 1.00655e+05      6.02e-06
+polygon 221        31 7.13048e+04      4.27e-06
+polygon 222        85 1.37243e+06      8.21e-05
+polygon 223       180 8.26968e+05      4.95e-05
+polygon 224        59 1.98986e+05      1.19e-05
+polygon 225       116 3.13325e+05      1.88e-05
+polygon 226       134 4.76075e+05      2.85e-05
+polygon 227       102 1.63410e+07      9.78e-04
+polygon 228        21 6.42532e+03      3.85e-07
+polygon 229        10 7.72548e+03      4.62e-07
+polygon 230       205 1.42142e+06      8.51e-05
+polygon 231       125 2.33639e+06      1.40e-04
+polygon 232        32 2.58895e+04      1.55e-06
+polygon 233        25 2.06544e+04      1.24e-06
+polygon 234        87 1.25178e+06      7.49e-05
+polygon 235        40 4.05100e+04      2.42e-06
+polygon 236        10 5.04046e+04      3.02e-06
+polygon 237         6 1.12481e+04      6.73e-07
+polygon 238        40 1.56824e+05      9.39e-06
+polygon 239        66 5.25078e+04      3.14e-06
+polygon 240         8 1.11133e+04      6.65e-07
+polygon 241        11 1.53991e+03      9.22e-08
+polygon 242        18 4.61307e+03      2.76e-07
+polygon 243        41 4.12896e+04      2.47e-06
+polygon 244         7 3.03565e+03      1.82e-07
+polygon 245        19 7.54562e+03      4.52e-07
+polygon 246        18 8.34406e+03      4.99e-07
+polygon 247        26 5.16289e+05      3.09e-05
+polygon 248        13 9.23973e+04      5.53e-06
+polygon 249        25 4.18386e+04      2.50e-06
+polygon 250         7 3.85109e+03      2.30e-07
+polygon 251        82 4.38488e+05      2.62e-05
+polygon 252       165 3.46331e+06      2.07e-04
+polygon 253        11 5.22200e+03      3.13e-07
+polygon 254        13 3.28209e+04      1.96e-06
+polygon 255         6 3.00930e+04      1.80e-06
+polygon 256         7 1.13351e+04      6.78e-07
+polygon 257        13 2.03132e+05      1.22e-05
+polygon 258        38 2.87613e+04      1.72e-06
+polygon 259         7 1.13203e+04      6.77e-07
+polygon 260        15 4.10660e+03      2.46e-07
+polygon 261        44 1.67056e+05      1.00e-05
+polygon 262        11 6.66261e+04      3.99e-06
+polygon 263       129 2.29313e+06      1.37e-04
+polygon 264         6 7.23358e+04      4.33e-06
+polygon 265        24 6.50053e+03      3.89e-07
+polygon 266       107 1.06864e+06      6.40e-05
+polygon 267         9 2.30454e+04      1.38e-06
+polygon 268        38 9.13816e+03      5.47e-07
+polygon 269        72 1.08578e+05      6.50e-06
+polygon 270        64 2.19772e+05      1.32e-05
+polygon 271        25 2.58054e+05      1.54e-05
+polygon 272        26 4.59971e+04      2.75e-06
+polygon 273        59 8.30359e+04      4.97e-06
+polygon 274        83 1.13991e+06      6.82e-05
+polygon 275        11 3.01697e+04      1.81e-06
+polygon 276        14 1.30442e+05      7.81e-06
+polygon 277        22 2.37056e+05      1.42e-05
+polygon 278        23 1.84825e+05      1.11e-05
+enclosing rectangle: [512053.7, 928107.3] x [9621818, 9833989] units
+                     (416100 x 212200 units)
+Window area = 16709700000 square units
+Fraction of frame area: 0.189</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fire_month_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex03_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="computing-spatio-temporal-kde" class="level3">
+<h3 class="anchored" data-anchor-id="computing-spatio-temporal-kde"><strong>6.4.4 Computing Spatio-temporal KDE</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>st_kde <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(fire_month_owin)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st_kde)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 19052.08 (spatial)
+  lambda = 0.0264 (temporal)
+
+No. of observations
+  903 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [512053.7, 928107.3] x [9621818, 9833989]
+
+Temporal bound
+  [1, 12]
+
+Evaluation
+  128 x 128 x 12 trivariate lattice
+  Density range: [4.10577e-40, 6.36957e-10]</code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-the-spatio-temporal-kde-object" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-the-spatio-temporal-kde-object"><strong>6.4.5 Plotting the spatio-temporal KDE object</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>tims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> tims){ </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(st_kde, i, </span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par=</span><span class="cn">FALSE</span>, </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range=</span><span class="cn">TRUE</span>, </span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">main=</span><span class="fu">paste</span>(<span class="st">"KDE at month"</span>,i))</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex03_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="computing-stkde-by-day-of-year" class="level2">
+<h2 class="anchored" data-anchor-id="computing-stkde-by-day-of-year"><strong>6.5 Computing STKDE by Day of Year</strong></h2>
+<section id="creating-ppp-object" class="level3">
+<h3 class="anchored" data-anchor-id="creating-ppp-object"><strong>6.5.1 Creating ppp object</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>fire_yday_ppp <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(DayofYear) <span class="sc">%&gt;%</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.ppp</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="including-owin-object-1" class="level3">
+<h3 class="anchored" data-anchor-id="including-owin-object-1"><strong>6.5.2 Including Owin object</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>fire_yday_owin <span class="ot">&lt;-</span> fire_yday_ppp[kbb_owin]</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_yday_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  905 points
+Average intensity 5.416003e-08 points per square unit
+
+Coordinates are given to 10 decimal places
+
+marks are numeric, of type 'double'
+Summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   10.0   220.0   258.0   247.8   288.0   360.0 
+
+Window: polygonal boundary
+278 separate polygons (no holes)
+             vertices        area relative.area
+polygon 1       16176 1.15467e+10      6.91e-01
+polygon 2          20 1.26644e+04      7.58e-07
+polygon 3          23 9.26148e+04      5.54e-06
+polygon 4          30 3.37145e+04      2.02e-06
+polygon 5          54 3.25210e+05      1.95e-05
+polygon 6          36 1.30251e+06      7.79e-05
+polygon 7         133 1.16489e+06      6.97e-05
+polygon 8          70 1.91331e+05      1.15e-05
+polygon 9         117 1.51938e+05      9.09e-06
+polygon 10         96 1.14343e+05      6.84e-06
+polygon 11         24 4.57388e+03      2.74e-07
+polygon 12         25 1.18350e+04      7.08e-07
+polygon 13        131 1.52336e+05      9.12e-06
+polygon 14         41 1.08051e+04      6.47e-07
+polygon 15         54 3.46933e+05      2.08e-05
+polygon 16         72 2.15827e+05      1.29e-05
+polygon 17         27 1.89588e+03      1.13e-07
+polygon 18         80 1.05646e+05      6.32e-06
+polygon 19         24 4.30354e+03      2.58e-07
+polygon 20        120 1.64767e+05      9.86e-06
+polygon 21         43 1.15924e+04      6.94e-07
+polygon 22         19 3.54741e+03      2.12e-07
+polygon 23        330 3.08593e+06      1.85e-04
+polygon 24        191 2.36948e+06      1.42e-04
+polygon 25         82 8.83099e+04      5.28e-06
+polygon 26         49 6.13131e+04      3.67e-06
+polygon 27        129 7.65905e+04      4.58e-06
+polygon 28          5 1.73957e+04      1.04e-06
+polygon 29       6444 4.61702e+09      2.76e-01
+polygon 30          4 6.36011e+03      3.81e-07
+polygon 31         16 1.18305e+05      7.08e-06
+polygon 32          5 2.11524e+04      1.27e-06
+polygon 33         12 3.54495e+04      2.12e-06
+polygon 34         13 6.20225e+04      3.71e-06
+polygon 35          8 1.23192e+04      7.37e-07
+polygon 36          5 1.08324e+04      6.48e-07
+polygon 37          5 9.14466e+03      5.47e-07
+polygon 38          6 9.61182e+03      5.75e-07
+polygon 39         31 1.54535e+06      9.25e-05
+polygon 40          9 2.89833e+04      1.73e-06
+polygon 41         11 2.76319e+04      1.65e-06
+polygon 42         12 8.99519e+04      5.38e-06
+polygon 43         15 5.42899e+04      3.25e-06
+polygon 44          9 1.59051e+04      9.52e-07
+polygon 45          6 1.35402e+04      8.10e-07
+polygon 46          4 4.29114e+03      2.57e-07
+polygon 47         23 1.76941e+05      1.06e-05
+polygon 48         46 4.35817e+04      2.61e-06
+polygon 49          5 6.83234e+03      4.09e-07
+polygon 50          5 6.67681e+03      4.00e-07
+polygon 51          5 2.24960e+03      1.35e-07
+polygon 52          7 2.62410e+04      1.57e-06
+polygon 53          9 1.19871e+04      7.17e-07
+polygon 54          8 2.25166e+04      1.35e-06
+polygon 55          6 1.21530e+04      7.27e-07
+polygon 56          5 8.76372e+03      5.24e-07
+polygon 57          9 2.28011e+04      1.36e-06
+polygon 58          6 9.21520e+03      5.51e-07
+polygon 59         49 1.00152e+05      5.99e-06
+polygon 60          5 4.45701e+03      2.67e-07
+polygon 61          4 2.90445e+03      1.74e-07
+polygon 62          4 3.68660e+03      2.21e-07
+polygon 63         69 9.91665e+04      5.93e-06
+polygon 64          5 3.03755e+03      1.82e-07
+polygon 65          6 1.05159e+04      6.29e-07
+polygon 66         12 9.48324e+03      5.68e-07
+polygon 67         13 6.95065e+04      4.16e-06
+polygon 68         34 2.01268e+05      1.20e-05
+polygon 69        229 1.23405e+06      7.39e-05
+polygon 70          4 2.60396e+03      1.56e-07
+polygon 71          7 8.47987e+03      5.07e-07
+polygon 72          5 8.09566e+03      4.84e-07
+polygon 73         95 2.08272e+05      1.25e-05
+polygon 74         18 7.79534e+04      4.67e-06
+polygon 75         24 1.58871e+04      9.51e-07
+polygon 76          4 8.84551e+02      5.29e-08
+polygon 77         44 4.25752e+04      2.55e-06
+polygon 78          5 4.40652e+03      2.64e-07
+polygon 79          4 2.45347e+03      1.47e-07
+polygon 80          5 4.70738e+03      2.82e-07
+polygon 81        217 2.22673e+06      1.33e-04
+polygon 82         65 5.45704e+04      3.27e-06
+polygon 83          7 4.52332e+03      2.71e-07
+polygon 84          6 1.47384e+04      8.82e-07
+polygon 85          6 1.35523e+04      8.11e-07
+polygon 86         52 9.01072e+04      5.39e-06
+polygon 87          4 1.53570e+03      9.19e-08
+polygon 88         32 4.34407e+04      2.60e-06
+polygon 89        147 5.46546e+05      3.27e-05
+polygon 90         36 7.39284e+04      4.42e-06
+polygon 91         42 9.17464e+04      5.49e-06
+polygon 92        141 1.10139e+06      6.59e-05
+polygon 93         96 2.55417e+05      1.53e-05
+polygon 94         81 3.75480e+04      2.25e-06
+polygon 95         74 9.11239e+05      5.45e-05
+polygon 96          5 4.23910e+03      2.54e-07
+polygon 97         48 1.10206e+05      6.60e-06
+polygon 98          6 1.00635e+04      6.02e-07
+polygon 99         33 2.35528e+04      1.41e-06
+polygon 100       120 3.80491e+05      2.28e-05
+polygon 101        20 3.14002e+04      1.88e-06
+polygon 102        42 1.21240e+05      7.26e-06
+polygon 103        24 3.83264e+04      2.29e-06
+polygon 104        88 4.56947e+05      2.73e-05
+polygon 105        20 1.78311e+04      1.07e-06
+polygon 106        20 2.39230e+04      1.43e-06
+polygon 107         5 6.65848e+03      3.98e-07
+polygon 108         5 5.41794e+03      3.24e-07
+polygon 109        53 4.55018e+05      2.72e-05
+polygon 110       263 1.76197e+07      1.05e-03
+polygon 111         4 6.79553e+03      4.07e-07
+polygon 112        17 5.84071e+03      3.50e-07
+polygon 113        25 2.16665e+05      1.30e-05
+polygon 114         9 7.99698e+03      4.79e-07
+polygon 115         8 3.28857e+03      1.97e-07
+polygon 116        10 1.13477e+04      6.79e-07
+polygon 117        45 1.05244e+05      6.30e-06
+polygon 118         7 4.67575e+03      2.80e-07
+polygon 119      1477 4.81100e+07      2.88e-03
+polygon 120       650 1.19875e+08      7.17e-03
+polygon 121        68 3.72768e+06      2.23e-04
+polygon 122        10 1.01915e+05      6.10e-06
+polygon 123        19 8.26882e+04      4.95e-06
+polygon 124        17 4.00986e+04      2.40e-06
+polygon 125        11 4.05800e+04      2.43e-06
+polygon 126       111 1.46838e+06      8.79e-05
+polygon 127       112 3.73963e+06      2.24e-04
+polygon 128        19 1.91739e+04      1.15e-06
+polygon 129        73 3.61915e+06      2.17e-04
+polygon 130        10 3.05705e+04      1.83e-06
+polygon 131         6 1.62985e+04      9.75e-07
+polygon 132       127 2.10345e+05      1.26e-05
+polygon 133         8 2.09365e+04      1.25e-06
+polygon 134         9 2.23158e+04      1.34e-06
+polygon 135        11 1.96459e+04      1.18e-06
+polygon 136       145 7.13727e+06      4.27e-04
+polygon 137       190 1.81834e+05      1.09e-05
+polygon 138        75 2.06444e+06      1.24e-04
+polygon 139        39 2.64974e+04      1.59e-06
+polygon 140      2813 2.13023e+08      1.27e-02
+polygon 141        26 2.21137e+05      1.32e-05
+polygon 142         6 6.87472e+03      4.11e-07
+polygon 143        31 1.67778e+06      1.00e-04
+polygon 144         7 9.00061e+03      5.39e-07
+polygon 145        12 6.30884e+04      3.78e-06
+polygon 146       202 2.25185e+07      1.35e-03
+polygon 147        46 2.39825e+06      1.44e-04
+polygon 148        50 1.07270e+04      6.42e-07
+polygon 149         8 4.61444e+04      2.76e-06
+polygon 150         7 3.16310e+04      1.89e-06
+polygon 151         5 6.49748e+03      3.89e-07
+polygon 152        12 2.17426e+04      1.30e-06
+polygon 153         5 7.19829e+03      4.31e-07
+polygon 154        11 6.58154e+05      3.94e-05
+polygon 155       160 1.11858e+06      6.69e-05
+polygon 156       106 3.97298e+05      2.38e-05
+polygon 157        14 3.77575e+05      2.26e-05
+polygon 158        27 1.21313e+06      7.26e-05
+polygon 159       360 7.99522e+04      4.78e-06
+polygon 160        56 6.47301e+04      3.87e-06
+polygon 161       360 7.21524e+04      4.32e-06
+polygon 162       360 3.31507e+04      1.98e-06
+polygon 163       360 3.90012e+04      2.33e-06
+polygon 164        59 5.31603e+06      3.18e-04
+polygon 165        48 1.76671e+06      1.06e-04
+polygon 166        35 5.03510e+04      3.01e-06
+polygon 167        58 1.83939e+04      1.10e-06
+polygon 168        21 5.33448e+03      3.19e-07
+polygon 169       249 3.09426e+06      1.85e-04
+polygon 170        28 1.99132e+05      1.19e-05
+polygon 171        21 4.52072e+05      2.71e-05
+polygon 172        14 5.66642e+04      3.39e-06
+polygon 173        12 1.09826e+05      6.57e-06
+polygon 174        15 1.37135e+06      8.21e-05
+polygon 175         6 1.22311e+05      7.32e-06
+polygon 176        47 2.41118e+05      1.44e-05
+polygon 177         7 2.79839e+04      1.67e-06
+polygon 178        46 1.72672e+06      1.03e-04
+polygon 179        13 6.36559e+04      3.81e-06
+polygon 180        11 7.02064e+05      4.20e-05
+polygon 181        47 9.13823e+05      5.47e-05
+polygon 182        62 3.95150e+06      2.36e-04
+polygon 183         9 4.34654e+05      2.60e-05
+polygon 184        14 4.20828e+04      2.52e-06
+polygon 185        20 5.14005e+03      3.08e-07
+polygon 186        31 7.44742e+05      4.46e-05
+polygon 187        18 4.11233e+05      2.46e-05
+polygon 188        25 7.73779e+03      4.63e-07
+polygon 189         8 3.86018e+04      2.31e-06
+polygon 190       210 7.46360e+06      4.47e-04
+polygon 191         4 9.19985e+03      5.51e-07
+polygon 192        14 2.75390e+05      1.65e-05
+polygon 193         9 9.63810e+03      5.77e-07
+polygon 194         9 6.16370e+04      3.69e-06
+polygon 195        10 1.04977e+05      6.28e-06
+polygon 196         8 8.75224e+04      5.24e-06
+polygon 197         5 1.84010e+04      1.10e-06
+polygon 198         5 3.30308e+03      1.98e-07
+polygon 199        13 3.15608e+04      1.89e-06
+polygon 200        67 3.93597e+05      2.36e-05
+polygon 201         4 2.83736e+03      1.70e-07
+polygon 202        16 4.91732e+03      2.94e-07
+polygon 203         4 1.26776e+03      7.59e-08
+polygon 204         8 1.67293e+04      1.00e-06
+polygon 205        12 2.45852e+04      1.47e-06
+polygon 206        12 5.95782e+04      3.57e-06
+polygon 207        50 5.34706e+03      3.20e-07
+polygon 208        38 1.08273e+04      6.48e-07
+polygon 209        36 1.59140e+04      9.52e-07
+polygon 210        21 1.90132e+03      1.14e-07
+polygon 211        34 3.85385e+06      2.31e-04
+polygon 212        44 7.02208e+03      4.20e-07
+polygon 213        46 5.81229e+03      3.48e-07
+polygon 214        31 4.14222e+03      2.48e-07
+polygon 215        16 4.56058e+05      2.73e-05
+polygon 216        29 1.42452e+04      8.53e-07
+polygon 217        38 2.65576e+04      1.59e-06
+polygon 218        27 4.58869e+03      2.75e-07
+polygon 219        96 5.26088e+05      3.15e-05
+polygon 220        61 1.00655e+05      6.02e-06
+polygon 221        31 7.13048e+04      4.27e-06
+polygon 222        85 1.37243e+06      8.21e-05
+polygon 223       180 8.26968e+05      4.95e-05
+polygon 224        59 1.98986e+05      1.19e-05
+polygon 225       116 3.13325e+05      1.88e-05
+polygon 226       134 4.76075e+05      2.85e-05
+polygon 227       102 1.63410e+07      9.78e-04
+polygon 228        21 6.42532e+03      3.85e-07
+polygon 229        10 7.72548e+03      4.62e-07
+polygon 230       205 1.42142e+06      8.51e-05
+polygon 231       125 2.33639e+06      1.40e-04
+polygon 232        32 2.58895e+04      1.55e-06
+polygon 233        25 2.06544e+04      1.24e-06
+polygon 234        87 1.25178e+06      7.49e-05
+polygon 235        40 4.05100e+04      2.42e-06
+polygon 236        10 5.04046e+04      3.02e-06
+polygon 237         6 1.12481e+04      6.73e-07
+polygon 238        40 1.56824e+05      9.39e-06
+polygon 239        66 5.25078e+04      3.14e-06
+polygon 240         8 1.11133e+04      6.65e-07
+polygon 241        11 1.53991e+03      9.22e-08
+polygon 242        18 4.61307e+03      2.76e-07
+polygon 243        41 4.12896e+04      2.47e-06
+polygon 244         7 3.03565e+03      1.82e-07
+polygon 245        19 7.54562e+03      4.52e-07
+polygon 246        18 8.34406e+03      4.99e-07
+polygon 247        26 5.16289e+05      3.09e-05
+polygon 248        13 9.23973e+04      5.53e-06
+polygon 249        25 4.18386e+04      2.50e-06
+polygon 250         7 3.85109e+03      2.30e-07
+polygon 251        82 4.38488e+05      2.62e-05
+polygon 252       165 3.46331e+06      2.07e-04
+polygon 253        11 5.22200e+03      3.13e-07
+polygon 254        13 3.28209e+04      1.96e-06
+polygon 255         6 3.00930e+04      1.80e-06
+polygon 256         7 1.13351e+04      6.78e-07
+polygon 257        13 2.03132e+05      1.22e-05
+polygon 258        38 2.87613e+04      1.72e-06
+polygon 259         7 1.13203e+04      6.77e-07
+polygon 260        15 4.10660e+03      2.46e-07
+polygon 261        44 1.67056e+05      1.00e-05
+polygon 262        11 6.66261e+04      3.99e-06
+polygon 263       129 2.29313e+06      1.37e-04
+polygon 264         6 7.23358e+04      4.33e-06
+polygon 265        24 6.50053e+03      3.89e-07
+polygon 266       107 1.06864e+06      6.40e-05
+polygon 267         9 2.30454e+04      1.38e-06
+polygon 268        38 9.13816e+03      5.47e-07
+polygon 269        72 1.08578e+05      6.50e-06
+polygon 270        64 2.19772e+05      1.32e-05
+polygon 271        25 2.58054e+05      1.54e-05
+polygon 272        26 4.59971e+04      2.75e-06
+polygon 273        59 8.30359e+04      4.97e-06
+polygon 274        83 1.13991e+06      6.82e-05
+polygon 275        11 3.01697e+04      1.81e-06
+polygon 276        14 1.30442e+05      7.81e-06
+polygon 277        22 2.37056e+05      1.42e-05
+polygon 278        23 1.84825e+05      1.11e-05
+enclosing rectangle: [512053.7, 928107.3] x [9621818, 9833989] units
+                     (416100 x 212200 units)
+Window area = 16709700000 square units
+Fraction of frame area: 0.189</code></pre>
+</div>
+</div>
+</section>
+<section id="section" class="level3">
+<h3 class="anchored" data-anchor-id="section"><strong>6.5.3</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>kde_yday <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  fire_yday_owin)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(kde_yday)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 19110 (spatial)
+  lambda = 6.4541 (temporal)
+
+No. of observations
+  905 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [512053.7, 928107.3] x [9621818, 9833989]
+
+Temporal bound
+  [10, 360]
+
+Evaluation
+  128 x 128 x 351 trivariate lattice
+  Density range: [1.591403e-28, 1.845623e-12]</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>tims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">250</span>, <span class="dv">251</span>, <span class="dv">252</span>, <span class="dv">253</span>, <span class="dv">254</span>, <span class="dv">255</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> tims){</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(kde_yday, i,</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE at day"</span>, i))</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex03_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="computing-stkde-by-day-of-year-improved-method" class="level2">
+<h2 class="anchored" data-anchor-id="computing-stkde-by-day-of-year-improved-method"><strong>6.6 Computing STKDE by Day of Year: Improved method</strong></h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">BOOT.spattemp</span>(fire_yday_owin) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Initialising...Done.
+Optimising...
+h = 19110 ; lambda = 14.87514 
+h = 21021 ; lambda = 14.87514 
+h = 19110 ; lambda = 1925.875 
+h = 19587.75 ; lambda = 970.375 
+h = 19826.62 ; lambda = 492.625 
+h = 19946.06 ; lambda = 253.7501 
+h = 20005.78 ; lambda = 134.3126 
+h = 20035.64 ; lambda = 74.59388 
+h = 20050.57 ; lambda = 44.73451 
+h = 20058.03 ; lambda = 29.80482 
+h = 21969.03 ; lambda = 29.80482 
+h = 23398.55 ; lambda = 37.26967 
+h = 22932 ; lambda = 14.87514 
+h = 24368.98 ; lambda = 7.410298 
+h = 23880.03 ; lambda = 29.80482 
+h = 23165.27 ; lambda = 26.0724 
+h = 24128.24 ; lambda = 11.14272 
+h = 23588.44 ; lambda = 15.80825 
+h = 23821.71 ; lambda = 27.00551 
+h = 23599.28 ; lambda = 23.97292 
+h = 24022.45 ; lambda = 13.70876 
+h = 23808.15 ; lambda = 16.79967 
+h = 23819 ; lambda = 24.96434 
+h = 23761.36 ; lambda = 22.67532 
+h = 23970.23 ; lambda = 15.50207 
+h = 23692.02 ; lambda = 21.8552 
+h = 23645.23 ; lambda = 27.73085 
+h = 23767.42 ; lambda = 19.53247 
+h = 23698.08 ; lambda = 18.71235 
+h = 23713.9 ; lambda = 19.70309 
+h = 23789.3 ; lambda = 17.38035 
+h = 23716.34 ; lambda = 20.73649 
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          h      lambda 
+23767.42040    19.53247 </code></pre>
+</div>
+</div>
+<section id="computing-spatio-temporal-kde-1" class="level3">
+<h3 class="anchored" data-anchor-id="computing-spatio-temporal-kde-1"><strong>6.6.1 Computing spatio-temporal KDE</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>kde_yday <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(fire_yday_owin,</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">h =</span> <span class="dv">9000</span>,</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">lambda =</span> <span class="dv">19</span>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(kde_yday)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 9000 (spatial)
+  lambda = 19 (temporal)
+
+No. of observations
+  905 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [512053.7, 928107.3] x [9621818, 9833989]
+
+Temporal bound
+  [10, 360]
+
+Evaluation
+  128 x 128 x 351 trivariate lattice
+  Density range: [1.297468e-33, 1.971862e-12]</code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-the-output-spatio-temporal-kde" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-the-output-spatio-temporal-kde"><strong>6.6.2 Plotting the output spatio-temporal KDE</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>tims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">250</span>, <span class="dv">251</span>, <span class="dv">252</span>, <span class="dv">253</span>, <span class="dv">254</span>, <span class="dv">255</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> tims){</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(kde_yday, i,</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE at day"</span>, i))</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex03_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="spatio-temporal-point-patterns-analysis-stpp-methods" class="level2">
+<h2 class="anchored" data-anchor-id="spatio-temporal-point-patterns-analysis-stpp-methods"><strong>6.7 Spatio-temporal Point Patterns Analysis: stpp methods</strong></h2>
+<section id="preparing-spatio-temporal-point-process-object-of-stpp" class="level3">
+<h3 class="anchored" data-anchor-id="preparing-spatio-temporal-point-process-object-of-stpp"><strong>6.7.1 Preparing spatio-temporal point process object of stpp</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(fire_sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>fire_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> coords[, <span class="dv">1</span>],  </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> coords[, <span class="dv">2</span>],</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">t =</span> fire_sf<span class="sc">$</span><span class="st">`</span><span class="at">DayofYear</span><span class="st">`</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>fire_stpp <span class="ot">&lt;-</span> <span class="fu">as.3dpoints</span>(fire_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "stpp"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex03_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="computing-spatio-temporal-k-function" class="level3">
+<h3 class="anchored" data-anchor-id="computing-spatio-temporal-k-function"><strong>6.7.2 Computing spatio-temporal k-function</strong></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>   fire_sf <span class="ot">&lt;-</span> fire_sf[kbb_sf, ]</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">nrow</span>(fire_sf)  </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 905</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>kbb_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/rawdata"</span>, <span class="at">layer =</span> <span class="st">"Kepulauan_Bangka_Belitung"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">"ZM"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `Kepulauan_Bangka_Belitung' from data source 
+  `/Users/mengxinyu/ISSS626-GAA/Hands-on_Ex/Hands-on_Ex03/data/rawdata' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 391 features and 36 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 105.1084 ymin: -3.416903 xmax: 108.848 ymax: -1.501757
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/rawdata/fire_archive_M-C61_800295.csv"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_sf[kbb_sf, ]              </span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(fire_sf)                             </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 905</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DayofYear =</span> <span class="fu">yday</span>(acq_date),</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">Month_num =</span> <span class="fu">month</span>(acq_date),</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">Month_fac =</span> <span class="fu">month</span>(acq_date, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: extract coordinates from the fire point events</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(fire_sf)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: build a data frame of x, y, and time (t must be integer)</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>fire_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> coords[, <span class="dv">1</span>],</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> coords[, <span class="dv">2</span>],</span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">t =</span> fire_sf<span class="sc">$</span>DayofYear)</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: create the stpp spatio-temporal object</span></span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>fire_stpp <span class="ot">&lt;-</span> <span class="fu">as.3dpoints</span>(fire_df)</span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "stpp"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex03_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>kbb_stik <span class="ot">&lt;-</span> <span class="fu">STIKhat</span>(fire_stpp)</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plotK</span>(kbb_stik)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+</section>
+<section id="what-i-learned" class="level1">
+<h1>What I Learned</h1>
+<p>In this exercise, I learned how to conduct spatio-temporal point pattern analysis in R, using 2023 forest fire events in Kepulauan Bangka Belitung, Indonesia as the case study. I prepared the data by importing the study area shapefile, reprojecting it to UTM Zone 48S (EPSG:32748), and converting it into an owin window, then turned the fire CSV into an sf point object and derived temporal marks such as month and day-of-year using lubridate. I learned the difference between first-order and second-order spatio-temporal analysis: for the first, I used spattemp.density() from the sparr package to estimate spatio-temporal kernel density, with BOOT.spattemp() providing objective spatial and temporal bandwidths; for the second, I built a stpp object with as.3dpoints() and computed the space-time inhomogeneous K-function using STIKhat(). Finally, I learned to interpret the resulting plot, recognising that high values at short spatial and temporal distances indicate that fires cluster closely in both space and time rather than occurring randomly across the region and the year.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
