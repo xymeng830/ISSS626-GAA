@@ -8,7 +8,6 @@
 
 **/data/
 **/rawdata/
-_site/
 _freeze/
 *_files/
 .Rproj.user
