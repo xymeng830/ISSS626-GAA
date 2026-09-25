@@ -1,0 +1,122 @@
+---
+title: "Forest-fire Point Patterns in Kab. Pulang Pisau"
+subtitle: "Take-home Exercise 1 · Executive Summary · ISSS626"
+author: "Meng Xinyu (Sherry)"
+date: "2026-09-22"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    transition: fade
+    incremental: false
+    footer: "ISSS626 Geospatial Analytics · Take-home Ex1"
+execute:
+  echo: false
+  eval: true
+  warning: false
+  message: false
+---
+
+## Contents
+
+1. Research question & study area
+2. Data & study design
+3. Analytical approach
+4. First-order: intensity
+5. Second-order: interaction
+6. Spatio-temporal (value-added)
+7. Key findings
+8. Limitations
+9. Public-safety implications
+
+::: {.notes}
+Cover page + this contents page do NOT count toward the 10-slide limit.
+:::
+
+# Research Question & Study Area
+
+## Why fire point patterns?
+
+- Peatland fires in Kalimantan → haze, health, economic cost.
+- **Where** do fire detections concentrate, and **do they cluster** beyond that?
+- Study window: **Kabupaten Pulang Pisau, Central Kalimantan** (peat-dominated
+  regency), 2026 observation period.
+
+*👉 one map thumbnail of the study window here*
+
+# Data & Study Design
+
+## Data & definitions
+
+- **Fire detections** — NASA FIRMS VIIRS 375 m (`acq_date`, `confidence`, `frp`).
+- **Boundary** — GADM ADM2 (regency).
+- **Point event** = one detection; ⚠️ detection ≠ distinct fire → de-duplicated
+  to one point per pixel-day.
+- CRS: **UTM 49S (EPSG:32749)**; low-confidence & out-of-window records removed.
+
+# Analytical Approach
+
+## Methods
+
+| Question | Method | Reference |
+|---|---|---|
+| Intensity (1st-order) | KDE (diggle/ppl/adaptive) | — |
+| Interaction (2nd-order) | G / F / K / L | homogeneous CSR |
+| Robustness | Linhom | inhomogeneous null |
+| Spatio-temporal | sparr STKDE | — |
+
+# First-order: Intensity
+
+## Where are the hotspots?
+
+*👉 paste your best KDE map here*
+
+- 👉 \[key sentence\]: intensity concentrates in \[area\], stable across
+  bandwidths.
+
+# Second-order: Interaction
+
+## Clustering vs CSR
+
+*👉 paste your L-function (centred) plot here*
+
+- 👉 \[key sentence\]: significant clustering at \[X\]–\[Y\] km; persists /
+  weakens under the inhomogeneous null.
+
+# Spatio-temporal (Value-added)
+
+## Does the hotspot move?
+
+*👉 paste an STKDE time-slice figure here*
+
+- 👉 \[key sentence\]: peak activity in \[month\]; hotspot shifts \[direction\].
+
+# Key Findings
+
+## What we learned
+
+- First-order: 👉 …
+- Second-order: 👉 …
+- Spatio-temporal: 👉 …
+- First- and second-order evidence 👉 agree / diverge because …
+
+# Limitations
+
+## Read with care
+
+- Detections ≠ fires; observation gaps (cloud, overpass).
+- Concentration ≠ risk without exposure/population.
+- CSR/KDE assumptions only partially met.
+
+# Public-safety Implications
+
+## From evidence to action
+
+- Prioritise monitoring/patrol in hotspot cells.
+- Align fire-danger readiness with peak months.
+- **Directly supported:** spatial concentration, temporal peaks.
+- **Needs more data:** causation, exposure, population at risk.
+
+## Thank you
+
+Technical report · GitHub · deployed on Vercel.

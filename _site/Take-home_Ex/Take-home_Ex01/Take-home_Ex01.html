@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Meng Xinyu">
+<meta name="dcterms.date" content="2026-09-23">
+
+<title>Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan – ISSS626 Geospatial Analytics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-4eaa7e2902977deb636442ed8e0cf898.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">ISSS626 Geospatial Analytics</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Hands-on Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html">
+ <span class="dropdown-text">Hands-on Ex01</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html">
+ <span class="dropdown-text">Hands-on Ex02</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03.html">
+ <span class="dropdown-text">Hands-on Ex03</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04.html">
+ <span class="dropdown-text">Hands-on Ex04</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05.html">
+ <span class="dropdown-text">Hands-on Ex05</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">In-class Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex01/In-class_Ex01.qmd">
+ <span class="dropdown-text">In-class Ex01</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex04/In-class_Ex04.html">
+ <span class="dropdown-text">In-class Ex04</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Take-home Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html">
+ <span class="dropdown-text">Take-home Ex01</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#research-questions" id="toc-research-questions" class="nav-link" data-scroll-target="#research-questions"><span class="header-section-number">2</span> Research questions</a></li>
+  <li><a href="#data-and-study-design" id="toc-data-and-study-design" class="nav-link" data-scroll-target="#data-and-study-design"><span class="header-section-number">3</span> Data and study design</a>
+  <ul class="collapse">
+  <li><a href="#data-sources" id="toc-data-sources" class="nav-link" data-scroll-target="#data-sources"><span class="header-section-number">3.1</span> Data sources</a></li>
+  <li><a href="#what-counts-as-a-point-event" id="toc-what-counts-as-a-point-event" class="nav-link" data-scroll-target="#what-counts-as-a-point-event"><span class="header-section-number">3.2</span> What counts as a point event</a></li>
+  <li><a href="#spatial-study-window" id="toc-spatial-study-window" class="nav-link" data-scroll-target="#spatial-study-window"><span class="header-section-number">3.3</span> Spatial study window</a></li>
+  <li><a href="#temporal-study-window" id="toc-temporal-study-window" class="nav-link" data-scroll-target="#temporal-study-window"><span class="header-section-number">3.4</span> Temporal study window</a></li>
+  <li><a href="#assumptions-worth-stating" id="toc-assumptions-worth-stating" class="nav-link" data-scroll-target="#assumptions-worth-stating"><span class="header-section-number">3.5</span> Assumptions worth stating</a></li>
+  <li><a href="#methodological-choices" id="toc-methodological-choices" class="nav-link" data-scroll-target="#methodological-choices"><span class="header-section-number">3.6</span> Methodological choices</a></li>
+  </ul></li>
+  <li><a href="#packages" id="toc-packages" class="nav-link" data-scroll-target="#packages"><span class="header-section-number">4</span> Packages</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation"><span class="header-section-number">5</span> Data preparation</a>
+  <ul class="collapse">
+  <li><a href="#boundary-and-study-window" id="toc-boundary-and-study-window" class="nav-link" data-scroll-target="#boundary-and-study-window"><span class="header-section-number">5.1</span> Boundary and study window</a></li>
+  <li><a href="#reading-the-two-fire-files" id="toc-reading-the-two-fire-files" class="nav-link" data-scroll-target="#reading-the-two-fire-files"><span class="header-section-number">5.2</span> Reading the two fire files</a></li>
+  <li><a href="#cleaning" id="toc-cleaning" class="nav-link" data-scroll-target="#cleaning"><span class="header-section-number">5.3</span> Cleaning</a></li>
+  <li><a href="#to-spatial-points-then-clip-to-the-regency" id="toc-to-spatial-points-then-clip-to-the-regency" class="nav-link" data-scroll-target="#to-spatial-points-then-clip-to-the-regency"><span class="header-section-number">5.4</span> To spatial points, then clip to the regency</a></li>
+  <li><a href="#removing-repeated-detections" id="toc-removing-repeated-detections" class="nav-link" data-scroll-target="#removing-repeated-detections"><span class="header-section-number">5.5</span> Removing repeated detections</a></li>
+  <li><a href="#building-the-spatstat-objects" id="toc-building-the-spatstat-objects" class="nav-link" data-scroll-target="#building-the-spatstat-objects"><span class="header-section-number">5.6</span> Building the spatstat objects</a></li>
+  </ul></li>
+  <li><a href="#first-order-analysis-where-is-the-intensity" id="toc-first-order-analysis-where-is-the-intensity" class="nav-link" data-scroll-target="#first-order-analysis-where-is-the-intensity"><span class="header-section-number">6</span> First-order analysis: where is the intensity?</a>
+  <ul class="collapse">
+  <li><a href="#a-first-check-with-quadrats" id="toc-a-first-check-with-quadrats" class="nav-link" data-scroll-target="#a-first-check-with-quadrats"><span class="header-section-number">6.1</span> A first check with quadrats</a></li>
+  <li><a href="#kernel-density-with-different-bandwidths" id="toc-kernel-density-with-different-bandwidths" class="nav-link" data-scroll-target="#kernel-density-with-different-bandwidths"><span class="header-section-number">6.2</span> Kernel density with different bandwidths</a></li>
+  <li><a href="#an-adaptive-estimate" id="toc-an-adaptive-estimate" class="nav-link" data-scroll-target="#an-adaptive-estimate"><span class="header-section-number">6.3</span> An adaptive estimate</a></li>
+  <li><a href="#a-cleaner-density-map" id="toc-a-cleaner-density-map" class="nav-link" data-scroll-target="#a-cleaner-density-map"><span class="header-section-number">6.4</span> A cleaner density map</a></li>
+  </ul></li>
+  <li><a href="#second-order-analysis-do-the-fires-interact" id="toc-second-order-analysis-do-the-fires-interact" class="nav-link" data-scroll-target="#second-order-analysis-do-the-fires-interact"><span class="header-section-number">7</span> Second-order analysis: do the fires interact?</a>
+  <ul class="collapse">
+  <li><a href="#nearest-neighbour-distances-g-function" id="toc-nearest-neighbour-distances-g-function" class="nav-link" data-scroll-target="#nearest-neighbour-distances-g-function"><span class="header-section-number">7.1</span> Nearest-neighbour distances (G-function)</a></li>
+  <li><a href="#empty-space-distances-f-function" id="toc-empty-space-distances-f-function" class="nav-link" data-scroll-target="#empty-space-distances-f-function"><span class="header-section-number">7.2</span> Empty-space distances (F-function)</a></li>
+  <li><a href="#clustering-across-scales-l-function" id="toc-clustering-across-scales-l-function" class="nav-link" data-scroll-target="#clustering-across-scales-l-function"><span class="header-section-number">7.3</span> Clustering across scales (L-function)</a></li>
+  <li><a href="#does-the-clustering-survive-once-intensity-is-allowed-to-vary" id="toc-does-the-clustering-survive-once-intensity-is-allowed-to-vary" class="nav-link" data-scroll-target="#does-the-clustering-survive-once-intensity-is-allowed-to-vary"><span class="header-section-number">7.4</span> Does the clustering survive once intensity is allowed to vary?</a></li>
+  </ul></li>
+  <li><a href="#value-added-does-the-hotspot-move-over-the-season" id="toc-value-added-does-the-hotspot-move-over-the-season" class="nav-link" data-scroll-target="#value-added-does-the-hotspot-move-over-the-season"><span class="header-section-number">8</span> Value-added: does the hotspot move over the season?</a></li>
+  <li><a href="#bringing-the-two-halves-together" id="toc-bringing-the-two-halves-together" class="nav-link" data-scroll-target="#bringing-the-two-halves-together"><span class="header-section-number">9</span> Bringing the two halves together</a></li>
+  <li><a href="#implications-for-public-safety-planning" id="toc-implications-for-public-safety-planning" class="nav-link" data-scroll-target="#implications-for-public-safety-planning"><span class="header-section-number">10</span> Implications for public-safety planning</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">11</span> Limitations</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">12</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan</h1>
+<p class="subtitle lead">Spatial and spatio-temporal analysis of fire detections in Kabupaten Pulang Pisau, 2026</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Meng Xinyu </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 23, 2026</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">September 25, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>Fire on peatland is one of Central Kalimantan’s recurring public-safety problems. When peat burns it is hard to put out, it produces haze that drifts across the region, and it damages both health and livelihoods. If we want to prevent and respond to these fires more effectively, a sensible starting point is to ask two plain questions about the satellite record: where do fire detections pile up, and are they genuinely clustered rather than just scattered thickly?</p>
+<p>This report works through those questions for one regency — Kabupaten Pulang Pisau — using satellite fire detections from 2026. I keep the two questions separate on purpose, because they are answered by different tools. The first is about <em>intensity</em>: how many detections fall in one place versus another. The second is about <em>interaction</em>: whether detections sit closer together than they would if they were placed at random. In point-pattern terms these are the first-order and second-order properties of the pattern, and confusing them is an easy way to draw the wrong conclusion.</p>
+</section>
+<section id="research-questions" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Research questions</h1>
+<p>I set out to answer three questions:</p>
+<p>The first is where fire activity concentrates within the regency, and how that concentration changes over the months of the observation period. The second is whether the detections show statistically significant clustering once we compare them against a random baseline, rather than clustering that is only apparent to the eye. The third, which goes a little beyond the core methods, is whether the busiest areas move over the course of the season rather than staying put.</p>
+</section>
+<section id="data-and-study-design" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Data and study design</h1>
+<section id="data-sources" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="data-sources"><span class="header-section-number">3.1</span> Data sources</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Dataset</th>
+<th>Source</th>
+<th>Access date</th>
+<th>Coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fire detections, VIIRS 375 m (NOAA-20 / VJ114)</td>
+<td>NASA FIRMS, Archive Download</td>
+<td>2026-09-23</td>
+<td>Indonesia; 2026-01-01 to 2026-09-23</td>
+</tr>
+<tr class="even">
+<td>Regency boundaries (ADM2)</td>
+<td>GADM v4.1</td>
+<td>2026-09-23</td>
+<td>Indonesia, regency level</td>
+</tr>
+</tbody>
+</table>
+<p>The FIRMS export arrived split into two files: a <em>standard</em> (science-quality) file covering the earlier part of the year, and a <em>near-real-time</em> file for the recent months that have not yet been reprocessed. I read both and combine them, and I keep a column recording which file each detection came from so I can report the split later.</p>
+</section>
+<section id="what-counts-as-a-point-event" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="what-counts-as-a-point-event"><span class="header-section-number">3.2</span> What counts as a point event</h2>
+<p>A point event here is a single VIIRS fire detection: one 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.</p>
+<p>It is worth being blunt about one thing early, because it shapes the whole analysis: a detection is not the same as a fire. A single fire that burns for several days will be picked up on several overpasses, so the raw file contains the same underlying fire many times over. Left alone, this makes the pattern look far more clustered than it really is. I therefore reduce repeated detections to one point per pixel location per day before any analysis, and I treat the remaining apparent clustering with appropriate caution.</p>
+<p>The other data-quality steps are more routine: drop exact duplicate rows, remove records with missing or impossible coordinates, drop low-confidence detections, and keep only the records that fall inside the regency and inside the observation window.</p>
+</section>
+<section id="spatial-study-window" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="spatial-study-window"><span class="header-section-number">3.3</span> Spatial study window</h2>
+<p>The pattern is analysed inside the boundary of Kabupaten Pulang Pisau. I chose a single regency for three reasons. It is an administrative unit, so any finding maps directly onto who would plan or respond. It is dominated by peatland, so the fires within it belong to a reasonably coherent regime rather than a mix of unrelated fire types. And restricting to one regency keeps the point pattern small enough to run the distance-based tests without the whole-Indonesia file overwhelming memory. The regency polygon becomes the observation window (<code>owin</code>) for every spatstat step, so that intensity estimates and edge corrections respect the true boundary.</p>
+</section>
+<section id="temporal-study-window" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="temporal-study-window"><span class="header-section-number">3.4</span> Temporal study window</h2>
+<p>Because the year is not yet over, the data can only run to the download date, so the observation period is a partial year rather than a full one.</p>
+<p>The analysis covers fire detections from 1 January 2026 to 23 September 2026, the full period available at the time of download. Because 2026 is still ongoing, this is a partial year: it captures the build-up of the dry season but not its later peak (around October–November), so any seasonal reading should be treated as incomplete.</p>
+</section>
+<section id="assumptions-worth-stating" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="assumptions-worth-stating"><span class="header-section-number">3.5</span> Assumptions worth stating</h2>
+<p>Two assumptions matter enough to flag up front. Kernel density estimation assumes there is a smooth underlying intensity surface, and its picture of that surface depends heavily on the bandwidth, so I show more than one bandwidth rather than trusting a single choice. The distance-based tests (K and L) compare the observed pattern against a <em>homogeneous</em> random process — one with the same intensity everywhere. That assumption is almost certainly false here, since fire intensity is driven by where the peatland and land use are, so a homogeneous test will read first-order heterogeneity as if it were clustering. To separate the two, I also run an inhomogeneous version of the test that allows intensity to vary. Finally, the tests assume detections are independent, which is exactly what the repeated-detection problem violates — hence the de-duplication above.</p>
+</section>
+<section id="methodological-choices" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="methodological-choices"><span class="header-section-number">3.6</span> Methodological choices</h2>
+<p>I work in EPSG:32749 (UTM zone 49S), which covers Central Kalimantan and gives distances in metres, and rescale to kilometres so the density and distance numbers are readable. For KDE I compare two data-driven bandwidths (<code>bw.diggle</code>, <code>bw.ppl</code>) against a fixed one, and add an adaptive estimate. Second-order tests use Ripley’s edge correction, and significance is judged against Monte Carlo envelopes — 39 simulations while drafting, which I raise before the final render.</p>
+</section>
+</section>
+<section id="packages" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Packages</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  sf,          <span class="co"># vector geospatial data</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  tmap,        <span class="co"># thematic maps</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  spatstat,    <span class="co"># point pattern analysis</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  sparr,       <span class="co"># spatio-temporal KDE (used later)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  raster,      <span class="co"># convert density images for tmap</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  tidyverse    <span class="co"># wrangling and plotting</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="data-preparation" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Data preparation</h1>
+<section id="boundary-and-study-window" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="boundary-and-study-window"><span class="header-section-number">5.1</span> Boundary and study window</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>idn_adm2 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/raw"</span>, <span class="at">layer =</span> <span class="st">"gadm41_IDN_2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `gadm41_IDN_2' from data source 
+  `/Users/mengxinyu/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/data/raw' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 502 features and 13 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 95.00971 ymin: -11.00761 xmax: 141.0194 ymax: 6.076941
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>study_area <span class="ot">&lt;-</span> idn_adm2 <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(NAME_2 <span class="sc">==</span> <span class="st">"Pulang Pisau"</span>) <span class="sc">%&gt;%</span>    <span class="co"># confirm this spelling against your file</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32749</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(<span class="fu">st_is_valid</span>(study_area))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(study_area) <span class="sc">+</span> <span class="fu">tm_polygons</span>(<span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Study window: Kabupaten Pulang Pisau"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/plot-boundary-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-the-two-fire-files" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="reading-the-two-fire-files"><span class="header-section-number">5.2</span> Reading the two fire files</h2>
+<p>The two files disagree on a couple of column types (for example <code>version</code> is numeric in the standard file and text in the near-real-time file), so I read everything as text first, stack the files, and then let <code>type_convert()</code> decide the types on the combined table.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fire_archive <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/raw/fire_archive_J1V-C2_811410.csv"</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">col_types =</span> <span class="fu">cols</span>(<span class="at">.default =</span> <span class="fu">col_character</span>()))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fire_nrt     <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/raw/fire_nrt_J1V-C2_811410.csv"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                         <span class="at">col_types =</span> <span class="fu">cols</span>(<span class="at">.default =</span> <span class="fu">col_character</span>()))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>fire_raw <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="at">archive =</span> fire_archive,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">nrt      =</span> fire_nrt,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">.id =</span> <span class="st">"source"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">type_convert</span>()</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(fire_raw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 370,354
+Columns: 16
+$ source     &lt;chr&gt; "archive", "archive", "archive", "archive", "archive", "arc…
+$ latitude   &lt;dbl&gt; -6.32139, -2.73144, -2.74199, -2.72553, -2.73672, -2.74262,…
+$ longitude  &lt;dbl&gt; 138.6728, 132.9328, 132.9431, 132.9320, 132.9379, 132.9388,…
+$ brightness &lt;dbl&gt; 342.70, 351.49, 354.93, 333.18, 356.28, 355.71, 355.96, 331…
+$ scan       &lt;dbl&gt; 0.43, 0.48, 0.48, 0.48, 0.48, 0.48, 0.48, 0.39, 0.46, 0.56,…
+$ track      &lt;dbl&gt; 0.46, 0.65, 0.64, 0.65, 0.65, 0.65, 0.65, 0.36, 0.39, 0.43,…
+$ acq_date   &lt;date&gt; 2026-01-01, 2026-01-01, 2026-01-01, 2026-01-01, 2026-01-01…
+$ acq_time   &lt;chr&gt; "0352", "0353", "0353", "0353", "0353", "0353", "0353", "05…
+$ satellite  &lt;chr&gt; "N20", "N20", "N20", "N20", "N20", "N20", "N20", "N20", "N2…
+$ instrument &lt;chr&gt; "VIIRS", "VIIRS", "VIIRS", "VIIRS", "VIIRS", "VIIRS", "VIIR…
+$ confidence &lt;chr&gt; "n", "n", "n", "n", "l", "n", "l", "n", "n", "n", "n", "n",…
+$ version    &lt;chr&gt; "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2", "2",…
+$ bright_t31 &lt;dbl&gt; 286.85, 288.75, 289.22, 288.10, 289.07, 288.19, 287.82, 295…
+$ frp        &lt;dbl&gt; 7.55, 14.95, 46.30, 6.35, 14.95, 23.54, 14.95, 1.16, 4.11, …
+$ daynight   &lt;chr&gt; "D", "D", "D", "D", "D", "D", "D", "D", "D", "D", "D", "D",…
+$ type       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 3, 1, 1,…</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># How much of the record is near-real-time vs standard quality?</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fire_raw <span class="sc">%&gt;%</span> <span class="fu">count</span>(source)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  source       n
+  &lt;chr&gt;    &lt;int&gt;
+1 archive  35153
+2 nrt     335201</code></pre>
+</div>
+</div>
+</section>
+<section id="cleaning" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="cleaning"><span class="header-section-number">5.3</span> Cleaning</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fire_clean <span class="ot">&lt;-</span> fire_raw <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">%&gt;%</span>                                    <span class="co"># drop exact duplicate rows</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(latitude), <span class="sc">!</span><span class="fu">is.na</span>(longitude),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>         <span class="fu">between</span>(latitude,  <span class="sc">-</span><span class="dv">90</span>,  <span class="dv">90</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>         <span class="fu">between</span>(longitude, <span class="sc">-</span><span class="dv">180</span>, <span class="dv">180</span>)) <span class="sc">%&gt;%</span>         <span class="co"># valid coordinates only</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(confidence <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"n"</span>, <span class="st">"h"</span>)) <span class="sc">%&gt;%</span>           <span class="co"># VIIRS: keep nominal + high</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">acq_date =</span> <span class="fu">as.Date</span>(acq_date)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(acq_date <span class="sc">&gt;=</span> <span class="fu">as.Date</span>(<span class="st">"2026-01-01"</span>),</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>         acq_date <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">"2026-09-23"</span>)) <span class="sc">%&gt;%</span>     <span class="co"># inside the window</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month =</span> lubridate<span class="sc">::</span><span class="fu">floor_date</span>(acq_date, <span class="st">"month"</span>))</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(fire_raw); <span class="fu">nrow</span>(fire_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 370354</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 351822</code></pre>
+</div>
+</div>
+<p>Starting from 370,354 detections across Indonesia, records with missing or invalid coordinates and low-confidence detections were removed, leaving 351,822. Restricting to Kabupaten Pulang Pisau left 16,189 detections. The per-pixel-per-day de-duplication removed none, indicating the export contained no exact same-day repeats at identical coordinates.</p>
+</section>
+<section id="to-spatial-points-then-clip-to-the-regency" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="to-spatial-points-then-clip-to-the-regency"><span class="header-section-number">5.4</span> To spatial points, then clip to the regency</h2>
+<p>Clipping to the regency straight after making the points is deliberate — the national file is large, and running anything on it before clipping is what causes the memory blow-up.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_clean <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32749</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_intersection</span>(study_area)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(fire_sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 16189</code></pre>
+</div>
+</div>
+</section>
+<section id="removing-repeated-detections" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="removing-repeated-detections"><span class="header-section-number">5.5</span> Removing repeated detections</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fire_dedup <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x =</span> <span class="fu">st_coordinates</span>(.)[, <span class="dv">1</span>],</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="fu">st_coordinates</span>(.)[, <span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(x, y, acq_date, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(fire_sf); <span class="fu">nrow</span>(fire_dedup)   <span class="co"># difference = repeated detections removed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 16189</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 16189</code></pre>
+</div>
+</div>
+</section>
+<section id="building-the-spatstat-objects" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="building-the-spatstat-objects"><span class="header-section-number">5.6</span> Building the spatstat objects</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fire_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(study_area)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>fire_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(<span class="fu">st_geometry</span>(fire_dedup))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">Window</span>(fire_ppp) <span class="ot">&lt;-</span> fire_owin</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">multiplicity</span>(fire_ppp) <span class="sc">&gt;</span> <span class="dv">1</span>)                     <span class="co"># any coincident points left?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fire_ppp <span class="ot">&lt;-</span> <span class="fu">rjitter</span>(fire_ppp, <span class="at">retry =</span> <span class="cn">TRUE</span>, <span class="at">nsim =</span> <span class="dv">1</span>, <span class="at">drop =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>fire_ppp.km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(fire_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)    <span class="co"># work in kilometres</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>fire_ppp.km</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Planar point pattern: 16189 points
+window: polygonal boundary
+enclosing rectangle: [786.3871, 870.7875] x [9616.111, 9829.378] km</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fire_ppp.km, <span class="at">main =</span> <span class="st">"Fire detections after cleaning"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/plot-ppp-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 16k+ points make the Monte Carlo envelopes very slow, so the second-order</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># tests below run on a reproducible random subsample. This is a standard way</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># to keep CSR testing tractable; it does not change the underlying pattern.</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>fire_sub <span class="ot">&lt;-</span> fire_ppp.km[<span class="fu">sample</span>(fire_ppp.km<span class="sc">$</span>n, <span class="dv">3000</span>)]</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>fire_sub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Planar point pattern: 3000 points
+window: polygonal boundary
+enclosing rectangle: [786.3871, 870.7875] x [9616.111, 9829.378] km</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="first-order-analysis-where-is-the-intensity" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> First-order analysis: where is the intensity?</h1>
+<section id="a-first-check-with-quadrats" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="a-first-check-with-quadrats"><span class="header-section-number">6.1</span> A first check with quadrats</h2>
+<p>Before smoothing anything, a quadrat count gives a quick sense of whether intensity is even across the regency.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>qt <span class="ot">&lt;-</span> <span class="fu">quadrat.test</span>(fire_ppp.km, <span class="at">nx =</span> <span class="dv">6</span>, <span class="at">ny =</span> <span class="dv">6</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>qt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Chi-squared test of CSR using quadrat counts
+
+data:  fire_ppp.km
+X2 = 16679, df = 29, p-value &lt; 2.2e-16
+alternative hypothesis: two.sided
+
+Quadrats: 30 tiles (irregular windows)</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fire_ppp.km, <span class="at">pch =</span> <span class="st">"."</span>, <span class="at">main =</span> <span class="st">"Quadrat counts"</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qt, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">cex =</span> <span class="fl">0.7</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/quadrat-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The quadrat test rejects a uniform intensity (p &lt; 0.001): detections are far from evenly spread across the regency. This is evidence of first-order heterogeneity only — it shows intensity varies in space, not that points cluster, which the second-order tests address separately. The result also depends on the chosen quadrat size.</p>
+</section>
+<section id="kernel-density-with-different-bandwidths" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="kernel-density-with-different-bandwidths"><span class="header-section-number">6.2</span> Kernel density with different bandwidths</h2>
+<p>The density surface depends on the bandwidth, so rather than commit to one I show two data-driven choices and one fixed value side by side.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>kde_diggle <span class="ot">&lt;-</span> <span class="fu">density</span>(fire_ppp.km, <span class="at">sigma =</span> bw.diggle, <span class="at">edge =</span> <span class="cn">TRUE</span>, <span class="at">kernel =</span> <span class="st">"gaussian"</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>kde_ppl    <span class="ot">&lt;-</span> <span class="fu">density</span>(fire_ppp.km, <span class="at">sigma =</span> bw.ppl,    <span class="at">edge =</span> <span class="cn">TRUE</span>, <span class="at">kernel =</span> <span class="st">"gaussian"</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>kde_fixed  <span class="ot">&lt;-</span> <span class="fu">density</span>(fire_ppp.km, <span class="at">sigma =</span> <span class="dv">2</span>,         <span class="at">edge =</span> <span class="cn">TRUE</span>, <span class="at">kernel =</span> <span class="st">"gaussian"</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_diggle, <span class="at">main =</span> <span class="st">"bw.diggle"</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_ppl,    <span class="at">main =</span> <span class="st">"bw.ppl"</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_fixed,  <span class="at">main =</span> <span class="st">"fixed 2 km"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/kde-bw-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="an-adaptive-estimate" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="an-adaptive-estimate"><span class="header-section-number">6.3</span> An adaptive estimate</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>kde_adaptive <span class="ot">&lt;-</span> <span class="fu">adaptive.density</span>(fire_ppp.km, <span class="at">method =</span> <span class="st">"kernel"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_adaptive, <span class="at">main =</span> <span class="st">"Adaptive KDE"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/kde-adaptive-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="a-cleaner-density-map" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="a-cleaner-density-map"><span class="header-section-number">6.4</span> A cleaner density map</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>kde_rast <span class="ot">&lt;-</span> <span class="fu">raster</span>(kde_ppl)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">crs</span>(kde_rast) <span class="ot">&lt;-</span> <span class="st">"EPSG:32749"</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kde_rast) <span class="sc">+</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_raster</span>(<span class="at">palette =</span> <span class="st">"YlOrRd"</span>, <span class="at">title =</span> <span class="st">"Intensity (per km²)"</span>) <span class="sc">+</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(study_area) <span class="sc">+</span> <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"grey30"</span>) <span class="sc">+</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Fire-detection intensity"</span>, <span class="at">legend.outside =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/kde-tmap-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The density surface shows fire detections are strongly concentrated in the central and southern parts of the regency, with very little activity in the north. The same core hotspot appears under all three bandwidths (bw.diggle, bw.ppl and the fixed 2 km kernel), so the location of the peak is robust to the smoothing choice, even if the smaller bandwidths show more local detail. This southern concentration is consistent with the low-lying peatland that dominates that part of Pulang Pisau and is highly fire-prone in the dry season. The map shows where intensity is highest but not why; it reflects where detections occur, which is shaped by both fire activity and the satellite’s ability to observe it.</p>
+</section>
+</section>
+<section id="second-order-analysis-do-the-fires-interact" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Second-order analysis: do the fires interact?</h1>
+<p>The tests below all ask a version of the same question — are detections closer together than random? — but they look at it from different angles, so I run several and read them together.</p>
+<section id="nearest-neighbour-distances-g-function" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="nearest-neighbour-distances-g-function"><span class="header-section-number">7.1</span> Nearest-neighbour distances (G-function)</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>G_env <span class="ot">&lt;-</span> <span class="fu">envelope</span>(fire_sub, Gest, <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">correction =</span> <span class="st">"border"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating 19 simulated realisations of CSR  ...
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
+19.
+
+Done.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_env, <span class="at">main =</span> <span class="st">"G-function against a random baseline"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/gest-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="empty-space-distances-f-function" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="empty-space-distances-f-function"><span class="header-section-number">7.2</span> Empty-space distances (F-function)</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>F_env <span class="ot">&lt;-</span> <span class="fu">envelope</span>(fire_sub, Fest, <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">correction =</span> <span class="st">"border"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating 19 simulated realisations of CSR  ...
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
+19.
+
+Done.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(F_env, <span class="at">main =</span> <span class="st">"F-function against a random baseline"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/fest-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="clustering-across-scales-l-function" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="clustering-across-scales-l-function"><span class="header-section-number">7.3</span> Clustering across scales (L-function)</h2>
+<p>The L-function is the most informative of the four because it shows clustering as a function of distance. I plot it centred, so the random baseline is the horizontal line and departures above it mean clustering.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>L_env <span class="ot">&lt;-</span> <span class="fu">envelope</span>(fire_sub, Lest, <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">correction =</span> <span class="st">"Ripley"</span>, <span class="at">global =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating 19 simulated realisations of CSR  ...
+1, 2,  [6:46 remaining] 3,
+ [5:49 remaining] 4,  [5:32 remaining] 5,  [5:06 remaining] 6,
+ [4:46 remaining] 7,  [4:29 remaining] 8,  [4:09 remaining] 9,
+ [3:56 remaining] 10,  [3:35 remaining] 11,  [3:10 remaining] 12,
+ [2:44 remaining] 13,  [2:20 remaining] 14,  [1:57 remaining] 15,
+ [1:33 remaining] 16,  [1:10 remaining] 17,  [47 sec remaining] 18,
+ [23 sec remaining] 
+19.
+
+Done.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_env, . <span class="sc">-</span> r <span class="sc">~</span> r, <span class="at">main =</span> <span class="st">"L-function (centred)"</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/lest-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Across the distances examined, the observed L-curve lies far above the simulation envelope, reaching values of 6–7 while the envelope stays close to zero. The detections are therefore significantly more clustered than a random (CSR) pattern at every scale up to about 20 km. The clustering rises steeply at short distances and remains outside the envelope throughout, the expected signature of fires concentrated in a few active areas rather than scattered independently.</p>
+</section>
+<section id="does-the-clustering-survive-once-intensity-is-allowed-to-vary" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="does-the-clustering-survive-once-intensity-is-allowed-to-vary"><span class="header-section-number">7.4</span> Does the clustering survive once intensity is allowed to vary?</h2>
+<p>This is the important cross-check. The test above assumes intensity is constant, which it isn’t, so some of the “clustering” it reports may just be the hotspots. Here I let intensity vary and ask whether clustering remains on top of that.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>lambda_sub <span class="ot">&lt;-</span> <span class="fu">density</span>(fire_sub, <span class="at">sigma =</span> bw.ppl, <span class="at">edge =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>Linhom_env <span class="ot">&lt;-</span> <span class="fu">envelope</span>(fire_sub, Linhom,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">sigma =</span> bw.ppl,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">nsim =</span> <span class="dv">19</span>,</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">correction =</span> <span class="st">"Ripley"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating 19 simulated realisations of CSR  ...
+1, 2,  [6:21 remaining] 3,
+ [6:06 remaining] 4,  [5:43 remaining] 5,  [5:24 remaining] 6,
+ [4:56 remaining] 7,  [4:33 remaining] 8,  [4:10 remaining] 9,
+ [3:46 remaining] 10,  [3:23 remaining] 11,  [3:01 remaining] 12,
+ [2:39 remaining] 13,  [2:17 remaining] 14,  [1:53 remaining] 15,
+ [1:31 remaining] 16,  [1:09 remaining] 17,  [46 sec remaining] 18,
+ [23 sec remaining] 
+19.
+
+Done.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Linhom_env, . <span class="sc">-</span> r <span class="sc">~</span> r, <span class="at">main =</span> <span class="st">"Inhomogeneous L-function"</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/linhom-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>When intensity is allowed to vary, the observed curve drops back close to the baseline for most distances, sitting near or inside the envelope rather than far above it. This is the key result: once the hotspots are accounted for, little extra clustering remains, so the strong clustering seen in the homogeneous L is largely explained by first-order heterogeneity (the uneven intensity) rather than by additional interaction between fires. The sharp rise at the largest distance is a boundary/edge effect and should not be over-interpreted.</p>
+</section>
+</section>
+<section id="value-added-does-the-hotspot-move-over-the-season" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Value-added: does the hotspot move over the season?</h1>
+<p>This last piece goes beyond the core methods. Instead of one density surface for the whole period, I estimate a spatio-temporal density so I can see whether the busy areas shift from month to month.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># continuous time in DAYS (not month buckets), so sparr can smooth over time</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>fire_st <span class="ot">&lt;-</span> fire_dedup <span class="sc">%&gt;%</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">tval =</span> <span class="fu">as.numeric</span>(acq_date <span class="sc">-</span> <span class="fu">min</span>(acq_date)))</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>st_ppp <span class="ot">&lt;-</span> <span class="fu">ppp</span>(<span class="at">x =</span> <span class="fu">st_coordinates</span>(fire_st)[, <span class="dv">1</span>],</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> <span class="fu">st_coordinates</span>(fire_st)[, <span class="dv">2</span>],</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">window =</span> fire_owin,</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">marks =</span> fire_st<span class="sc">$</span>tval)</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>st_ppp <span class="ot">&lt;-</span> <span class="fu">unmark</span>(st_ppp) <span class="sc">%&gt;%</span>          <span class="co"># drop marks</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">marks&lt;-</span><span class="st">`</span>(<span class="at">value =</span> fire_st<span class="sc">$</span>tval)      <span class="co"># re-attach clean numeric time</span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a><span class="co"># give an explicit temporal bandwidth (~30 days) instead of auto-selection</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>stkde <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(st_ppp, <span class="at">tres =</span> <span class="dv">30</span>)</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(stkde)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-2.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-3.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-4.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-5.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-6.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-7.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-8.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-9.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-10.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-11.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-12.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-13.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-14.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-15.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-16.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-17.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-18.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-19.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-20.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-21.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-22.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-23.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-24.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-25.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-26.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-27.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-28.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-29.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/stkde-30.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The spatio-temporal density adds a temporal dimension to the static map. Fire activity is not spread evenly through the period: detections are sparse in the early, wetter months and rise as the dry season advances toward the later part of the window. The high-intensity area stays broadly in the central-south peatland rather than migrating far. This matters for planning: the same core is at risk throughout, but the risk window is concentrated in the dry-season months, so timing — not just location — should guide when resources are made ready. (The single-slice STKDE output shown here is indicative; a full temporal animation would show the build-up more clearly.)</p>
+</section>
+<section id="bringing-the-two-halves-together" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Bringing the two halves together</h1>
+<p>The two analyses point the same way. The first-order analysis shows intensity is highly uneven, concentrated in the central-south peatland. The homogeneous L confirms the detections are far more clustered than random, but the inhomogeneous L shows that this clustering mainly reflects that uneven intensity rather than independent interaction between fires — fires are concentrated because the conditions for fire are concentrated. The spatio-temporal view adds that this concentration also peaks in time, during the dry season. Alternative explanations remain: repeated detections of the same fire, cloud cover and overpass timing, and the fact that detection intensity is not the same as risk to people or assets.</p>
+</section>
+<section id="implications-for-public-safety-planning" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Implications for public-safety planning</h1>
+<p>The analysis supports a targeted rather than uniform approach to fire management in Pulang Pisau. Because detections concentrate in the central and southern peatland, monitoring, patrols and early-response resources can be prioritised there rather than spread evenly. Because activity peaks in the dry-season months, readiness can be scaled up ahead of that window and down afterwards, making better use of limited resources. The persistence of the hotspot in the same peatland also points to it as the priority for longer-term measures such as maintaining water levels and canal blocking, which reduce peat flammability.</p>
+<p>Two limits matter. The analysis shows where and when detections concentrate, not why any fire started. And a concentration of detections is not the same as risk to people: translating these patterns into risk would need data on population, settlements and land use around the hotspot. The findings are best used to focus attention and resources, not to draw causal conclusions.</p>
+</section>
+<section id="limitations" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Limitations</h1>
+<p>A few things should temper how far these results are pushed. Detections are not fires, and even after de-duplication some repeated counting may remain. Cloud cover and the timing of overpasses leave gaps in what the satellite could see, so absence in the record is not the same as absence of fire. A concentration of detections is not by itself a measure of risk without knowing who and what is exposed. And the observation window stops partway through the year, so the tail of the dry season is missing. The KDE and CSR assumptions hold only partly, which is why the results are read against more than one baseline.</p>
+</section>
+<section id="references" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> References</h1>
+<ul>
+<li>R Core Team (2026). R: A Language and Environment for Statistical Computing.</li>
+<li>Baddeley, A., Rubak, E., &amp; Turner, R. (2015). Spatial Point Patterns: Methodology and Applications with R. CRC Press.</li>
+<li>Davies, T.M., Marshall, J.C., &amp; Hazelton, M.L. (2018). sparr: Spatial and Spatiotemporal Relative Risk. R package.</li>
+<li>NASA FIRMS (VIIRS 375 m active-fire product); GADM v4.1.</li>
+</ul>
+<!-- -->
+<ul>
+<li>Baddeley, A., Rubak, E., &amp; Turner, R. (2015). <em>Spatial Point Patterns: Methodology and Applications with R</em>. CRC Press.</li>
+<li>Kam, T.S. <em>R for Geospatial Data Science and Analysis</em>.</li>
+<li>NASA FIRMS (VIIRS 375 m active fire product); GADM v4.1.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

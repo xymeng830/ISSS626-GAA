@@ -397,5 +397,152 @@
     "title": "About",
     "section": "",
     "text": "About this site\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "",
+    "text": "Fire on peatland is one of Central Kalimantan’s recurring public-safety problems. When peat burns it is hard to put out, it produces haze that drifts across the region, and it damages both health and livelihoods. If we want to prevent and respond to these fires more effectively, a sensible starting point is to ask two plain questions about the satellite record: where do fire detections pile up, and are they genuinely clustered rather than just scattered thickly?\nThis report works through those questions for one regency — Kabupaten Pulang Pisau — using satellite fire detections from 2026. I keep the two questions separate on purpose, because they are answered by different tools. The first is about intensity: how many detections fall in one place versus another. The second is about interaction: whether detections sit closer together than they would if they were placed at random. In point-pattern terms these are the first-order and second-order properties of the pattern, and confusing them is an easy way to draw the wrong conclusion."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#data-sources",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#data-sources",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "3.1 Data sources",
+    "text": "3.1 Data sources\n\n\n\n\n\n\n\n\n\nDataset\nSource\nAccess date\nCoverage\n\n\n\n\nFire detections, VIIRS 375 m (NOAA-20 / VJ114)\nNASA FIRMS, Archive Download\n2026-09-23\nIndonesia; 2026-01-01 to 2026-09-23\n\n\nRegency boundaries (ADM2)\nGADM v4.1\n2026-09-23\nIndonesia, regency level\n\n\n\nThe FIRMS export arrived split into two files: a standard (science-quality) file covering the earlier part of the year, and a near-real-time file for the recent months that have not yet been reprocessed. I read both and combine them, and I keep a column recording which file each detection came from so I can report the split later."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#what-counts-as-a-point-event",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#what-counts-as-a-point-event",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "3.2 What counts as a point event",
+    "text": "3.2 What counts as a point event\nA point event here is a single VIIRS fire detection: one 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.\nIt is worth being blunt about one thing early, because it shapes the whole analysis: a detection is not the same as a fire. A single fire that burns for several days will be picked up on several overpasses, so the raw file contains the same underlying fire many times over. Left alone, this makes the pattern look far more clustered than it really is. I therefore reduce repeated detections to one point per pixel location per day before any analysis, and I treat the remaining apparent clustering with appropriate caution.\nThe other data-quality steps are more routine: drop exact duplicate rows, remove records with missing or impossible coordinates, drop low-confidence detections, and keep only the records that fall inside the regency and inside the observation window."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#spatial-study-window",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#spatial-study-window",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "3.3 Spatial study window",
+    "text": "3.3 Spatial study window\nThe pattern is analysed inside the boundary of Kabupaten Pulang Pisau. I chose a single regency for three reasons. It is an administrative unit, so any finding maps directly onto who would plan or respond. It is dominated by peatland, so the fires within it belong to a reasonably coherent regime rather than a mix of unrelated fire types. And restricting to one regency keeps the point pattern small enough to run the distance-based tests without the whole-Indonesia file overwhelming memory. The regency polygon becomes the observation window (owin) for every spatstat step, so that intensity estimates and edge corrections respect the true boundary."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#temporal-study-window",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#temporal-study-window",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "3.4 Temporal study window",
+    "text": "3.4 Temporal study window\nBecause the year is not yet over, the data can only run to the download date, so the observation period is a partial year rather than a full one.\nThe analysis covers fire detections from 1 January 2026 to 23 September 2026, the full period available at the time of download. Because 2026 is still ongoing, this is a partial year: it captures the build-up of the dry season but not its later peak (around October–November), so any seasonal reading should be treated as incomplete."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#assumptions-worth-stating",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#assumptions-worth-stating",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "3.5 Assumptions worth stating",
+    "text": "3.5 Assumptions worth stating\nTwo assumptions matter enough to flag up front. Kernel density estimation assumes there is a smooth underlying intensity surface, and its picture of that surface depends heavily on the bandwidth, so I show more than one bandwidth rather than trusting a single choice. The distance-based tests (K and L) compare the observed pattern against a homogeneous random process — one with the same intensity everywhere. That assumption is almost certainly false here, since fire intensity is driven by where the peatland and land use are, so a homogeneous test will read first-order heterogeneity as if it were clustering. To separate the two, I also run an inhomogeneous version of the test that allows intensity to vary. Finally, the tests assume detections are independent, which is exactly what the repeated-detection problem violates — hence the de-duplication above."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#methodological-choices",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#methodological-choices",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "3.6 Methodological choices",
+    "text": "3.6 Methodological choices\nI work in EPSG:32749 (UTM zone 49S), which covers Central Kalimantan and gives distances in metres, and rescale to kilometres so the density and distance numbers are readable. For KDE I compare two data-driven bandwidths (bw.diggle, bw.ppl) against a fixed one, and add an adaptive estimate. Second-order tests use Ripley’s edge correction, and significance is judged against Monte Carlo envelopes — 39 simulations while drafting, which I raise before the final render."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#boundary-and-study-window",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#boundary-and-study-window",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "5.1 Boundary and study window",
+    "text": "5.1 Boundary and study window\n\nidn_adm2 &lt;- st_read(dsn = \"data/raw\", layer = \"gadm41_IDN_2\")\n\nReading layer `gadm41_IDN_2' from data source \n  `/Users/mengxinyu/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/data/raw' \n  using driver `ESRI Shapefile'\nSimple feature collection with 502 features and 13 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 95.00971 ymin: -11.00761 xmax: 141.0194 ymax: 6.076941\nGeodetic CRS:  WGS 84\n\nstudy_area &lt;- idn_adm2 %&gt;%\n  filter(NAME_2 == \"Pulang Pisau\") %&gt;%    # confirm this spelling against your file\n  st_transform(crs = 32749)\n\nall(st_is_valid(study_area))\n\n[1] TRUE\n\n\n\ntmap_mode(\"plot\")\ntm_shape(study_area) + tm_polygons(alpha = 0.3) +\n  tm_layout(main.title = \"Study window: Kabupaten Pulang Pisau\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#reading-the-two-fire-files",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#reading-the-two-fire-files",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "5.2 Reading the two fire files",
+    "text": "5.2 Reading the two fire files\nThe two files disagree on a couple of column types (for example version is numeric in the standard file and text in the near-real-time file), so I read everything as text first, stack the files, and then let type_convert() decide the types on the combined table.\n\nfire_archive &lt;- read_csv(\"data/raw/fire_archive_J1V-C2_811410.csv\",\n                         col_types = cols(.default = col_character()))\nfire_nrt     &lt;- read_csv(\"data/raw/fire_nrt_J1V-C2_811410.csv\",\n                         col_types = cols(.default = col_character()))\n\nfire_raw &lt;- bind_rows(archive = fire_archive,\n                      nrt      = fire_nrt,\n                      .id = \"source\") %&gt;%\n  type_convert()\n\nglimpse(fire_raw)\n\nRows: 370,354\nColumns: 16\n$ source     &lt;chr&gt; \"archive\", \"archive\", \"archive\", \"archive\", \"archive\", \"arc…\n$ latitude   &lt;dbl&gt; -6.32139, -2.73144, -2.74199, -2.72553, -2.73672, -2.74262,…\n$ longitude  &lt;dbl&gt; 138.6728, 132.9328, 132.9431, 132.9320, 132.9379, 132.9388,…\n$ brightness &lt;dbl&gt; 342.70, 351.49, 354.93, 333.18, 356.28, 355.71, 355.96, 331…\n$ scan       &lt;dbl&gt; 0.43, 0.48, 0.48, 0.48, 0.48, 0.48, 0.48, 0.39, 0.46, 0.56,…\n$ track      &lt;dbl&gt; 0.46, 0.65, 0.64, 0.65, 0.65, 0.65, 0.65, 0.36, 0.39, 0.43,…\n$ acq_date   &lt;date&gt; 2026-01-01, 2026-01-01, 2026-01-01, 2026-01-01, 2026-01-01…\n$ acq_time   &lt;chr&gt; \"0352\", \"0353\", \"0353\", \"0353\", \"0353\", \"0353\", \"0353\", \"05…\n$ satellite  &lt;chr&gt; \"N20\", \"N20\", \"N20\", \"N20\", \"N20\", \"N20\", \"N20\", \"N20\", \"N2…\n$ instrument &lt;chr&gt; \"VIIRS\", \"VIIRS\", \"VIIRS\", \"VIIRS\", \"VIIRS\", \"VIIRS\", \"VIIR…\n$ confidence &lt;chr&gt; \"n\", \"n\", \"n\", \"n\", \"l\", \"n\", \"l\", \"n\", \"n\", \"n\", \"n\", \"n\",…\n$ version    &lt;chr&gt; \"2\", \"2\", \"2\", \"2\", \"2\", \"2\", \"2\", \"2\", \"2\", \"2\", \"2\", \"2\",…\n$ bright_t31 &lt;dbl&gt; 286.85, 288.75, 289.22, 288.10, 289.07, 288.19, 287.82, 295…\n$ frp        &lt;dbl&gt; 7.55, 14.95, 46.30, 6.35, 14.95, 23.54, 14.95, 1.16, 4.11, …\n$ daynight   &lt;chr&gt; \"D\", \"D\", \"D\", \"D\", \"D\", \"D\", \"D\", \"D\", \"D\", \"D\", \"D\", \"D\",…\n$ type       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 3, 1, 1,…\n\n\n\n# How much of the record is near-real-time vs standard quality?\nfire_raw %&gt;% count(source)\n\n# A tibble: 2 × 2\n  source       n\n  &lt;chr&gt;    &lt;int&gt;\n1 archive  35153\n2 nrt     335201"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#cleaning",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#cleaning",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "5.3 Cleaning",
+    "text": "5.3 Cleaning\n\nfire_clean &lt;- fire_raw %&gt;%\n  distinct() %&gt;%                                    # drop exact duplicate rows\n  filter(!is.na(latitude), !is.na(longitude),\n         between(latitude,  -90,  90),\n         between(longitude, -180, 180)) %&gt;%         # valid coordinates only\n  filter(confidence %in% c(\"n\", \"h\")) %&gt;%           # VIIRS: keep nominal + high\n  mutate(acq_date = as.Date(acq_date)) %&gt;%\n  filter(acq_date &gt;= as.Date(\"2026-01-01\"),\n         acq_date &lt;= as.Date(\"2026-09-23\")) %&gt;%     # inside the window\n  mutate(month = lubridate::floor_date(acq_date, \"month\"))\n\nnrow(fire_raw); nrow(fire_clean)\n\n[1] 370354\n\n\n[1] 351822\n\n\nStarting from 370,354 detections across Indonesia, records with missing or invalid coordinates and low-confidence detections were removed, leaving 351,822. Restricting to Kabupaten Pulang Pisau left 16,189 detections. The per-pixel-per-day de-duplication removed none, indicating the export contained no exact same-day repeats at identical coordinates."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#to-spatial-points-then-clip-to-the-regency",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#to-spatial-points-then-clip-to-the-regency",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "5.4 To spatial points, then clip to the regency",
+    "text": "5.4 To spatial points, then clip to the regency\nClipping to the regency straight after making the points is deliberate — the national file is large, and running anything on it before clipping is what causes the memory blow-up.\n\nfire_sf &lt;- fire_clean %&gt;%\n  st_as_sf(coords = c(\"longitude\", \"latitude\"), crs = 4326) %&gt;%\n  st_transform(crs = 32749) %&gt;%\n  st_intersection(study_area)\nnrow(fire_sf)\n\n[1] 16189"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#removing-repeated-detections",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#removing-repeated-detections",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "5.5 Removing repeated detections",
+    "text": "5.5 Removing repeated detections\n\nfire_dedup &lt;- fire_sf %&gt;%\n  mutate(x = st_coordinates(.)[, 1],\n         y = st_coordinates(.)[, 2]) %&gt;%\n  distinct(x, y, acq_date, .keep_all = TRUE)\n\nnrow(fire_sf); nrow(fire_dedup)   # difference = repeated detections removed\n\n[1] 16189\n\n\n[1] 16189"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#building-the-spatstat-objects",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#building-the-spatstat-objects",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "5.6 Building the spatstat objects",
+    "text": "5.6 Building the spatstat objects\n\nfire_owin &lt;- as.owin(study_area)\n\nfire_ppp &lt;- as.ppp(st_geometry(fire_dedup))\nWindow(fire_ppp) &lt;- fire_owin\n\nsum(multiplicity(fire_ppp) &gt; 1)                     # any coincident points left?\n\n[1] 2\n\nfire_ppp &lt;- rjitter(fire_ppp, retry = TRUE, nsim = 1, drop = TRUE)\n\nfire_ppp.km &lt;- rescale.ppp(fire_ppp, 1000, \"km\")    # work in kilometres\nfire_ppp.km\n\nPlanar point pattern: 16189 points\nwindow: polygonal boundary\nenclosing rectangle: [786.3871, 870.7875] x [9616.111, 9829.378] km\n\n\n\nplot(fire_ppp.km, main = \"Fire detections after cleaning\")\n\n\n\n\n\n\n\n\n\n# 16k+ points make the Monte Carlo envelopes very slow, so the second-order\n# tests below run on a reproducible random subsample. This is a standard way\n# to keep CSR testing tractable; it does not change the underlying pattern.\nset.seed(1234)\nfire_sub &lt;- fire_ppp.km[sample(fire_ppp.km$n, 3000)]\nfire_sub\n\nPlanar point pattern: 3000 points\nwindow: polygonal boundary\nenclosing rectangle: [786.3871, 870.7875] x [9616.111, 9829.378] km"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#a-first-check-with-quadrats",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#a-first-check-with-quadrats",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "6.1 A first check with quadrats",
+    "text": "6.1 A first check with quadrats\nBefore smoothing anything, a quadrat count gives a quick sense of whether intensity is even across the regency.\n\nqt &lt;- quadrat.test(fire_ppp.km, nx = 6, ny = 6)\nqt\n\n\n    Chi-squared test of CSR using quadrat counts\n\ndata:  fire_ppp.km\nX2 = 16679, df = 29, p-value &lt; 2.2e-16\nalternative hypothesis: two.sided\n\nQuadrats: 30 tiles (irregular windows)\n\nplot(fire_ppp.km, pch = \".\", main = \"Quadrat counts\")\nplot(qt, add = TRUE, cex = 0.7)\n\n\n\n\n\n\n\n\nThe quadrat test rejects a uniform intensity (p &lt; 0.001): detections are far from evenly spread across the regency. This is evidence of first-order heterogeneity only — it shows intensity varies in space, not that points cluster, which the second-order tests address separately. The result also depends on the chosen quadrat size."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#kernel-density-with-different-bandwidths",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#kernel-density-with-different-bandwidths",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "6.2 Kernel density with different bandwidths",
+    "text": "6.2 Kernel density with different bandwidths\nThe density surface depends on the bandwidth, so rather than commit to one I show two data-driven choices and one fixed value side by side.\n\nkde_diggle &lt;- density(fire_ppp.km, sigma = bw.diggle, edge = TRUE, kernel = \"gaussian\")\nkde_ppl    &lt;- density(fire_ppp.km, sigma = bw.ppl,    edge = TRUE, kernel = \"gaussian\")\nkde_fixed  &lt;- density(fire_ppp.km, sigma = 2,         edge = TRUE, kernel = \"gaussian\")\n\npar(mfrow = c(1, 3))\nplot(kde_diggle, main = \"bw.diggle\")\nplot(kde_ppl,    main = \"bw.ppl\")\nplot(kde_fixed,  main = \"fixed 2 km\")\n\n\n\n\n\n\n\npar(mfrow = c(1, 1))"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#an-adaptive-estimate",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#an-adaptive-estimate",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "6.3 An adaptive estimate",
+    "text": "6.3 An adaptive estimate\n\nkde_adaptive &lt;- adaptive.density(fire_ppp.km, method = \"kernel\")\nplot(kde_adaptive, main = \"Adaptive KDE\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#a-cleaner-density-map",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#a-cleaner-density-map",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "6.4 A cleaner density map",
+    "text": "6.4 A cleaner density map\n\nkde_rast &lt;- raster(kde_ppl)\ncrs(kde_rast) &lt;- \"EPSG:32749\"\n\ntmap_mode(\"plot\")\ntm_shape(kde_rast) +\n  tm_raster(palette = \"YlOrRd\", title = \"Intensity (per km²)\") +\n  tm_shape(study_area) + tm_borders(col = \"grey30\") +\n  tm_layout(main.title = \"Fire-detection intensity\", legend.outside = TRUE)\n\n\n\n\n\n\n\n\nThe density surface shows fire detections are strongly concentrated in the central and southern parts of the regency, with very little activity in the north. The same core hotspot appears under all three bandwidths (bw.diggle, bw.ppl and the fixed 2 km kernel), so the location of the peak is robust to the smoothing choice, even if the smaller bandwidths show more local detail. This southern concentration is consistent with the low-lying peatland that dominates that part of Pulang Pisau and is highly fire-prone in the dry season. The map shows where intensity is highest but not why; it reflects where detections occur, which is shaped by both fire activity and the satellite’s ability to observe it."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#nearest-neighbour-distances-g-function",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#nearest-neighbour-distances-g-function",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "7.1 Nearest-neighbour distances (G-function)",
+    "text": "7.1 Nearest-neighbour distances (G-function)\n\nG_env &lt;- envelope(fire_sub, Gest, nsim = 19, correction = \"border\")\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, \n19.\n\nDone.\n\nplot(G_env, main = \"G-function against a random baseline\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#empty-space-distances-f-function",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#empty-space-distances-f-function",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "7.2 Empty-space distances (F-function)",
+    "text": "7.2 Empty-space distances (F-function)\n\nF_env &lt;- envelope(fire_sub, Fest, nsim = 19, correction = \"border\")\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, \n19.\n\nDone.\n\nplot(F_env, main = \"F-function against a random baseline\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#clustering-across-scales-l-function",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#clustering-across-scales-l-function",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "7.3 Clustering across scales (L-function)",
+    "text": "7.3 Clustering across scales (L-function)\nThe L-function is the most informative of the four because it shows clustering as a function of distance. I plot it centred, so the random baseline is the horizontal line and departures above it mean clustering.\n\nL_env &lt;- envelope(fire_sub, Lest, nsim = 19, correction = \"Ripley\", global = FALSE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2,  [6:46 remaining] 3,\n [5:49 remaining] 4,  [5:32 remaining] 5,  [5:06 remaining] 6,\n [4:46 remaining] 7,  [4:29 remaining] 8,  [4:09 remaining] 9,\n [3:56 remaining] 10,  [3:35 remaining] 11,  [3:10 remaining] 12,\n [2:44 remaining] 13,  [2:20 remaining] 14,  [1:57 remaining] 15,\n [1:33 remaining] 16,  [1:10 remaining] 17,  [47 sec remaining] 18,\n [23 sec remaining] \n19.\n\nDone.\n\nplot(L_env, . - r ~ r, main = \"L-function (centred)\")\nabline(h = 0, lty = 2)\n\n\n\n\n\n\n\n\nAcross the distances examined, the observed L-curve lies far above the simulation envelope, reaching values of 6–7 while the envelope stays close to zero. The detections are therefore significantly more clustered than a random (CSR) pattern at every scale up to about 20 km. The clustering rises steeply at short distances and remains outside the envelope throughout, the expected signature of fires concentrated in a few active areas rather than scattered independently."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#does-the-clustering-survive-once-intensity-is-allowed-to-vary",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#does-the-clustering-survive-once-intensity-is-allowed-to-vary",
+    "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
+    "section": "7.4 Does the clustering survive once intensity is allowed to vary?",
+    "text": "7.4 Does the clustering survive once intensity is allowed to vary?\nThis is the important cross-check. The test above assumes intensity is constant, which it isn’t, so some of the “clustering” it reports may just be the hotspots. Here I let intensity vary and ask whether clustering remains on top of that.\n\nlambda_sub &lt;- density(fire_sub, sigma = bw.ppl, edge = TRUE)\nLinhom_env &lt;- envelope(fire_sub, Linhom,\n                       sigma = bw.ppl,\n                       nsim = 19,\n                       correction = \"Ripley\")\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2,  [6:21 remaining] 3,\n [6:06 remaining] 4,  [5:43 remaining] 5,  [5:24 remaining] 6,\n [4:56 remaining] 7,  [4:33 remaining] 8,  [4:10 remaining] 9,\n [3:46 remaining] 10,  [3:23 remaining] 11,  [3:01 remaining] 12,\n [2:39 remaining] 13,  [2:17 remaining] 14,  [1:53 remaining] 15,\n [1:31 remaining] 16,  [1:09 remaining] 17,  [46 sec remaining] 18,\n [23 sec remaining] \n19.\n\nDone.\n\nplot(Linhom_env, . - r ~ r, main = \"Inhomogeneous L-function\")\nabline(h = 0, lty = 2)\n\n\n\n\n\n\n\n\nWhen intensity is allowed to vary, the observed curve drops back close to the baseline for most distances, sitting near or inside the envelope rather than far above it. This is the key result: once the hotspots are accounted for, little extra clustering remains, so the strong clustering seen in the homogeneous L is largely explained by first-order heterogeneity (the uneven intensity) rather than by additional interaction between fires. The sharp rise at the largest distance is a boundary/edge effect and should not be over-interpreted."
   }
 ]
