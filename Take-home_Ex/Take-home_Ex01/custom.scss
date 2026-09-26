@@ -1,0 +1,49 @@
+/*-- scss:defaults --*/
+// palette pulled from the site's green navbar
+$green:        #3c6e47;
+$green-light:  #cfe3d4;
+$ink:          #232823;
+$body-bg:      #ffffff;
+$body-color:   $ink;
+$link-color:   $green;
+
+// modern sans stack (matches the clean Quarto site)
+$font-family-sans-serif: "Inter", "Helvetica Neue", "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+$presentation-font-size-root: 30px;
+$presentation-heading-font: $font-family-sans-serif;
+$presentation-heading-color: $green;
+$presentation-heading-font-weight: 700;
+
+/*-- scss:rules --*/
+.reveal { letter-spacing: -0.005em; }
+
+.reveal h1, .reveal h2 { color: $green; }
+
+// thin green rule under each slide title
+.reveal .slides section > h2 {
+  border-bottom: 2px solid $green-light;
+  padding-bottom: .25em;
+  margin-bottom: .5em;
+  font-size: 1.5em;
+}
+
+.reveal strong { color: $green; }
+
+.reveal table { font-size: .85em; }
+.reveal table th { color: $green; border-bottom: 2px solid $green-light; }
+.reveal table td, .reveal table th { padding: .35em .6em; }
+
+// tidy callouts
+.reveal .callout { border-left-color: $green !important; }
+
+// dark title / closing slides
+.title-slide h1, .title-slide h2, .title-slide h3,
+section[data-background-color] h2,
+section[data-background-color] h3 { color: #ffffff !important; }
+.title-block { color: #ffffff; }
+.title-block h3 { font-weight: 800; margin-bottom: .3em; }
+.title-block h4 { font-weight: 500; opacity: .95; margin-bottom: 1em; }
+
+// footer + slide number in muted green
+.reveal .footer { color: $green; opacity: .7; font-size: .5em; }
+.reveal .slide-number { color: $green; }

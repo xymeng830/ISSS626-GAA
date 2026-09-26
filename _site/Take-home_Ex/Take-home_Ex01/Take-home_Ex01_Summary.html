@@ -9,9 +9,9 @@
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
-  <meta name="author" content="Meng Xinyu">
+  <meta name="author" content="Meng Xinyu · ISSS626 Geospatial Analytics">
   <meta name="dcterms.date" content="2026-09-23">
-  <title>ISSS626 Geospatial Analytics – Forest-fire Point Patterns in Kab. Pulang Pisau</title>
+  <title>ISSS626 Geospatial Analytics – Forest-fire Point Patterns in Kabupaten Pulang Pisau</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -33,7 +33,7 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-0427d8d92a431aa6a6430e53ec02a470.css">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-52a828884a5363181cff4ae16f99840e.css">
   <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -131,75 +131,94 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Forest-fire Point Patterns in Kab. Pulang Pisau</h1>
-  <p class="subtitle">Take-home Exercise 1 · Executive Summary · ISSS626</p>
+  <h1 class="title">Forest-fire Point Patterns in Kabupaten Pulang Pisau</h1>
+  <p class="subtitle">Take-home Exercise 1 · Executive Summary</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
 <div class="quarto-title-author-name">
-Meng Xinyu 
+Meng Xinyu · ISSS626 Geospatial Analytics 
 </div>
 </div>
 </div>
 
   <p class="date">2026-09-23</p>
 </section>
-<section id="contents" class="slide level2">
-<h2>Contents</h2>
-<ol type="1">
-<li>Research question &amp; study area</li>
-<li>Data &amp; study design</li>
-<li>Analytical approach</li>
-<li>First-order: Clark-Evans &amp; intensity</li>
-<li>Second-order: L-function</li>
-<li>Value-added: inhomogeneous L</li>
-<li>Value-added: spatio-temporal KDE</li>
-<li>Key findings</li>
-<li>Limitations</li>
-<li>Public-safety implications</li>
-</ol>
-</section>
 <section>
-<section id="research-question-study-area" class="title-slide slide level1 center">
-<h1>Research question &amp; study area</h1>
+<section id="section" class="title-slide slide level1 center" data-background-color="#3c6e47">
+<h1></h1>
 
 </section>
-<section id="where-do-fires-concentrate-and-do-they-cluster" class="slide level2">
-<h2>Where do fires concentrate — and do they cluster?</h2>
+<section id="forest-fire-point-patterns" class="title-block">
+<h3 class="r-fit-text">Forest-fire Point Patterns</h3>
+<h4 id="kabupaten-pulang-pisau-central-kalimantan-2026">Kabupaten Pulang Pisau, Central Kalimantan · 2026</h4>
+<p>Take-home Exercise 1 — Executive Summary<br>
+<strong>Meng Xinyu</strong> · ISSS626 Geospatial Analytics</p>
+</section>
+<section id="research-question-study-area" class="slide level2 smaller">
+<h2>Research question &amp; study area</h2>
+<div class="columns">
+<div class="column" style="width:58%;">
+<p>Peatland fires in Central Kalimantan cause haze, health and economic harm. This study asks two questions of the 2026 satellite record:</p>
 <ul>
-<li>Peatland fires in Central Kalimantan cause haze, health and economic harm.</li>
-<li><strong>Q1</strong> Where does fire-detection intensity concentrate, and when?</li>
-<li><strong>Q2</strong> Are detections significantly clustered, beyond just being dense?</li>
-<li>Study window: <strong>Kabupaten Pulang Pisau</strong>, a peat-dominated regency; 2026.</li>
+<li><strong>Q1</strong> — Where does fire-detection intensity concentrate, and when?</li>
+<li><strong>Q2</strong> — Are detections significantly clustered, beyond just being dense?</li>
 </ul>
-
-<img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-1-1.png" width="960" class="r-stretch"></section></section>
-<section>
-<section id="data-study-design" class="title-slide slide level1 center">
-<h1>Data &amp; study design</h1>
-
+<p>Study window: <strong>Kabupaten Pulang Pisau</strong>, a peat-dominated regency.</p>
+</div><div class="column" style="width:42%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-1-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
 </section>
-<section id="data-definitions" class="slide level2">
-<h2>Data &amp; definitions</h2>
-<ul>
-<li><strong>Detections</strong> — NASA FIRMS VIIRS 375 m (NOAA-20), 1 Jan – 23 Sep 2026.</li>
-<li><strong>Boundary</strong> — GADM ADM2 (regency), projected to UTM 49S (EPSG:32749).</li>
-<li><strong>Point event</strong> = one detection; a detection is <strong>not</strong> a distinct fire, so repeats are de-duplicated to one point per pixel per day.</li>
-<li>Cleaning: 370,354 → 351,822 national records; <strong>16,189</strong> inside the regency.</li>
-</ul>
-</section></section>
-<section>
-<section id="analytical-approach" class="title-slide slide level1 center">
-<h1>Analytical approach</h1>
-
-</section>
-<section id="methods-following-r4gdsa-ch.-46" class="slide level2">
-<h2>Methods (following r4gdsa Ch. 4–6)</h2>
+<section id="data-study-design" class="slide level2 smaller">
+<h2>Data &amp; study design</h2>
 <table class="caption-top">
 <colgroup>
-<col style="width: 30%">
-<col style="width: 41%">
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Detections</strong></td>
+<td>NASA FIRMS VIIRS 375 m (NOAA-20), 1 Jan – 23 Sep 2026</td>
+</tr>
+<tr class="even">
+<td><strong>Boundary</strong></td>
+<td>GADM ADM2 (regency), UTM 49S (EPSG:32749)</td>
+</tr>
+<tr class="odd">
+<td><strong>Point event</strong></td>
+<td>one detection ≠ one fire → de-duplicated to one point per pixel per day</td>
+</tr>
+<tr class="even">
+<td><strong>Cleaning</strong></td>
+<td>370,354 → 351,822 national → <strong>16,189</strong> inside the regency</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-note no-icon callout-style-simple">
+<div class="callout-body">
+<div class="callout-content">
+<p>A detection is not a distinct fire — repeated overpasses inflate apparent clustering, so de-duplication comes first.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="analytical-approach" class="slide level2 smaller">
+<h2>Analytical approach</h2>
+<p>Following the class workflow (r4gdsa Ch. 4–6):</p>
+<table class="caption-top">
+<colgroup>
 <col style="width: 28%">
+<col style="width: 44%">
+<col style="width: 27%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -211,123 +230,146 @@ Meng Xinyu
 <tbody>
 <tr class="odd">
 <td>Is it random?</td>
-<td>Clark-Evans test</td>
+<td><strong>Clark-Evans test</strong></td>
 <td>CSR (Monte Carlo)</td>
 </tr>
 <tr class="even">
 <td>Where is intensity?</td>
-<td>Kernel density (KDE)</td>
+<td><strong>Kernel density (KDE)</strong></td>
 <td>—</td>
 </tr>
 <tr class="odd">
 <td>Do points interact?</td>
-<td>G / F / K / L functions</td>
+<td><strong>G / F / K / L functions</strong></td>
 <td>homogeneous CSR</td>
 </tr>
 <tr class="even">
 <td>Robustness</td>
-<td>Inhomogeneous L</td>
+<td><strong>Inhomogeneous L</strong></td>
 <td>inhomogeneous null</td>
 </tr>
 <tr class="odd">
 <td>Timing</td>
-<td>Spatio-temporal KDE (sparr)</td>
+<td><strong>Spatio-temporal KDE</strong> (sparr)</td>
 <td>—</td>
 </tr>
 </tbody>
 </table>
-</section></section>
-<section>
-<section id="first-order-clark-evans-intensity" class="title-slide slide level1 center">
-<h1>First-order: Clark-Evans &amp; intensity</h1>
-
 </section>
-<section id="detections-are-clustered-and-concentrate-in-the-south" class="slide level2">
-<h2>Detections are clustered, and concentrate in the south</h2>
-
-<img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-2-1.png" width="960" class="r-stretch"><p>Clark-Evans <strong>R = 0.42 (p = 0.01)</strong> → clustered. The KDE shows the hotspot in the <strong>central-south peatland</strong>, stable across bandwidths.</p>
-</section></section>
-<section>
-<section id="second-order-l-function" class="title-slide slide level1 center">
-<h1>Second-order: L-function</h1>
-
+<section id="first-order-intensity-concentrates-in-the-south" class="slide level2 smaller">
+<h2>First-order — intensity concentrates in the south</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-2-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:45%;">
+<p><strong>Clark-Evans R = 0.42</strong> (p = 0.01) → clustered, not random.</p>
+<p>The KDE hotspot sits in the <strong>central-south peatland</strong>, and is stable across all three bandwidths — the peak location does not depend on the smoothing choice.</p>
+</div></div>
 </section>
-<section id="strong-clustering-vs-a-random-baseline" class="slide level2">
-<h2>Strong clustering vs a random baseline</h2>
-
-<img data-src="Take-home_Ex01_files/figure-html/lest-1.png" class="r-stretch"><p>The observed L sits <strong>far above</strong> the CSR envelope up to ~20 km. G, F, K and L all agree: <strong>significant clustering</strong> at every scale.</p>
-</section></section>
-<section>
-<section id="value-added-inhomogeneous-l" class="title-slide slide level1 center">
-<h1>Value-added: inhomogeneous L</h1>
-
+<section id="second-order-strong-clustering-vs-csr" class="slide level2 smaller">
+<h2>Second-order — strong clustering vs CSR</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p><img data-src="Take-home_Ex01_files/figure-html/lest-1.png"></p>
+</div><div class="column" style="width:45%;">
+<p>The observed <strong>L-curve sits far above</strong> the CSR envelope across all scales up to ~20 km.</p>
+<p><strong>G, F, K and L all agree</strong>: the detections are significantly more clustered than a random pattern — the signature of fires concentrated in a few active areas.</p>
+</div></div>
 </section>
-<section id="most-clustering-is-the-hotspot-not-interaction" class="slide level2">
-<h2>Most clustering is the hotspot, not interaction</h2>
+<section id="value-added-1-is-the-clustering-real" class="slide level2 smaller">
+<h2>Value-added 1 — is the clustering real?</h2>
+<p>The CSR test assumes constant intensity, which is false here. The <strong>inhomogeneous L</strong> lets intensity vary and re-tests.</p>
+<div class="fragment">
 <ul>
-<li>Under a homogeneous null, detections look strongly clustered.</li>
-<li>Once <strong>intensity is allowed to vary</strong> (inhomogeneous L), the curve drops back near the baseline.</li>
-<li><strong>Reading:</strong> the clustering mostly reflects <strong>first-order heterogeneity</strong> — fires concentrate because the conditions for fire concentrate — not extra fire-to-fire interaction.</li>
+<li>Under a <strong>homogeneous</strong> null → detections look strongly clustered.</li>
+<li>Once <strong>intensity is allowed to vary</strong> → the curve drops back near the baseline.</li>
 </ul>
-</section></section>
-<section>
-<section id="value-added-spatio-temporal-kde" class="title-slide slide level1 center">
-<h1>Value-added: spatio-temporal KDE</h1>
-
+</div>
+<div class="fragment">
+<div class="callout callout-tip no-icon callout-style-simple">
+<div class="callout-body">
+<div class="callout-content">
+<p><strong>Key result:</strong> the clustering mostly reflects <strong>first-order heterogeneity</strong> — fires concentrate because the <em>conditions</em> for fire concentrate — not extra fire-to-fire interaction.</p>
+</div>
+</div>
+</div>
+</div>
 </section>
-<section id="activity-builds-up-through-the-dry-season" class="slide level2">
-<h2>Activity builds up through the dry season</h2>
-
-<img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch"><p>The hotspot stays in the central-south peatland but <strong>gets stronger</strong> as the dry season advances — timing matters as much as location.</p>
-</section></section>
-<section>
-<section id="key-findings" class="title-slide slide level1 center">
-<h1>Key findings</h1>
-
+<section id="value-added-2-activity-builds-up-in-time" class="slide level2 smaller">
+<h2>Value-added 2 — activity builds up in time</h2>
+<div class="columns">
+<div class="column" style="width:58%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-3-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:42%;">
+<p>The spatio-temporal KDE shows the hotspot <strong>stays in the central-south peatland</strong> but <strong>grows stronger</strong> as the dry season advances.</p>
+<p>So <strong>timing matters as much as location</strong> — the same core is at risk, but the risk window concentrates in a few months.</p>
+</div></div>
 </section>
-<section id="what-we-learned" class="slide level2">
-<h2>What we learned</h2>
+<section id="key-findings" class="slide level2 smaller">
+<h2>Key findings</h2>
 <ul>
-<li><strong>First-order:</strong> Clark-Evans confirms clustering; intensity concentrates in the central-south peatland.</li>
-<li><strong>Second-order:</strong> G/F/K/L all show significant clustering vs CSR — but the <strong>inhomogeneous L shows it is mostly first-order heterogeneity</strong>.</li>
-<li><strong>Timing:</strong> activity peaks in the dry-season months.</li>
-<li>First- and second-order evidence agree: a few peat-dominated areas drive the pattern.</li>
+<li><strong>First-order</strong> — Clark-Evans confirms clustering; intensity concentrates in the central-south peatland.</li>
+<li><strong>Second-order</strong> — G/F/K/L all show significant clustering vs CSR…</li>
+<li><strong>…but</strong> the <strong>inhomogeneous L</strong> shows it is <em>mostly first-order heterogeneity</em>, not fire-to-fire interaction.</li>
+<li><strong>Timing</strong> — activity peaks in the dry-season months.</li>
 </ul>
-</section></section>
-<section>
-<section id="limitations" class="title-slide slide level1 center">
-<h1>Limitations</h1>
-
+<div class="callout callout-note no-icon callout-style-simple">
+<div class="callout-body">
+<div class="callout-content">
+<p>First- and second-order evidence agree: a few peat-dominated areas drive the whole pattern.</p>
+</div>
+</div>
+</div>
 </section>
-<section id="read-with-care" class="slide level2">
-<h2>Read with care</h2>
+<section id="limitations-implications" class="slide level2 smaller">
+<h2>Limitations &amp; implications</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>Read with care</strong></p>
 <ul>
-<li>Detections ≠ fires; cloud cover and overpass timing leave observation gaps.</li>
-<li>Concentration of detections ≠ risk to people, without exposure data.</li>
-<li>CSR / KDE assumptions hold only partly; results read against more than one null.</li>
-<li>Window stops in September — the later dry-season peak is not captured.</li>
+<li>Detections ≠ fires; cloud/overpass gaps.</li>
+<li>Concentration ≠ risk without exposure data.</li>
+<li>CSR/KDE assumptions only partly hold.</li>
+<li>Window stops in September.</li>
 </ul>
-</section></section>
-<section>
-<section id="public-safety-implications" class="title-slide slide level1 center">
-<h1>Public-safety implications</h1>
-
-</section>
-<section id="from-evidence-to-action" class="slide level2">
-<h2>From evidence to action</h2>
+</div><div class="column" style="width:50%;">
+<p><strong>From evidence to action</strong></p>
 <ul>
-<li><strong>Where:</strong> prioritise monitoring, patrols and response resources in the central-south peatland.</li>
-<li><strong>When:</strong> raise fire-danger readiness ahead of the dry-season peak.</li>
-<li><strong>Longer term:</strong> peatland water management (maintaining levels, canal blocking) in the hotspot.</li>
-<li>Directly supported: <strong>spatial concentration + timing</strong>. Needs more data: causation, who is exposed.</li>
+<li><strong>Where</strong> — focus monitoring &amp; patrols on the central-south peatland.</li>
+<li><strong>When</strong> — raise readiness ahead of the dry-season peak.</li>
+<li><strong>Longer term</strong> — peatland water management (levels, canal blocking).</li>
 </ul>
+</div></div>
+<div class="callout callout-tip no-icon callout-style-simple">
+<div class="callout-body">
+<div class="callout-content">
+<p>Directly supported: <strong>spatial concentration + timing</strong>. Needs more data: causation, who is exposed.</p>
+</div>
+</div>
+</div>
 
 
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
-<p>ISSS626 Geospatial Analytics · Take-home Ex1</p>
+<p>ISSS626 · Take-home Ex1 · Meng Xinyu</p>
 </div>
 </div></div>
 
@@ -505,9 +547,9 @@ Meng Xinyu
         // The "normal" size of the presentation, aspect ratio will be preserved
         // when the presentation is scaled to fit different resolutions. Can be
         // specified using percentage units.
-        width: 1050,
+        width: 1280,
 
-        height: 700,
+        height: 720,
 
         // Factor of the display size that should remain empty around the content
         margin: 0.1,

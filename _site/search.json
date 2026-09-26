@@ -726,5 +726,68 @@
     "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
     "section": "From evidence to action",
     "text": "From evidence to action\n\nWhere: prioritise monitoring, patrols and response resources in the central-south peatland.\nWhen: raise fire-danger readiness ahead of the dry-season peak.\nLonger term: peatland water management (maintaining levels, canal blocking) in the hotspot.\nDirectly supported: spatial concentration + timing. Needs more data: causation, who is exposed."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#research-question-study-area",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#research-question-study-area",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "Research question & study area",
+    "text": "Research question & study area\n\n\nPeatland fires in Central Kalimantan cause haze, health and economic harm. This study asks two questions of the 2026 satellite record:\n\nQ1 — Where does fire-detection intensity concentrate, and when?\nQ2 — Are detections significantly clustered, beyond just being dense?\n\nStudy window: Kabupaten Pulang Pisau, a peat-dominated regency."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#data-study-design",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#data-study-design",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "Data & study design",
+    "text": "Data & study design\n\n\n\n\n\n\n\nDetections\nNASA FIRMS VIIRS 375 m (NOAA-20), 1 Jan – 23 Sep 2026\n\n\nBoundary\nGADM ADM2 (regency), UTM 49S (EPSG:32749)\n\n\nPoint event\none detection ≠ one fire → de-duplicated to one point per pixel per day\n\n\nCleaning\n370,354 → 351,822 national → 16,189 inside the regency\n\n\n\n\n\n\nA detection is not a distinct fire — repeated overpasses inflate apparent clustering, so de-duplication comes first."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#analytical-approach",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#analytical-approach",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "Analytical approach",
+    "text": "Analytical approach\nFollowing the class workflow (r4gdsa Ch. 4–6):\n\n\n\n\n\n\n\n\nQuestion\nMethod\nCompared against\n\n\n\n\nIs it random?\nClark-Evans test\nCSR (Monte Carlo)\n\n\nWhere is intensity?\nKernel density (KDE)\n—\n\n\nDo points interact?\nG / F / K / L functions\nhomogeneous CSR\n\n\nRobustness\nInhomogeneous L\ninhomogeneous null\n\n\nTiming\nSpatio-temporal KDE (sparr)\n—"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#first-order-intensity-concentrates-in-the-south",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#first-order-intensity-concentrates-in-the-south",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "First-order — intensity concentrates in the south",
+    "text": "First-order — intensity concentrates in the south\n\n\n\n\n\n\n\n\n\n\n\n\nClark-Evans R = 0.42 (p = 0.01) → clustered, not random.\nThe KDE hotspot sits in the central-south peatland, and is stable across all three bandwidths — the peak location does not depend on the smoothing choice."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#second-order-strong-clustering-vs-csr",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#second-order-strong-clustering-vs-csr",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "Second-order — strong clustering vs CSR",
+    "text": "Second-order — strong clustering vs CSR\n\n\n\n\nThe observed L-curve sits far above the CSR envelope across all scales up to ~20 km.\nG, F, K and L all agree: the detections are significantly more clustered than a random pattern — the signature of fires concentrated in a few active areas."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-1-is-the-clustering-real",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-1-is-the-clustering-real",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "Value-added 1 — is the clustering real?",
+    "text": "Value-added 1 — is the clustering real?\nThe CSR test assumes constant intensity, which is false here. The inhomogeneous L lets intensity vary and re-tests.\n\n\nUnder a homogeneous null → detections look strongly clustered.\nOnce intensity is allowed to vary → the curve drops back near the baseline.\n\n\n\n\n\n\nKey result: the clustering mostly reflects first-order heterogeneity — fires concentrate because the conditions for fire concentrate — not extra fire-to-fire interaction."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-2-activity-builds-up-in-time",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-2-activity-builds-up-in-time",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "Value-added 2 — activity builds up in time",
+    "text": "Value-added 2 — activity builds up in time\n\n\n\n\n\n\n\n\n\n\n\n\nThe spatio-temporal KDE shows the hotspot stays in the central-south peatland but grows stronger as the dry season advances.\nSo timing matters as much as location — the same core is at risk, but the risk window concentrates in a few months."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#key-findings",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#key-findings",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "Key findings",
+    "text": "Key findings\n\nFirst-order — Clark-Evans confirms clustering; intensity concentrates in the central-south peatland.\nSecond-order — G/F/K/L all show significant clustering vs CSR…\n…but the inhomogeneous L shows it is mostly first-order heterogeneity, not fire-to-fire interaction.\nTiming — activity peaks in the dry-season months.\n\n\n\n\nFirst- and second-order evidence agree: a few peat-dominated areas drive the whole pattern."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#limitations-implications",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#limitations-implications",
+    "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
+    "section": "Limitations & implications",
+    "text": "Limitations & implications\n\n\nRead with care\n\nDetections ≠ fires; cloud/overpass gaps.\nConcentration ≠ risk without exposure data.\nCSR/KDE assumptions only partly hold.\nWindow stops in September.\n\n\nFrom evidence to action\n\nWhere — focus monitoring & patrols on the central-south peatland.\nWhen — raise readiness ahead of the dry-season peak.\nLonger term — peatland water management (levels, canal blocking).\n\n\n\n\n\nDirectly supported: spatial concentration + timing. Needs more data: causation, who is exposed."
   }
 ]
