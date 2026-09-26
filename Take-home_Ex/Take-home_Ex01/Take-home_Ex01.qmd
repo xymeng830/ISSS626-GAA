@@ -1,6 +1,6 @@
 ---
 title: "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan"
-subtitle: "Spatial and spatio-temporal analysis of fire detections in Kabupaten Pulang Pisau, 2026"
+subtitle: "Spatial and spatio-temporal point pattern analysis of fire detections in Kabupaten Pulang Pisau, 2026"
 author: "Meng Xinyu"
 date: "2026-09-23"
 date-modified: "last-modified"
@@ -20,17 +20,17 @@ execute:
   freeze: auto
 ---
 
-# Introduction
+# Overview
 
-Fire on peatland is one of Central Kalimantan's recurring public-safety problems. When peat burns it is hard to put out, it produces haze that drifts across the region, and it damages both health and livelihoods. If we want to prevent and respond to these fires more effectively, a sensible starting point is to ask two plain questions about the satellite record: where do fire detections pile up, and are they genuinely clustered rather than just scattered thickly?
+Peatland fires are a recurring public-safety problem in Central Kalimantan. Peat fires are hard to put out, they produce haze that spreads across the region, and they damage both health and the local economy. To support prevention and response, this exercise looks at the satellite fire record and asks two basic questions: where do fire detections concentrate, and are they really clustered or just densely scattered.
 
-This report works through those questions for one regency — Kabupaten Pulang Pisau — using satellite fire detections from 2026. I keep the two questions separate on purpose, because they are answered by different tools. The first is about *intensity*: how many detections fall in one place versus another. The second is about *interaction*: whether detections sit closer together than they would if they were placed at random. In point-pattern terms these are the first-order and second-order properties of the pattern, and confusing them is an easy way to draw the wrong conclusion.
+The study area is one regency, Kabupaten Pulang Pisau, and the data are VIIRS fire detections from 2026. Following the workflow taught in class (r4gdsa Chapters 4-6), the analysis separates first-order effects (how the intensity of detections varies across space) from second-order effects (whether detections interact - cluster, inhibit, or appear random). These two properties are measured with different tools, so they are reported separately.
 
 # Research questions
 
-I set out to answer three questions:
-
-The first is where fire activity concentrates within the regency, and how that concentration changes over the months of the observation period. The second is whether the detections show statistically significant clustering once we compare them against a random baseline, rather than clustering that is only apparent to the eye. The third, which goes a little beyond the core methods, is whether the busiest areas move over the course of the season rather than staying put.
+1.  Where does fire-detection intensity concentrate within the regency, and how does it change over the observation period?
+2.  Are the detections significantly clustered compared with a Complete Spatial Randomness (CSR) baseline, rather than only appearing clustered on a map?
+3.  (Value-added) Does the high-intensity area move over the season, and does the clustering hold once the uneven intensity is accounted for?
 
 # Data and study design
 
@@ -41,57 +41,50 @@ The first is where fire activity concentrates within the regency, and how that c
 | Fire detections, VIIRS 375 m (NOAA-20 / VJ114) | NASA FIRMS, Archive Download | 2026-09-23 | Indonesia; 2026-01-01 to 2026-09-23 |
 | Regency boundaries (ADM2) | GADM v4.1 | 2026-09-23 | Indonesia, regency level |
 
-The FIRMS export arrived split into two files: a *standard* (science-quality) file covering the earlier part of the year, and a *near-real-time* file for the recent months that have not yet been reprocessed. I read both and combine them, and I keep a column recording which file each detection came from so I can report the split later.
+FIRMS returned the export as two files: a standard (science-quality) file for the earlier part of the year and a near-real-time (NRT) file for the recent months that have not been reprocessed yet. Both are read and combined, and a `source` column is kept so the standard/NRT split can be reported.
 
-## What counts as a point event
+## Point event definition
 
-A point event here is a single VIIRS fire detection: one 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.
+A point event is one VIIRS fire detection - a single 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.
 
-It is worth being blunt about one thing early, because it shapes the whole analysis: a detection is not the same as a fire. A single fire that burns for several days will be picked up on several overpasses, so the raw file contains the same underlying fire many times over. Left alone, this makes the pattern look far more clustered than it really is. I therefore reduce repeated detections to one point per pixel location per day before any analysis, and I treat the remaining apparent clustering with appropriate caution.
+One point to be clear about early: a detection is not a distinct fire. A fire that burns for several days is picked up on several overpasses, so the raw file contains the same fire many times. This inflates apparent clustering, so repeated detections are reduced to one point per pixel per day before analysis.
 
-The other data-quality steps are more routine: drop exact duplicate rows, remove records with missing or impossible coordinates, drop low-confidence detections, and keep only the records that fall inside the regency and inside the observation window.
+The remaining cleaning steps are routine: drop exact duplicate rows, remove records with missing or impossible coordinates, drop low-confidence detections, and keep only records inside the regency and inside the observation window.
 
 ## Spatial study window
 
-The pattern is analysed inside the boundary of Kabupaten Pulang Pisau. I chose a single regency for three reasons. It is an administrative unit, so any finding maps directly onto who would plan or respond. It is dominated by peatland, so the fires within it belong to a reasonably coherent regime rather than a mix of unrelated fire types. And restricting to one regency keeps the point pattern small enough to run the distance-based tests without the whole-Indonesia file overwhelming memory. The regency polygon becomes the observation window (`owin`) for every spatstat step, so that intensity estimates and edge corrections respect the true boundary.
+The analysis is confined to Kabupaten Pulang Pisau. A single regency is used because it is an administrative unit (so a finding maps onto who would plan or respond), it is dominated by peatland (so the fires belong to a fairly consistent regime), and one regency keeps the point pattern small enough for the distance-based tests. The regency polygon becomes the observation window (`owin`) for all spatstat steps, so intensity estimates and edge corrections respect the true boundary.
 
 ## Temporal study window
 
-Because the year is not yet over, the data can only run to the download date, so the observation period is a partial year rather than a full one.
+The data cover 1 January 2026 to 23 September 2026, the full range available at download. Because 2026 is not over, this is a partial year: it captures the build-up of the dry season but not its later peak around October-November, so seasonal readings are incomplete.
 
-The analysis covers fire detections from 1 January 2026 to 23 September 2026, the full period available at the time of download. Because 2026 is still ongoing, this is a partial year: it captures the build-up of the dry season but not its later peak (around October–November), so any seasonal reading should be treated as incomplete.
+## Assumptions
 
-## Assumptions worth stating
-
-Two assumptions matter enough to flag up front. Kernel density estimation assumes there is a smooth underlying intensity surface, and its picture of that surface depends heavily on the bandwidth, so I show more than one bandwidth rather than trusting a single choice. The distance-based tests (K and L) compare the observed pattern against a *homogeneous* random process — one with the same intensity everywhere. That assumption is almost certainly false here, since fire intensity is driven by where the peatland and land use are, so a homogeneous test will read first-order heterogeneity as if it were clustering. To separate the two, I also run an inhomogeneous version of the test that allows intensity to vary. Finally, the tests assume detections are independent, which is exactly what the repeated-detection problem violates — hence the de-duplication above.
+KDE assumes a smooth underlying intensity surface, and the result depends heavily on the bandwidth, so more than one bandwidth is shown. The K and L functions compare the pattern against a homogeneous Poisson process (constant intensity everywhere). That assumption is almost certainly false here, because fire intensity is driven by where the peatland is, so a homogeneous test can read first-order heterogeneity as clustering. To separate the two, an inhomogeneous L is added as a value-added check. The tests also assume detections are independent, which is exactly what repeated detections break - hence the de-duplication.
 
 ## Methodological choices
 
-I work in EPSG:32749 (UTM zone 49S), which covers Central Kalimantan and gives distances in metres, and rescale to kilometres so the density and distance numbers are readable. For KDE I compare two data-driven bandwidths (`bw.diggle`, `bw.ppl`) against a fixed one, and add an adaptive estimate. Second-order tests use Ripley's edge correction, and significance is judged against Monte Carlo envelopes — 39 simulations while drafting, which I raise before the final render.
+The projected CRS is EPSG:32749 (UTM zone 49S), which covers Central Kalimantan and gives distances in metres; values are rescaled to kilometres for readability. KDE uses two data-driven bandwidths (`bw.diggle`, `bw.ppl`), a fixed bandwidth, and an adaptive estimate. Second-order tests use Ripley's edge correction and are assessed against Monte Carlo envelopes.
 
-# Packages
+# Installing and loading R packages
+
+Following Chapters 4-6, the packages used are sf, spatstat, sparr, terra, tmap and tidyverse.
 
 ```{r}
-pacman::p_load(
-  sf,          # vector geospatial data
-  tmap,        # thematic maps
-  spatstat,    # point pattern analysis
-  sparr,       # spatio-temporal KDE (used later)
-  raster,      # convert density images for tmap
-  tidyverse    # wrangling and plotting
-)
+pacman::p_load(sf, spatstat, sparr, terra, tmap, tidyverse)
 ```
 
 # Data preparation
 
-## Boundary and study window
+## Importing the study area
 
 ```{r}
 #| label: import-boundary
 idn_adm2 <- st_read(dsn = "data/raw", layer = "gadm41_IDN_2")
 
 study_area <- idn_adm2 %>%
-  filter(NAME_2 == "Pulang Pisau") %>%    # confirm this spelling against your file
+  filter(NAME_2 == "Pulang Pisau") %>%
   st_transform(crs = 32749)
 
 all(st_is_valid(study_area))
@@ -100,13 +93,13 @@ all(st_is_valid(study_area))
 ```{r}
 #| label: plot-boundary
 tmap_mode("plot")
-tm_shape(study_area) + tm_polygons(alpha = 0.3) +
-  tm_layout(main.title = "Study window: Kabupaten Pulang Pisau")
+tm_shape(study_area) + tm_polygons() +
+  tm_layout(main.title = "Study area: Kabupaten Pulang Pisau")
 ```
 
-## Reading the two fire files
+## Importing and combining the fire detections
 
-The two files disagree on a couple of column types (for example `version` is numeric in the standard file and text in the near-real-time file), so I read everything as text first, stack the files, and then let `type_convert()` decide the types on the combined table.
+The two files disagree on a few column types (for example `version` is numeric in the standard file and text in the NRT file), so everything is read as text first, stacked, then `type_convert()` decides the types on the combined table.
 
 ```{r}
 #| label: import-fire
@@ -115,9 +108,7 @@ fire_archive <- read_csv("data/raw/fire_archive_J1V-C2_811410.csv",
 fire_nrt     <- read_csv("data/raw/fire_nrt_J1V-C2_811410.csv",
                          col_types = cols(.default = col_character()))
 
-fire_raw <- bind_rows(archive = fire_archive,
-                      nrt      = fire_nrt,
-                      .id = "source") %>%
+fire_raw <- bind_rows(archive = fire_archive, nrt = fire_nrt, .id = "source") %>%
   type_convert()
 
 glimpse(fire_raw)
@@ -125,7 +116,6 @@ glimpse(fire_raw)
 
 ```{r}
 #| label: source-split
-# How much of the record is near-real-time vs standard quality?
 fire_raw %>% count(source)
 ```
 
@@ -134,24 +124,24 @@ fire_raw %>% count(source)
 ```{r}
 #| label: clean-fire
 fire_clean <- fire_raw %>%
-  distinct() %>%                                    # drop exact duplicate rows
+  distinct() %>%
   filter(!is.na(latitude), !is.na(longitude),
-         between(latitude,  -90,  90),
-         between(longitude, -180, 180)) %>%         # valid coordinates only
-  filter(confidence %in% c("n", "h")) %>%           # VIIRS: keep nominal + high
+         between(latitude, -90, 90), between(longitude, -180, 180)) %>%
+  filter(confidence %in% c("n", "h")) %>%          # VIIRS: keep nominal + high
   mutate(acq_date = as.Date(acq_date)) %>%
   filter(acq_date >= as.Date("2026-01-01"),
-         acq_date <= as.Date("2026-09-23")) %>%     # inside the window
-  mutate(month = lubridate::floor_date(acq_date, "month"))
+         acq_date <= as.Date("2026-09-23")) %>%
+  mutate(Month_num = month(acq_date),
+         Month_fac = month(acq_date, label = TRUE, abbr = FALSE))
 
 nrow(fire_raw); nrow(fire_clean)
 ```
 
-Starting from 370,354 detections across Indonesia, records with missing or invalid coordinates and low-confidence detections were removed, leaving 351,822. Restricting to Kabupaten Pulang Pisau left 16,189 detections. The per-pixel-per-day de-duplication removed none, indicating the export contained no exact same-day repeats at identical coordinates.
+Cleaning drops the national record from 370,354 to 351,822 (removing missing/invalid coordinates and low-confidence detections). Clipping to Pulang Pisau in the next step leaves 16,189 detections.
 
-## To spatial points, then clip to the regency
+## Converting to sf and clipping to the regency
 
-Clipping to the regency straight after making the points is deliberate — the national file is large, and running anything on it before clipping is what causes the memory blow-up.
+Following Chapter 1, the aspatial csv is converted with `st_as_sf()` and transformed to the projected CRS. Clipping to the regency is done right after, because running anything on the whole-Indonesia file first causes a memory blow-up.
 
 ```{r}
 #| label: to-sf
@@ -171,59 +161,67 @@ fire_dedup <- fire_sf %>%
          y = st_coordinates(.)[, 2]) %>%
   distinct(x, y, acq_date, .keep_all = TRUE)
 
-nrow(fire_sf); nrow(fire_dedup)   # difference = repeated detections removed
+nrow(fire_sf); nrow(fire_dedup)
 ```
 
-## Building the spatstat objects
+Here the per-pixel-per-day rule removes no rows, which means the export contained no exact same-day repeats at identical coordinates.
+
+## Creating the spatstat objects (ppp and owin)
+
+Following Chapter 4, `as.ppp()` converts the points and `as.owin()` builds the observation window; the two are then combined and rescaled to kilometres.
 
 ```{r}
 #| label: make-ppp
-fire_owin <- as.owin(study_area)
-
 fire_ppp <- as.ppp(st_geometry(fire_dedup))
+fire_owin <- as.owin(study_area)
 Window(fire_ppp) <- fire_owin
 
-sum(multiplicity(fire_ppp) > 1)                     # any coincident points left?
+# check for coincident points (spatstat needs no exact duplicates)
+sum(multiplicity(fire_ppp) > 1)
 fire_ppp <- rjitter(fire_ppp, retry = TRUE, nsim = 1, drop = TRUE)
 
-fire_ppp.km <- rescale.ppp(fire_ppp, 1000, "km")    # work in kilometres
-fire_ppp.km
+fire_ppp.km <- rescale.ppp(fire_ppp, 1000, "km")
+summary(fire_ppp.km)
 ```
 
 ```{r}
 #| label: plot-ppp
+#| fig-width: 6
+#| fig-height: 6
 plot(fire_ppp.km, main = "Fire detections after cleaning")
 ```
 
+Because the pattern has 16,189 points, the Monte Carlo envelopes in the second-order section become very slow. Following the standard practice of testing CSR on a subsample, a reproducible random sample of 3,000 points is drawn and used for the envelope tests only (the first-order KDE below uses all points).
+
 ```{r}
 #| label: subsample
-# 16k+ points make the Monte Carlo envelopes very slow, so the second-order
-# tests below run on a reproducible random subsample. This is a standard way
-# to keep CSR testing tractable; it does not change the underlying pattern.
 set.seed(1234)
 fire_sub <- fire_ppp.km[sample(fire_ppp.km$n, 3000)]
 fire_sub
 ```
 
-# First-order analysis: where is the intensity?
+# First-order analysis: intensity
 
-## A first check with quadrats
+## Clark-Evans test
 
-Before smoothing anything, a quadrat count gives a quick sense of whether intensity is even across the regency.
+Following Chapter 4, the Clark-Evans test is used first to check whether the pattern is clustered, random, or regular. The Clark-Evans index R is below 1 for clustering and above 1 for regularity.
+
+-   H0: the detections are randomly distributed.
+-   H1: the detections are not randomly distributed.
 
 ```{r}
-#| label: quadrat
-qt <- quadrat.test(fire_ppp.km, nx = 6, ny = 6)
-qt
-plot(fire_ppp.km, pch = ".", main = "Quadrat counts")
-plot(qt, add = TRUE, cex = 0.7)
+#| label: clarkevans
+clarkevans.test(fire_ppp.km, correction = "none",
+                clipregion = fire_owin,
+                alternative = "clustered",
+                method = "MonteCarlo", nsim = 99)
 ```
 
-The quadrat test rejects a uniform intensity (p \< 0.001): detections are far from evenly spread across the regency. This is evidence of first-order heterogeneity only — it shows intensity varies in space, not that points cluster, which the second-order tests address separately. The result also depends on the chosen quadrat size.
+The Monte Carlo Clark-Evans test gives R well below 1 with a very small p-value, so the null of random distribution is rejected: the detections are clustered. This is a first-order signal - it tells us the pattern is not random, and the KDE below shows where the intensity is highest.
 
 ## Kernel density with different bandwidths
 
-The density surface depends on the bandwidth, so rather than commit to one I show two data-driven choices and one fixed value side by side.
+Following Chapter 4, KDE is computed with `density()` using two automatic bandwidths and one fixed value, all with a Gaussian kernel and edge correction.
 
 ```{r}
 #| label: kde-bw
@@ -238,7 +236,9 @@ plot(kde_fixed,  main = "fixed 2 km")
 par(mfrow = c(1, 1))
 ```
 
-## An adaptive estimate
+## Adaptive KDE
+
+Following Chapter 4.8, an adaptive-bandwidth KDE is added, which is less sensitive to the uneven spread of points than a fixed bandwidth.
 
 ```{r}
 #| label: kde-adaptive
@@ -246,120 +246,144 @@ kde_adaptive <- adaptive.density(fire_ppp.km, method = "kernel")
 plot(kde_adaptive, main = "Adaptive KDE")
 ```
 
-## A cleaner density map
+## Cartographic-quality KDE map
+
+Following Chapter 4.9, the `im` output is converted to a SpatRaster with `terra::rast()`, the CRS is assigned, and the map is drawn with tmap.
 
 ```{r}
 #| label: kde-tmap
-kde_rast <- raster(kde_ppl)
-crs(kde_rast) <- "EPSG:32749"
+kde_terra <- rast(kde_ppl)
+crs(kde_terra) <- "EPSG:32749"
 
-tmap_mode("plot")
-tm_shape(kde_rast) +
-  tm_raster(palette = "YlOrRd", title = "Intensity (per km²)") +
+tm_shape(kde_terra) +
+  tm_raster(palette = "YlOrRd", title = "Intensity") +
   tm_shape(study_area) + tm_borders(col = "grey30") +
   tm_layout(main.title = "Fire-detection intensity", legend.outside = TRUE)
 ```
 
-The density surface shows fire detections are strongly concentrated in the central and southern parts of the regency, with very little activity in the north. The same core hotspot appears under all three bandwidths (bw.diggle, bw.ppl and the fixed 2 km kernel), so the location of the peak is robust to the smoothing choice, even if the smaller bandwidths show more local detail. This southern concentration is consistent with the low-lying peatland that dominates that part of Pulang Pisau and is highly fire-prone in the dry season. The map shows where intensity is highest but not why; it reflects where detections occur, which is shaped by both fire activity and the satellite's ability to observe it.
+The KDE shows detections concentrated in the central and southern parts of the regency, with little activity in the north. The same hotspot shows up under all three bandwidths, so the location of the peak does not depend on the smoothing choice (the smaller bandwidths just show more local detail). This southern concentration matches the low-lying peatland that dominates that part of Pulang Pisau and burns easily in the dry season. The map shows where intensity is high, not why - it reflects where detections happen, which depends on both fire activity and what the satellite could observe.
 
-# Second-order analysis: do the fires interact?
+# Second-order analysis: interaction
 
-The tests below all ask a version of the same question — are detections closer together than random? — but they look at it from different angles, so I run several and read them together.
+The four functions below all test the same idea - are detections closer together than random - from different angles, so they are run together and read as a set. Each test uses the 3,000-point subsample and `envelope()` with `rank = 1, glocal = TRUE` as in Chapter 5.
 
-## Nearest-neighbour distances (G-function)
+For each test:
+
+-   H0: the detections are randomly distributed (CSR).
+-   H1: the detections are not randomly distributed.
+-   The null is rejected if the observed curve leaves the simulation envelope.
+
+## G-function (nearest-neighbour distances)
 
 ```{r}
 #| label: gest
-G_env <- envelope(fire_sub, Gest, nsim = 19, correction = "border")
-plot(G_env, main = "G-function against a random baseline")
+G_csr <- envelope(fire_sub, Gest, nsim = 19, rank = 1, glocal = TRUE)
+plot(G_csr, main = "G-function vs CSR envelope")
 ```
 
-## Empty-space distances (F-function)
+The observed G rises above the envelope, meaning nearest-neighbour distances are shorter than expected under CSR - a sign of clustering.
+
+## F-function (empty-space distances)
 
 ```{r}
 #| label: fest
-F_env <- envelope(fire_sub, Fest, nsim = 19, correction = "border")
-plot(F_env, main = "F-function against a random baseline")
+F_csr <- envelope(fire_sub, Fest, nsim = 19, rank = 1, glocal = TRUE)
+plot(F_csr, main = "F-function vs CSR envelope")
 ```
 
-## Clustering across scales (L-function)
+The observed F sits below the envelope, meaning there is more empty space than expected under CSR - again consistent with clustering.
 
-The L-function is the most informative of the four because it shows clustering as a function of distance. I plot it centred, so the random baseline is the horizontal line and departures above it mean clustering.
+## K-function
+
+```{r}
+#| label: kest
+K_csr <- envelope(fire_sub, Kest, nsim = 19, rank = 1, glocal = TRUE)
+plot(K_csr, . - r ~ r, xlab = "d (km)", ylab = "K(d)-r", main = "K-function vs CSR envelope")
+```
+
+## L-function
+
+The L-function is the clearest of the four because it shows clustering as a function of distance. It is plotted centred, so the CSR baseline is the horizontal line and any curve above it means clustering at that distance.
 
 ```{r}
 #| label: lest
-L_env <- envelope(fire_sub, Lest, nsim = 19, correction = "Ripley", global = FALSE)
-plot(L_env, . - r ~ r, main = "L-function (centred)")
-abline(h = 0, lty = 2)
+L_csr <- envelope(fire_sub, Lest, nsim = 19, rank = 1, glocal = TRUE)
+plot(L_csr, . - r ~ r, xlab = "d (km)", ylab = "L(d)-r", main = "L-function vs CSR envelope")
 ```
 
-Across the distances examined, the observed L-curve lies far above the simulation envelope, reaching values of 6–7 while the envelope stays close to zero. The detections are therefore significantly more clustered than a random (CSR) pattern at every scale up to about 20 km. The clustering rises steeply at short distances and remains outside the envelope throughout, the expected signature of fires concentrated in a few active areas rather than scattered independently.
+The observed L is far above the envelope across the whole distance range up to about 20 km. So the detections are significantly more clustered than CSR at every scale, which is the expected pattern for fires concentrated in a few active areas rather than spread out independently. Together, G, F, K and L all point the same way: clear clustering.
 
-## Does the clustering survive once intensity is allowed to vary?
+# Value-added 1: inhomogeneous L-function
 
-This is the important cross-check. The test above assumes intensity is constant, which it isn't, so some of the "clustering" it reports may just be the hotspots. Here I let intensity vary and ask whether clustering remains on top of that.
+This part goes beyond the class methods. The CSR tests above assume intensity is constant, which it is not, so some of the "clustering" they show may just be the hotspots. The inhomogeneous L (`Linhom`) lets intensity vary and asks whether clustering still remains on top of that.
 
 ```{r}
 #| label: linhom
-lambda_sub <- density(fire_sub, sigma = bw.ppl, edge = TRUE)
-Linhom_env <- envelope(fire_sub, Linhom,
-                       sigma = bw.ppl,
-                       nsim = 19,
-                       correction = "Ripley")
-plot(Linhom_env, . - r ~ r, main = "Inhomogeneous L-function")
-abline(h = 0, lty = 2)
+Linhom_csr <- envelope(fire_sub, Linhom, sigma = bw.ppl,
+                       nsim = 19, rank = 1, glocal = TRUE)
+plot(Linhom_csr, . - r ~ r, xlab = "d (km)", ylab = "Linhom(d)-r",
+     main = "Inhomogeneous L-function")
 ```
 
-When intensity is allowed to vary, the observed curve drops back close to the baseline for most distances, sitting near or inside the envelope rather than far above it. This is the key result: once the hotspots are accounted for, little extra clustering remains, so the strong clustering seen in the homogeneous L is largely explained by first-order heterogeneity (the uneven intensity) rather than by additional interaction between fires. The sharp rise at the largest distance is a boundary/edge effect and should not be over-interpreted.
+Once intensity is allowed to vary, the observed curve drops back close to the baseline for most distances instead of sitting far above it. This is the key result: after the hotspots are accounted for, little extra clustering is left, so the strong clustering in the homogeneous L is mostly explained by first-order heterogeneity (the uneven intensity), not by extra interaction between fires. The sharp rise at the largest distance is an edge effect and should not be over-read.
 
-# Value-added: does the hotspot move over the season?
+# Value-added 2: spatio-temporal KDE by month
 
-This last piece goes beyond the core methods. Instead of one density surface for the whole period, I estimate a spatio-temporal density so I can see whether the busy areas shift from month to month.
+Following Chapter 6, the STKDE uses the month number as the temporal mark, then `spattemp.density()` of sparr estimates the density over space and time. This shows whether the busy areas move from month to month rather than staying put.
+
+## Building the marked ppp
+
+```{r}
+#| label: stkde-ppp
+fire_month <- fire_dedup %>% select(Month_num)
+fire_month_ppp <- as.ppp(fire_month)
+fire_month_owin <- fire_month_ppp[fire_owin]
+summary(fire_month_owin)
+```
+
+## Computing and plotting the STKDE
 
 ```{r}
 #| label: stkde
-# continuous time in DAYS (not month buckets), so sparr can smooth over time
-fire_st <- fire_dedup %>%
-  mutate(tval = as.numeric(acq_date - min(acq_date)))
-
-st_ppp <- ppp(x = st_coordinates(fire_st)[, 1],
-              y = st_coordinates(fire_st)[, 2],
-              window = fire_owin,
-              marks = fire_st$tval)
-
-st_ppp <- unmark(st_ppp) %>%          # drop marks
-  `marks<-`(value = fire_st$tval)      # re-attach clean numeric time
-
-# give an explicit temporal bandwidth (~30 days) instead of auto-selection
-stkde <- spattemp.density(st_ppp, tres = 30)
-plot(stkde)
+st_kde <- spattemp.density(fire_month_owin, lambda = 1.5)
+summary(st_kde)
 ```
 
-The spatio-temporal density adds a temporal dimension to the static map. Fire activity is not spread evenly through the period: detections are sparse in the early, wetter months and rise as the dry season advances toward the later part of the window. The high-intensity area stays broadly in the central-south peatland rather than migrating far. This matters for planning: the same core is at risk throughout, but the risk window is concentrated in the dry-season months, so timing — not just location — should guide when resources are made ready. (The single-slice STKDE output shown here is indicative; a full temporal animation would show the build-up more clearly.)
+```{r}
+#| label: stkde-plot
+#| fig-width: 9
+#| fig-height: 6
+tims <- c(6, 7, 8, 9)
+par(mfcol = c(2, 2))
+for (i in tims) {
+  plot(st_kde, i, override.par = FALSE, fix.range = TRUE,
+       main = paste("STKDE, month", i))
+}
+par(mfrow = c(1, 1))
+```
 
-# Bringing the two halves together
+The monthly STKDE shows fire activity building up as the dry season advances rather than being spread evenly through the year. The high-density area stays broadly in the central-south peatland across the months rather than moving far, but it gets stronger over time. This adds a temporal side to the static KDE: the same core is at risk throughout, but the risk window is concentrated in a few months, so timing matters as much as location.
 
-The two analyses point the same way. The first-order analysis shows intensity is highly uneven, concentrated in the central-south peatland. The homogeneous L confirms the detections are far more clustered than random, but the inhomogeneous L shows that this clustering mainly reflects that uneven intensity rather than independent interaction between fires — fires are concentrated because the conditions for fire are concentrated. The spatio-temporal view adds that this concentration also peaks in time, during the dry season. Alternative explanations remain: repeated detections of the same fire, cloud cover and overpass timing, and the fact that detection intensity is not the same as risk to people or assets.
+# Integrated findings and discussion
+
+The first-order and second-order results agree. The Clark-Evans test and the KDE show intensity is strongly uneven and concentrated in the central-south peatland. The G, F, K and L functions all confirm the detections are far more clustered than CSR. But the inhomogeneous L shows this clustering mainly reflects the uneven intensity rather than independent interaction between fires - fires are concentrated because the conditions for fire are concentrated. The monthly STKDE adds that this concentration also peaks in time, during the dry season.
+
+As a robustness check, the hotspot location is stable across the three KDE bandwidths, and the homogeneous-vs-inhomogeneous L comparison shows the clustering signal is driven by first-order heterogeneity rather than one modelling choice. Alternative explanations still remain: repeated detections of the same fire, cloud cover and overpass timing, and the fact that detection intensity is not the same as risk to people or assets.
 
 # Implications for public-safety planning
 
-The analysis supports a targeted rather than uniform approach to fire management in Pulang Pisau. Because detections concentrate in the central and southern peatland, monitoring, patrols and early-response resources can be prioritised there rather than spread evenly. Because activity peaks in the dry-season months, readiness can be scaled up ahead of that window and down afterwards, making better use of limited resources. The persistence of the hotspot in the same peatland also points to it as the priority for longer-term measures such as maintaining water levels and canal blocking, which reduce peat flammability.
+The results support a targeted rather than uniform approach to fire management in Pulang Pisau. Because detections concentrate in the central and southern peatland, monitoring, patrols and early-response resources can be focused there instead of spread evenly. Because activity peaks in the dry-season months, readiness can be raised ahead of that window and lowered afterwards, which uses limited resources better. The hotspot staying in the same peatland also makes that landscape the priority for longer-term measures such as maintaining water levels and canal blocking, which reduce peat flammability.
 
-Two limits matter. The analysis shows where and when detections concentrate, not why any fire started. And a concentration of detections is not the same as risk to people: translating these patterns into risk would need data on population, settlements and land use around the hotspot. The findings are best used to focus attention and resources, not to draw causal conclusions.
+Two limits matter. The analysis shows where and when detections concentrate, not why any fire started. And a concentration of detections is not the same as risk to people: turning these patterns into risk would need data on population, settlements and land use around the hotspot. So the findings are best used to focus attention and resources, not to draw causal conclusions.
 
 # Limitations
 
-A few things should temper how far these results are pushed. Detections are not fires, and even after de-duplication some repeated counting may remain. Cloud cover and the timing of overpasses leave gaps in what the satellite could see, so absence in the record is not the same as absence of fire. A concentration of detections is not by itself a measure of risk without knowing who and what is exposed. And the observation window stops partway through the year, so the tail of the dry season is missing. The KDE and CSR assumptions hold only partly, which is why the results are read against more than one baseline.
+Detections are not fires, and some repeated counting may remain even after de-duplication. Cloud cover and overpass timing leave gaps in what the satellite could see, so absence in the record is not the same as absence of fire. A concentration of detections is not by itself a measure of risk without knowing who and what is exposed. The observation window stops in September, so the later dry-season peak is missing. Finally, the CSR and KDE assumptions only partly hold, which is why the results are read against more than one baseline.
 
 # References
 
--   R Core Team (2026). R: A Language and Environment for Statistical Computing.
--   Baddeley, A., Rubak, E., & Turner, R. (2015). Spatial Point Patterns: Methodology and Applications with R. CRC Press.
--   Davies, T.M., Marshall, J.C., & Hazelton, M.L. (2018). sparr: Spatial and Spatiotemporal Relative Risk. R package.
--   NASA FIRMS (VIIRS 375 m active-fire product); GADM v4.1.
-
-<!-- -->
-
+-   R Core Team (2026). *R: A Language and Environment for Statistical Computing*.
 -   Baddeley, A., Rubak, E., & Turner, R. (2015). *Spatial Point Patterns: Methodology and Applications with R*. CRC Press.
--   Kam, T.S. *R for Geospatial Data Science and Analysis*.
--   NASA FIRMS (VIIRS 375 m active fire product); GADM v4.1.
+-   Davies, T.M., Marshall, J.C., & Hazelton, M.L. (2018). *sparr: Spatial and Spatiotemporal Relative Risk*. R package.
+-   Kam, T.S. *R for Geospatial Data Science and Analysis* (r4gdsa), Chapters 4-6.
+-   NASA FIRMS (VIIRS 375 m active-fire product); GADM v4.1.

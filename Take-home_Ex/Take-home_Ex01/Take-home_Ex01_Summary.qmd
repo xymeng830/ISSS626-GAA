@@ -1,8 +1,8 @@
 ---
 title: "Forest-fire Point Patterns in Kab. Pulang Pisau"
 subtitle: "Take-home Exercise 1 · Executive Summary · ISSS626"
-author: "Meng Xinyu (Sherry)"
-date: "2026-09-22"
+author: "Meng Xinyu"
+date: "2026-09-23"
 format:
   revealjs:
     theme: simple
@@ -17,106 +17,185 @@ execute:
   message: false
 ---
 
+```{r}
+#| label: setup
+#| include: false
+# Rebuild the objects needed for the plots below (same pipeline as the report).
+pacman::p_load(sf, tmap, spatstat, raster, tidyverse)
+
+# boundary / study window
+study_area <- st_read("data/raw", layer = "gadm41_IDN_2", quiet = TRUE) %>%
+  filter(NAME_2 == "Pulang Pisau") %>%
+  st_transform(crs = 32749)
+
+# fire detections (two files: standard + near-real-time)
+fire_archive <- read_csv("data/raw/fire_archive_J1V-C2_811410.csv",
+                         col_types = cols(.default = col_character()))
+fire_nrt     <- read_csv("data/raw/fire_nrt_J1V-C2_811410.csv",
+                         col_types = cols(.default = col_character()))
+fire_raw <- bind_rows(archive = fire_archive, nrt = fire_nrt, .id = "source") %>%
+  type_convert()
+
+fire_clean <- fire_raw %>%
+  distinct() %>%
+  filter(!is.na(latitude), !is.na(longitude),
+         between(latitude, -90, 90), between(longitude, -180, 180)) %>%
+  filter(confidence %in% c("n", "h")) %>%
+  mutate(acq_date = as.Date(acq_date)) %>%
+  filter(acq_date >= as.Date("2026-01-01"), acq_date <= as.Date("2026-09-23")) %>%
+  mutate(month = lubridate::floor_date(acq_date, "month"))
+
+fire_sf <- fire_clean %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+  st_transform(crs = 32749) %>%
+  st_intersection(study_area)
+
+fire_dedup <- fire_sf %>%
+  mutate(x = st_coordinates(.)[, 1], y = st_coordinates(.)[, 2]) %>%
+  distinct(x, y, acq_date, .keep_all = TRUE)
+
+fire_owin <- as.owin(study_area)
+fire_ppp  <- as.ppp(st_geometry(fire_dedup)); Window(fire_ppp) <- fire_owin
+fire_ppp  <- rjitter(fire_ppp, retry = TRUE, nsim = 1, drop = TRUE)
+fire_ppp.km <- rescale.ppp(fire_ppp, 1000, "km")
+
+# first-order intensity
+kde_ppl <- density(fire_ppp.km, sigma = bw.ppl, edge = TRUE, kernel = "gaussian")
+
+# subsample for the second-order envelope (fewer sims here to keep rendering quick)
+set.seed(1234)
+fire_sub <- fire_ppp.km[sample(fire_ppp.km$n, 3000)]
+L_env <- envelope(fire_sub, Lest, nsim = 9, correction = "Ripley",
+                  global = FALSE, verbose = FALSE)
+```
+
 ## Contents
 
-1. Research question & study area
-2. Data & study design
-3. Analytical approach
-4. First-order: intensity
-5. Second-order: interaction
-6. Spatio-temporal (value-added)
-7. Key findings
-8. Limitations
-9. Public-safety implications
+1.  Research question & study area
+2.  Data & study design
+3.  Analytical approach
+4.  First-order: intensity
+5.  Second-order: interaction
+6.  Robustness: inhomogeneous L
+7.  Value-added: timing
+8.  Key findings
+9.  Limitations
+10. Public-safety implications
 
-::: {.notes}
-Cover page + this contents page do NOT count toward the 10-slide limit.
+::: notes
+Cover + contents do not count toward the 10-slide limit.
 :::
 
-# Research Question & Study Area
+# Research question & study area
 
-## Why fire point patterns?
+## Where do fires concentrate — and do they cluster?
 
-- Peatland fires in Kalimantan → haze, health, economic cost.
-- **Where** do fire detections concentrate, and **do they cluster** beyond that?
-- Study window: **Kabupaten Pulang Pisau, Central Kalimantan** (peat-dominated
-  regency), 2026 observation period.
+-   Peatland fires in Central Kalimantan cause haze, health and economic harm.
+-   **Q1** Where does fire-detection intensity concentrate, and when?
+-   **Q2** Are detections significantly clustered, beyond just being dense?
+-   Study window: **Kabupaten Pulang Pisau**, a peat-dominated regency; 2026.
 
-*👉 one map thumbnail of the study window here*
+```{r}
+#| fig-height: 3.2
+tm_shape(study_area) + tm_polygons(alpha = 0.3) +
+  tm_layout(frame = FALSE)
+```
 
-# Data & Study Design
+# Data & study design
 
 ## Data & definitions
 
-- **Fire detections** — NASA FIRMS VIIRS 375 m (`acq_date`, `confidence`, `frp`).
-- **Boundary** — GADM ADM2 (regency).
-- **Point event** = one detection; ⚠️ detection ≠ distinct fire → de-duplicated
-  to one point per pixel-day.
-- CRS: **UTM 49S (EPSG:32749)**; low-confidence & out-of-window records removed.
+-   **Detections** — NASA FIRMS VIIRS 375 m (NOAA-20), 1 Jan – 23 Sep 2026.
+-   **Boundary** — GADM ADM2 (regency), projected to UTM 49S.
+-   **Point event** = one detection; a detection is **not** a distinct fire, so repeats are de-duplicated to one point per pixel per day.
+-   Cleaning: 370,354 → 351,822 national records; **16,189** inside the regency.
 
-# Analytical Approach
+# Analytical approach
 
 ## Methods
 
-| Question | Method | Reference |
-|---|---|---|
-| Intensity (1st-order) | KDE (diggle/ppl/adaptive) | — |
-| Interaction (2nd-order) | G / F / K / L | homogeneous CSR |
-| Robustness | Linhom | inhomogeneous null |
-| Spatio-temporal | sparr STKDE | — |
+| Question    | Method                     | Compared against   |
+|-------------|----------------------------|--------------------|
+| Intensity   | Kernel density (KDE)       | —                  |
+| Interaction | G / F / K / L functions    | homogeneous CSR    |
+| Robustness  | Inhomogeneous L            | inhomogeneous null |
+| Timing      | Detections over the season | —                  |
 
-# First-order: Intensity
+# First-order: intensity
 
-## Where are the hotspots?
+## Detections concentrate in the south
 
-*👉 paste your best KDE map here*
+```{r}
+#| fig-height: 3.6
+kde_rast <- raster(kde_ppl); crs(kde_rast) <- "EPSG:32749"
+tm_shape(kde_rast) +
+  tm_raster(palette = "YlOrRd", title = "Intensity") +
+  tm_shape(study_area) + tm_borders(col = "grey30") +
+  tm_layout(frame = FALSE, legend.outside = TRUE)
+```
 
-- 👉 \[key sentence\]: intensity concentrates in \[area\], stable across
-  bandwidths.
+**Intensity is highly uneven** — a clear hotspot in the central-south peatland, stable across bandwidths.
 
-# Second-order: Interaction
+# Second-order: interaction
 
-## Clustering vs CSR
+## Strong clustering vs a random baseline
 
-*👉 paste your L-function (centred) plot here*
+```{r}
+#| fig-height: 3.6
+plot(L_env, . - r ~ r, main = "", legend = FALSE)
+abline(h = 0, lty = 2)
+```
 
-- 👉 \[key sentence\]: significant clustering at \[X\]–\[Y\] km; persists /
-  weakens under the inhomogeneous null.
+The observed L-curve sits **far above** the CSR envelope up to \~20 km → **significant clustering** at all scales.
 
-# Spatio-temporal (Value-added)
+# Robustness: inhomogeneous L
 
-## Does the hotspot move?
+## Most clustering is the hotspot, not interaction
 
-*👉 paste an STKDE time-slice figure here*
+-   Under a homogeneous null, detections look strongly clustered.
+-   But once **intensity is allowed to vary** (inhomogeneous L), the curve falls back near the baseline.
+-   **Interpretation:** the clustering mostly reflects **first-order heterogeneity** — fires are concentrated because the conditions for fire are concentrated — not extra fire-to-fire interaction.
 
-- 👉 \[key sentence\]: peak activity in \[month\]; hotspot shifts \[direction\].
+# Value-added: timing
 
-# Key Findings
+## Activity peaks as the dry season advances
+
+```{r}
+#| fig-height: 3.4
+fire_dedup %>%
+  st_drop_geometry() %>%
+  count(month) %>%
+  ggplot(aes(month, n)) +
+  geom_col(fill = "firebrick") +
+  labs(x = NULL, y = "Detections") +
+  theme_minimal(base_size = 14)
+```
+
+Detections rise through the year toward the dry-season peak; the hotspot stays central-south but **intensifies over time**.
+
+# Key findings
 
 ## What we learned
 
-- First-order: 👉 …
-- Second-order: 👉 …
-- Spatio-temporal: 👉 …
-- First- and second-order evidence 👉 agree / diverge because …
+-   **First-order:** intensity highly uneven, concentrated in the central-south peatland.
+-   **Second-order:** significant clustering under CSR — but the **inhomogeneous L shows it is mostly first-order heterogeneity**.
+-   **Timing:** activity concentrates in the dry-season months.
+-   First- and second-order evidence agree: a few peat-dominated areas drive the pattern.
 
 # Limitations
 
 ## Read with care
 
-- Detections ≠ fires; observation gaps (cloud, overpass).
-- Concentration ≠ risk without exposure/population.
-- CSR/KDE assumptions only partially met.
+-   Detections ≠ fires; cloud cover and overpass timing leave observation gaps.
+-   Concentration of detections ≠ risk to people, without exposure data.
+-   CSR / KDE assumptions hold only partly; results read against more than one null.
+-   Window stops in September — the later dry-season peak is not captured.
 
-# Public-safety Implications
+# Public-safety implications
 
 ## From evidence to action
 
-- Prioritise monitoring/patrol in hotspot cells.
-- Align fire-danger readiness with peak months.
-- **Directly supported:** spatial concentration, temporal peaks.
-- **Needs more data:** causation, exposure, population at risk.
-
-## Thank you
-
-Technical report · GitHub · deployed on Vercel.
+-   **Where:** prioritise monitoring, patrols and response resources in the central-south peatland.
+-   **When:** raise fire-danger readiness ahead of the dry-season peak.
+-   **Longer term:** peatland water management (maintaining levels, canal blocking) in the hotspot.
+-   Directly supported: **spatial concentration + timing**. Needs more data: causation, who is exposed.
