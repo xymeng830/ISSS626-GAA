@@ -1,106 +1,51 @@
 ---
 title: "Forest-fire Point Patterns in Kabupaten Pulang Pisau"
-subtitle: "Take-home Exercise 1 · Executive Summary"
-author: "Meng Xinyu · ISSS626 Geospatial Analytics"
-date: "2026-09-23"
+subtitle: "Take-home Exercise 1 · Executive Summary · Meng Xinyu · ISSS626"
 format:
   revealjs:
     theme: [default, custom.scss]
     slide-number: c/t
     transition: none
     incremental: false
-    center-title-slide: true
     width: 1280
     height: 720
     fig-align: center
     footer: "ISSS626 · Take-home Ex1 · Meng Xinyu"
-execute:
-  echo: false
-  eval: true
-  warning: false
-  message: false
-  freeze: auto
 ---
 
-```{r}
-#| label: setup
-#| include: false
-pacman::p_load(sf, spatstat, sparr, terra, tmap, tidyverse)
+## Contents {.smaller}
 
-study_area <- st_read("data/raw", layer = "gadm41_IDN_2", quiet = TRUE) %>%
-  filter(NAME_2 == "Pulang Pisau") %>%
-  st_transform(crs = 32749)
-
-fire_archive <- read_csv("data/raw/fire_archive_J1V-C2_811410.csv",
-                         col_types = cols(.default = col_character()))
-fire_nrt     <- read_csv("data/raw/fire_nrt_J1V-C2_811410.csv",
-                         col_types = cols(.default = col_character()))
-fire_raw <- bind_rows(archive = fire_archive, nrt = fire_nrt, .id = "source") %>%
-  type_convert()
-
-fire_clean <- fire_raw %>%
-  distinct() %>%
-  filter(!is.na(latitude), !is.na(longitude),
-         between(latitude, -90, 90), between(longitude, -180, 180)) %>%
-  filter(confidence %in% c("n", "h")) %>%
-  mutate(acq_date = as.Date(acq_date)) %>%
-  filter(acq_date >= as.Date("2026-01-01"), acq_date <= as.Date("2026-09-23")) %>%
-  mutate(Month_num = month(acq_date))
-
-fire_sf <- fire_clean %>%
-  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
-  st_transform(crs = 32749) %>%
-  st_intersection(study_area)
-
-fire_dedup <- fire_sf %>%
-  mutate(x = st_coordinates(.)[, 1], y = st_coordinates(.)[, 2]) %>%
-  distinct(x, y, acq_date, .keep_all = TRUE)
-
-fire_owin <- as.owin(study_area)
-fire_ppp  <- as.ppp(st_geometry(fire_dedup)); Window(fire_ppp) <- fire_owin
-fire_ppp  <- rjitter(fire_ppp, retry = TRUE, nsim = 1, drop = TRUE)
-fire_ppp.km <- rescale.ppp(fire_ppp, 1000, "km")
-
-kde_ppl <- density(fire_ppp.km, sigma = bw.ppl, edge = TRUE, kernel = "gaussian")
-
-fire_month <- fire_dedup %>% select(Month_num)
-fire_month_ppp  <- as.ppp(fire_month)
-fire_month_owin <- fire_month_ppp[fire_owin]
-st_kde <- spattemp.density(fire_month_owin, lambda = 1.5)
-```
-
-# Forest-fire Point Patterns {.cover}
-
-#### Kabupaten Pulang Pisau, Central Kalimantan · 2026
-
-Take-home Exercise 1 — Executive Summary
-
-**Meng Xinyu** · ISSS626 Geospatial Analytics
+1.  Research question & study area
+2.  Data & study design
+3.  Analytical approach
+4.  First-order — Clark-Evans & intensity
+5.  Second-order — L-function
+6.  Value-added 1 — inhomogeneous L
+7.  Value-added 2 — spatio-temporal KDE
+8.  Key findings
+9.  Limitations & implications
 
 ## Research question & study area {.smaller}
 
-::: {.columns}
+::::: columns
 ::: {.column width="58%"}
 Peatland fires in Central Kalimantan cause haze, health and economic harm. This study asks two questions of the 2026 satellite record:
 
-- **Q1** — Where does fire-detection intensity concentrate, and when?
-- **Q2** — Are detections significantly clustered, beyond just being dense?
+-   **Q1** — Where does fire-detection intensity concentrate, and when?
+-   **Q2** — Are detections significantly clustered, beyond just being dense?
 
 Study window: **Kabupaten Pulang Pisau**, a peat-dominated regency.
 :::
+
 ::: {.column width="42%"}
-```{r}
-#| fig-height: 4
-tm_shape(study_area) + tm_polygons(col = "#cfe3d4", border.col = "#3c6e47") +
-  tm_layout(frame = FALSE)
-```
+![](Take-home_Ex01_files/figure-html/plot-boundary-1.png)
 :::
-:::
+:::::
 
 ## Data & study design {.smaller}
 
-| | |
-|---|---|
+|  |  |
+|----|----|
 | **Detections** | NASA FIRMS VIIRS 375 m (NOAA-20), 1 Jan – 23 Sep 2026 |
 | **Boundary** | GADM ADM2 (regency), UTM 49S (EPSG:32749) |
 | **Point event** | one detection ≠ one fire → de-duplicated to one point per pixel per day |
@@ -114,87 +59,78 @@ A detection is not a distinct fire — repeated overpasses inflate apparent clus
 
 Following the class workflow (r4gdsa Ch. 4–6):
 
-| Question | Method | Compared against |
-|---|---|---|
-| Is it random? | **Clark-Evans test** | CSR (Monte Carlo) |
-| Where is intensity? | **Kernel density (KDE)** | — |
-| Do points interact? | **G / F / K / L functions** | homogeneous CSR |
-| Robustness | **Inhomogeneous L** | inhomogeneous null |
-| Timing | **Spatio-temporal KDE** (sparr) | — |
+| Question            | Method                          | Compared against   |
+|---------------------|---------------------------------|--------------------|
+| Is it random?       | **Clark-Evans test**            | CSR (Monte Carlo)  |
+| Where is intensity? | **Kernel density (KDE)**        | —                  |
+| Do points interact? | **G / F / K / L functions**     | homogeneous CSR    |
+| Robustness          | **Inhomogeneous L**             | inhomogeneous null |
+| Timing              | **Spatio-temporal KDE** (sparr) | —                  |
 
 ## First-order — intensity concentrates in the south {.smaller}
 
-::: {.columns}
+::::: columns
 ::: {.column width="55%"}
-```{r}
-#| fig-height: 4.6
-kde_terra <- rast(kde_ppl); crs(kde_terra) <- "EPSG:32749"
-tm_shape(kde_terra) +
-  tm_raster(palette = "YlOrRd", title = "Intensity") +
-  tm_shape(study_area) + tm_borders(col = "grey30") +
-  tm_layout(frame = FALSE, legend.outside = TRUE)
-```
+![](Take-home_Ex01_files/figure-html/kde-tmap-1.png)
 :::
+
 ::: {.column width="45%"}
 **Clark-Evans R = 0.42** (p = 0.01) → clustered, not random.
 
 The KDE hotspot sits in the **central-south peatland**, and is stable across all three bandwidths — the peak location does not depend on the smoothing choice.
 :::
-:::
+:::::
 
 ## Second-order — strong clustering vs CSR {.smaller}
 
-::: {.columns}
+::::: columns
 ::: {.column width="55%"}
 ![](Take-home_Ex01_files/figure-html/lest-1.png)
 :::
+
 ::: {.column width="45%"}
-The observed **L-curve sits far above** the CSR envelope across all scales up to ~20 km.
+The observed **L-curve sits far above** the CSR envelope across all scales up to \~20 km.
 
 **G, F, K and L all agree**: the detections are significantly more clustered than a random pattern — the signature of fires concentrated in a few active areas.
 :::
-:::
+:::::
 
 ## Value-added 1 — is the clustering real? {.smaller}
 
-The CSR test assumes constant intensity, which is false here. The **inhomogeneous L** lets intensity vary and re-tests.
-
-- Under a **homogeneous** null → detections look strongly clustered.
-- Once **intensity is allowed to vary** → the curve drops back near the baseline.
-
-::: {.callout-tip appearance="minimal"}
-**Key result:** the clustering mostly reflects **first-order heterogeneity** — fires concentrate because the *conditions* for fire concentrate — not extra fire-to-fire interaction.
+::::: columns
+::: {.column width="52%"}
+![](Take-home_Ex01_files/figure-html/linhom-1.png)
 :::
 
+::: {.column width="48%"}
+The CSR test assumes constant intensity, which is false here. The **inhomogeneous L** lets intensity vary and re-tests.
+
+Once intensity is allowed to vary, the curve **drops back near the baseline**.
+
+**Key result:** the clustering mostly reflects **first-order heterogeneity** — fires concentrate because the *conditions* for fire concentrate — not fire-to-fire interaction.
+:::
+:::::
 
 ## Value-added 2 — activity builds up in time {.smaller}
 
-::: {.columns}
+::::: columns
 ::: {.column width="58%"}
-```{r}
-#| fig-height: 4.6
-tims <- c(6, 7, 8, 9)
-par(mfcol = c(2, 2), mar = c(1, 1, 2, 1))
-for (i in tims) {
-  plot(st_kde, i, override.par = FALSE, fix.range = TRUE,
-       main = paste("Month", i))
-}
-par(mfrow = c(1, 1))
-```
+![](Take-home_Ex01_files/figure-html/stkde-plot-1.png)
 :::
+
 ::: {.column width="42%"}
 The spatio-temporal KDE shows the hotspot **stays in the central-south peatland** but **grows stronger** as the dry season advances.
 
 So **timing matters as much as location** — the same core is at risk, but the risk window concentrates in a few months.
 :::
-:::
+:::::
 
 ## Key findings {.smaller}
 
-- **First-order** — Clark-Evans confirms clustering; intensity concentrates in the central-south peatland.
-- **Second-order** — G/F/K/L all show significant clustering vs CSR…
-- **…but** the **inhomogeneous L** shows it is *mostly first-order heterogeneity*, not fire-to-fire interaction.
-- **Timing** — activity peaks in the dry-season months.
+-   **First-order** — Clark-Evans confirms clustering; intensity concentrates in the central-south peatland.
+-   **Second-order** — G/F/K/L all show significant clustering vs CSR…
+-   **…but** the **inhomogeneous L** shows it is *mostly first-order heterogeneity*, not fire-to-fire interaction.
+-   **Timing** — activity peaks in the dry-season months.
 
 ::: {.callout-note appearance="minimal"}
 First- and second-order evidence agree: a few peat-dominated areas drive the whole pattern.
@@ -202,23 +138,24 @@ First- and second-order evidence agree: a few peat-dominated areas drive the who
 
 ## Limitations & implications {.smaller}
 
-::: {.columns}
+::::: columns
 ::: {.column width="50%"}
 **Read with care**
 
-- Detections ≠ fires; cloud/overpass gaps.
-- Concentration ≠ risk without exposure data.
-- CSR/KDE assumptions only partly hold.
-- Window stops in September.
+-   Detections ≠ fires; cloud/overpass gaps.
+-   Concentration ≠ risk without exposure data.
+-   CSR/KDE assumptions only partly hold.
+-   Window stops in September.
 :::
+
 ::: {.column width="50%"}
 **From evidence to action**
 
-- **Where** — focus monitoring & patrols on the central-south peatland.
-- **When** — raise readiness ahead of the dry-season peak.
-- **Longer term** — peatland water management (levels, canal blocking).
+-   **Where** — focus monitoring & patrols on the central-south peatland.
+-   **When** — raise readiness ahead of the dry-season peak.
+-   **Longer term** — peatland water management (levels, canal blocking).
 :::
-:::
+:::::
 
 ::: {.callout-tip appearance="minimal"}
 Directly supported: **spatial concentration + timing**. Needs more data: causation, who is exposed.

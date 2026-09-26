@@ -9,8 +9,6 @@
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.37">
 
-  <meta name="author" content="Meng Xinyu · ISSS626 Geospatial Analytics">
-  <meta name="dcterms.date" content="2026-09-23">
   <title>ISSS626 Geospatial Analytics – Forest-fire Point Patterns in Kabupaten Pulang Pisau</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -132,26 +130,26 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Forest-fire Point Patterns in Kabupaten Pulang Pisau</h1>
-  <p class="subtitle">Take-home Exercise 1 · Executive Summary</p>
+  <p class="subtitle">Take-home Exercise 1 · Executive Summary · Meng Xinyu · ISSS626</p>
 
 <div class="quarto-title-authors">
-<div class="quarto-title-author">
-<div class="quarto-title-author-name">
-Meng Xinyu · ISSS626 Geospatial Analytics 
-</div>
-</div>
 </div>
 
-  <p class="date">2026-09-23</p>
 </section>
-<section>
-<section id="forest-fire-point-patterns" class="title-slide slide level1 cover center">
-<h1>Forest-fire Point Patterns</h1>
-
+<section id="contents" class="slide level2 smaller">
+<h2>Contents</h2>
+<ol type="1">
+<li>Research question &amp; study area</li>
+<li>Data &amp; study design</li>
+<li>Analytical approach</li>
+<li>First-order — Clark-Evans &amp; intensity</li>
+<li>Second-order — L-function</li>
+<li>Value-added 1 — inhomogeneous L</li>
+<li>Value-added 2 — spatio-temporal KDE</li>
+<li>Key findings</li>
+<li>Limitations &amp; implications</li>
+</ol>
 </section>
-<h4 id="kabupaten-pulang-pisau-central-kalimantan-2026">Kabupaten Pulang Pisau, Central Kalimantan · 2026</h4>
-<p>Take-home Exercise 1 — Executive Summary</p>
-<p><strong>Meng Xinyu</strong> · ISSS626 Geospatial Analytics</p>
 <section id="research-question-study-area" class="slide level2 smaller">
 <h2>Research question &amp; study area</h2>
 <div class="columns">
@@ -163,15 +161,7 @@ Meng Xinyu · ISSS626 Geospatial Analytics
 </ul>
 <p>Study window: <strong>Kabupaten Pulang Pisau</strong>, a peat-dominated regency.</p>
 </div><div class="column" style="width:42%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-1-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
+<p><img data-src="Take-home_Ex01_files/figure-html/plot-boundary-1.png"></p>
 </div></div>
 </section>
 <section id="data-study-design" class="slide level2 smaller">
@@ -252,15 +242,7 @@ Meng Xinyu · ISSS626 Geospatial Analytics
 <h2>First-order — intensity concentrates in the south</h2>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-2-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
+<p><img data-src="Take-home_Ex01_files/figure-html/kde-tmap-1.png"></p>
 </div><div class="column" style="width:45%;">
 <p><strong>Clark-Evans R = 0.42</strong> (p = 0.01) → clustered, not random.</p>
 <p>The KDE hotspot sits in the <strong>central-south peatland</strong>, and is stable across all three bandwidths — the peak location does not depend on the smoothing choice.</p>
@@ -278,32 +260,20 @@ Meng Xinyu · ISSS626 Geospatial Analytics
 </section>
 <section id="value-added-1-is-the-clustering-real" class="slide level2 smaller">
 <h2>Value-added 1 — is the clustering real?</h2>
+<div class="columns">
+<div class="column" style="width:52%;">
+<p><img data-src="Take-home_Ex01_files/figure-html/linhom-1.png"></p>
+</div><div class="column" style="width:48%;">
 <p>The CSR test assumes constant intensity, which is false here. The <strong>inhomogeneous L</strong> lets intensity vary and re-tests.</p>
-<ul>
-<li>Under a <strong>homogeneous</strong> null → detections look strongly clustered.</li>
-<li>Once <strong>intensity is allowed to vary</strong> → the curve drops back near the baseline.</li>
-</ul>
-<div class="callout callout-tip no-icon callout-style-simple">
-<div class="callout-body">
-<div class="callout-content">
-<p><strong>Key result:</strong> the clustering mostly reflects <strong>first-order heterogeneity</strong> — fires concentrate because the <em>conditions</em> for fire concentrate — not extra fire-to-fire interaction.</p>
-</div>
-</div>
-</div>
+<p>Once intensity is allowed to vary, the curve <strong>drops back near the baseline</strong>.</p>
+<p><strong>Key result:</strong> the clustering mostly reflects <strong>first-order heterogeneity</strong> — fires concentrate because the <em>conditions</em> for fire concentrate — not fire-to-fire interaction.</p>
+</div></div>
 </section>
 <section id="value-added-2-activity-builds-up-in-time" class="slide level2 smaller">
 <h2>Value-added 2 — activity builds up in time</h2>
 <div class="columns">
 <div class="column" style="width:58%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="Take-home_Ex01_Summary_files/figure-revealjs/unnamed-chunk-3-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
+<p><img data-src="Take-home_Ex01_files/figure-html/stkde-plot-1.png"></p>
 </div><div class="column" style="width:42%;">
 <p>The spatio-temporal KDE shows the hotspot <strong>stays in the central-south peatland</strong> but <strong>grows stronger</strong> as the dry season advances.</p>
 <p>So <strong>timing matters as much as location</strong> — the same core is at risk, but the risk window concentrates in a few months.</p>
@@ -353,7 +323,7 @@ Meng Xinyu · ISSS626 Geospatial Analytics
 </div>
 
 
-</section></section>
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -569,44 +539,6 @@ Meng Xinyu · ISSS626 Geospatial Analytics
         ]
       });
     </script>
-    
-    <script>
-      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-      // slide changes (different for each slide format).
-      (function () {
-        // dispatch for htmlwidgets
-        function fireSlideEnter() {
-          const event = window.document.createEvent("Event");
-          event.initEvent("slideenter", true, true);
-          window.document.dispatchEvent(event);
-        }
-
-        function fireSlideChanged(previousSlide, currentSlide) {
-          fireSlideEnter();
-
-          // dispatch for shiny
-          if (window.jQuery) {
-            if (previousSlide) {
-              window.jQuery(previousSlide).trigger("hidden");
-            }
-            if (currentSlide) {
-              window.jQuery(currentSlide).trigger("shown");
-            }
-          }
-        }
-
-        // hookup for slidy
-        if (window.w3c_slidy) {
-          window.w3c_slidy.add_observer(function (slide_num) {
-            // slide_num starts at position 1
-            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-          });
-        }
-
-      })();
-    </script>
-
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
