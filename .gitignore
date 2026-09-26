@@ -11,3 +11,4 @@
 _freeze/
 *_files/
 .Rproj.user
+*.rmarkdown

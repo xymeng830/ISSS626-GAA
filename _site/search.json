@@ -746,7 +746,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#analytical-approach",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
     "section": "Analytical approach",
-    "text": "Analytical approach\nFollowing the class workflow (r4gdsa Ch. 4–6):\n\n\n\n\n\n\n\n\nQuestion\nMethod\nCompared against\n\n\n\n\nIs it random?\nClark-Evans test\nCSR (Monte Carlo)\n\n\nWhere is intensity?\nKernel density (KDE)\n—\n\n\nDo points interact?\nG / F / K / L functions\nhomogeneous CSR\n\n\nRobustness\nInhomogeneous L\ninhomogeneous null\n\n\nTiming\nSpatio-temporal KDE (sparr)\n—"
+    "text": "Analytical approach\nFollowing the class workflow (r4gdsa Ch. 4–6):\n\n\n\nQuestion\nMethod\nCompared against\n\n\n\n\nIs it random?\nClark-Evans test\nCSR (Monte Carlo)\n\n\nWhere is intensity?\nKernel density (KDE)\n—\n\n\nDo points interact?\nG / F / K / L functions\nhomogeneous CSR\n\n\nRobustness\nInhomogeneous L\ninhomogeneous null\n\n\nTiming\nSpatio-temporal KDE (sparr)\n—"
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#first-order-intensity-concentrates-in-the-south",
@@ -767,7 +767,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-1-is-the-clustering-real",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
     "section": "Value-added 1 — is the clustering real?",
-    "text": "Value-added 1 — is the clustering real?\nThe CSR test assumes constant intensity, which is false here. The inhomogeneous L lets intensity vary and re-tests.\n\n\nUnder a homogeneous null → detections look strongly clustered.\nOnce intensity is allowed to vary → the curve drops back near the baseline.\n\n\n\n\n\n\nKey result: the clustering mostly reflects first-order heterogeneity — fires concentrate because the conditions for fire concentrate — not extra fire-to-fire interaction."
+    "text": "Value-added 1 — is the clustering real?\nThe CSR test assumes constant intensity, which is false here. The inhomogeneous L lets intensity vary and re-tests.\n\nUnder a homogeneous null → detections look strongly clustered.\nOnce intensity is allowed to vary → the curve drops back near the baseline.\n\n\n\n\nKey result: the clustering mostly reflects first-order heterogeneity — fires concentrate because the conditions for fire concentrate — not extra fire-to-fire interaction."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-2-activity-builds-up-in-time",
