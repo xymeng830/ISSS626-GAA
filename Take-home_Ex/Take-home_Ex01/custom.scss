@@ -1,5 +1,4 @@
 /*-- scss:defaults --*/
-// palette pulled from the site's green navbar
 $green:        #3c6e47;
 $green-light:  #cfe3d4;
 $ink:          #232823;
@@ -7,7 +6,6 @@ $body-bg:      #ffffff;
 $body-color:   $ink;
 $link-color:   $green;
 
-// modern sans stack (matches the clean Quarto site)
 $font-family-sans-serif: "Inter", "Helvetica Neue", "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 $presentation-font-size-root: 30px;
 $presentation-heading-font: $font-family-sans-serif;
@@ -16,7 +14,6 @@ $presentation-heading-font-weight: 700;
 
 /*-- scss:rules --*/
 .reveal { letter-spacing: -0.005em; }
-
 .reveal h1, .reveal h2 { color: $green; }
 
 // thin green rule under each slide title
@@ -33,17 +30,24 @@ $presentation-heading-font-weight: 700;
 .reveal table th { color: $green; border-bottom: 2px solid $green-light; }
 .reveal table td, .reveal table th { padding: .35em .6em; }
 
-// tidy callouts
 .reveal .callout { border-left-color: $green !important; }
 
-// dark title / closing slides
-.title-slide h1, .title-slide h2, .title-slide h3,
-section[data-background-color] h2,
-section[data-background-color] h3 { color: #ffffff !important; }
-.title-block { color: #ffffff; }
-.title-block h3 { font-weight: 800; margin-bottom: .3em; }
-.title-block h4 { font-weight: 500; opacity: .95; margin-bottom: 1em; }
+// clean cover / closing slide (white bg, big green title, no rule line)
+.reveal .slides section.cover { text-align: center; }
+.reveal .slides section.cover h1 {
+  color: $green; font-weight: 800; font-size: 2.1em; margin-bottom: .3em;
+  border-bottom: none;
+}
+.reveal .slides section.cover h2 {
+  color: $green; font-weight: 800; font-size: 2em;
+  border-bottom: none; margin-bottom: .5em;
+}
+.reveal .slides section.cover h4 { color: $ink; font-weight: 500; opacity: .85; }
 
-// footer + slide number in muted green
 .reveal .footer { color: $green; opacity: .7; font-size: .5em; }
 .reveal .slide-number { color: $green; }
+
+// small muted caption under figures
+.reveal .caption, .reveal .column em:first-child {
+  font-size: .72em; color: #5a6b5c; font-style: italic;
+}

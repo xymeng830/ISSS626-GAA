@@ -31,7 +31,7 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-52a828884a5363181cff4ae16f99840e.css">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-2d3d52c89e31895b95e7ae1aaa2fd7c0.css">
   <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -159,9 +159,12 @@
 <li><strong>Q1</strong> — Where does fire-detection intensity concentrate, and when?</li>
 <li><strong>Q2</strong> — Are detections significantly clustered, beyond just being dense?</li>
 </ul>
-<p>Study window: <strong>Kabupaten Pulang Pisau</strong>, a peat-dominated regency.</p>
+<p>Study window: <strong>Kabupaten Pulang Pisau</strong>, a peat-dominated regency — chosen because it is an administrative unit and dominated by fire-prone peatland.</p>
 </div><div class="column" style="width:42%;">
 <p><img data-src="Take-home_Ex01_files/figure-html/plot-boundary-1.png"></p>
+<div class="caption">
+<p>The regency boundary, used as the observation window for every analysis.</p>
+</div>
 </div></div>
 </section>
 <section id="data-study-design" class="slide level2 smaller">
@@ -193,14 +196,14 @@
 <div class="callout callout-note no-icon callout-style-simple">
 <div class="callout-body">
 <div class="callout-content">
-<p>A detection is not a distinct fire — repeated overpasses inflate apparent clustering, so de-duplication comes first.</p>
+<p>A detection is not a distinct fire — a fire burning over several days is picked up on several satellite overpasses, which inflates apparent clustering. De-duplication therefore comes first.</p>
 </div>
 </div>
 </div>
 </section>
 <section id="analytical-approach" class="slide level2 smaller">
 <h2>Analytical approach</h2>
-<p>Following the class workflow (r4gdsa Ch. 4–6):</p>
+<p>The two questions are answered separately, because <strong>intensity</strong> (how many events, and where) and <strong>interaction</strong> (whether events cluster beyond that) are different properties. Following r4gdsa Ch. 4–6:</p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -244,8 +247,9 @@
 <div class="column" style="width:55%;">
 <p><img data-src="Take-home_Ex01_files/figure-html/kde-tmap-1.png"></p>
 </div><div class="column" style="width:45%;">
-<p><strong>Clark-Evans R = 0.42</strong> (p = 0.01) → clustered, not random.</p>
-<p>The KDE hotspot sits in the <strong>central-south peatland</strong>, and is stable across all three bandwidths — the peak location does not depend on the smoothing choice.</p>
+<p><em>The map is a kernel density surface — darker/redder means more detections per km².</em></p>
+<p><strong>Clark-Evans R = 0.42</strong> (p = 0.01): R below 1 means the points are <strong>clustered, not random</strong>.</p>
+<p>The KDE hotspot sits in the <strong>central-south peatland</strong>, and stays there across all three bandwidths — so the peak is real, not an artefact of the smoothing choice. This matches the low-lying, fire-prone peat in that part of the regency.</p>
 </div></div>
 </section>
 <section id="second-order-strong-clustering-vs-csr" class="slide level2 smaller">
@@ -254,8 +258,8 @@
 <div class="column" style="width:55%;">
 <p><img data-src="Take-home_Ex01_files/figure-html/lest-1.png"></p>
 </div><div class="column" style="width:45%;">
-<p>The observed <strong>L-curve sits far above</strong> the CSR envelope across all scales up to ~20 km.</p>
-<p><strong>G, F, K and L all agree</strong>: the detections are significantly more clustered than a random pattern — the signature of fires concentrated in a few active areas.</p>
+<p><em>How to read it: the x-axis is distance; the grey band is what a random (CSR) pattern would look like. The observed curve (black) above the band means clustering at that distance.</em></p>
+<p>Here the observed <strong>L-curve sits far above</strong> the band across all scales up to ~20 km. G, F, K and L all agree — the detections are <strong>significantly more clustered</strong> than random, the signature of fires concentrated in a few active areas.</p>
 </div></div>
 </section>
 <section id="value-added-1-is-the-clustering-real" class="slide level2 smaller">
@@ -264,9 +268,9 @@
 <div class="column" style="width:52%;">
 <p><img data-src="Take-home_Ex01_files/figure-html/linhom-1.png"></p>
 </div><div class="column" style="width:48%;">
-<p>The CSR test assumes constant intensity, which is false here. The <strong>inhomogeneous L</strong> lets intensity vary and re-tests.</p>
-<p>Once intensity is allowed to vary, the curve <strong>drops back near the baseline</strong>.</p>
-<p><strong>Key result:</strong> the clustering mostly reflects <strong>first-order heterogeneity</strong> — fires concentrate because the <em>conditions</em> for fire concentrate — not fire-to-fire interaction.</p>
+<p>The CSR test above assumes intensity is the <em>same everywhere</em>, which is false. The <strong>inhomogeneous L</strong> allows intensity to vary and re-tests.</p>
+<p><em>Reading it the same way: once intensity is allowed to vary, the curve now sits close to the baseline instead of far above it.</em></p>
+<p><strong>Key result:</strong> the clustering mostly reflects <strong>first-order heterogeneity</strong> — fires concentrate because the <em>conditions</em> for fire concentrate — not extra fire-to-fire interaction.</p>
 </div></div>
 </section>
 <section id="value-added-2-activity-builds-up-in-time" class="slide level2 smaller">
@@ -275,8 +279,9 @@
 <div class="column" style="width:58%;">
 <p><img data-src="Take-home_Ex01_files/figure-html/stkde-plot-1.png"></p>
 </div><div class="column" style="width:42%;">
+<p><em>Each panel is the fire-density surface for one month (Jun–Sep); brighter means more intense activity that month.</em></p>
 <p>The spatio-temporal KDE shows the hotspot <strong>stays in the central-south peatland</strong> but <strong>grows stronger</strong> as the dry season advances.</p>
-<p>So <strong>timing matters as much as location</strong> — the same core is at risk, but the risk window concentrates in a few months.</p>
+<p>So <strong>timing matters as much as location</strong> — the same core is at risk throughout, but the risk window concentrates in a few months.</p>
 </div></div>
 </section>
 <section id="key-findings" class="slide level2 smaller">
@@ -290,7 +295,7 @@
 <div class="callout callout-note no-icon callout-style-simple">
 <div class="callout-body">
 <div class="callout-content">
-<p>First- and second-order evidence agree: a few peat-dominated areas drive the whole pattern.</p>
+<p>First- and second-order evidence agree: a few peat-dominated areas drive the whole pattern — so <em>where</em> the peat is matters more than any interaction between fires.</p>
 </div>
 </div>
 </div>
@@ -317,7 +322,7 @@
 <div class="callout callout-tip no-icon callout-style-simple">
 <div class="callout-body">
 <div class="callout-content">
-<p>Directly supported: <strong>spatial concentration + timing</strong>. Needs more data: causation, who is exposed.</p>
+<p>Directly supported by the analysis: <strong>spatial concentration + timing</strong>. Needs more data before acting: causation, and who/what is exposed.</p>
 </div>
 </div>
 </div>
