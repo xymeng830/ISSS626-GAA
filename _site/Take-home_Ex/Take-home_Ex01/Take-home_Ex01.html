@@ -182,7 +182,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercises">    
         <li>
     <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html">
- <span class="dropdown-text">Take-home Ex01</span></a>
+ <span class="dropdown-text">Take-home Ex01 — Report</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html">
+ <span class="dropdown-text">Take-home Ex01 — Summary</span></a>
   </li>  
     </ul>
   </li>
@@ -591,7 +595,7 @@ enclosing rectangle: [786.3871, 870.7875] x [9616.111, 9829.378] km</code></pre>
     Monte Carlo test based on 99 simulations of CSR with fixed n
 
 data:  fire_ppp.km
-R = 0.41808, p-value = 0.01
+R = 0.41914, p-value = 0.01
 alternative hypothesis: clustered (R &lt; 1)</code></pre>
 </div>
 </div>
@@ -715,12 +719,12 @@ Done.</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>K_csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(fire_sub, Kest, <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 19 simulated realisations of CSR  ...
-1, 2,  [5:47 remaining] 3,
- [5:28 remaining] 4,  [5:07 remaining] 5,  [4:54 remaining] 6,
- [4:34 remaining] 7,  [4:21 remaining] 8,  [4:03 remaining] 9,
- [3:40 remaining] 10,  [3:16 remaining] 11,  [2:56 remaining] 12,
- [2:33 remaining] 13,  [2:10 remaining] 14,  [1:48 remaining] 15,
- [1:26 remaining] 16,  [1:05 remaining] 17,  [43 sec remaining] 18,
+1, 2,  [5:52 remaining] 3,
+ [5:34 remaining] 4,  [5:11 remaining] 5,  [4:57 remaining] 6,
+ [4:37 remaining] 7,  [4:17 remaining] 8,  [3:56 remaining] 9,
+ [3:35 remaining] 10,  [3:12 remaining] 11,  [2:51 remaining] 12,
+ [2:30 remaining] 13,  [2:08 remaining] 14,  [1:48 remaining] 15,
+ [1:27 remaining] 16,  [1:05 remaining] 17,  [43 sec remaining] 18,
  [22 sec remaining] 
 19.
 
@@ -743,13 +747,13 @@ Done.</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>L_csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(fire_sub, Lest, <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 19 simulated realisations of CSR  ...
-1, 2,  [6:02 remaining] 3,
- [5:28 remaining] 4,  [5:15 remaining] 5,  [4:55 remaining] 6,
- [4:42 remaining] 7,  [4:29 remaining] 8,  [4:07 remaining] 9,
- [3:44 remaining] 10,  [3:29 remaining] 11,  [3:05 remaining] 12,
- [2:44 remaining] 13,  [2:20 remaining] 14,  [1:57 remaining] 15,
- [1:33 remaining] 16,  [1:10 remaining] 17,  [47 sec remaining] 18,
- [23 sec remaining] 
+1, 2,  [6:18 remaining] 3,
+ [5:48 remaining] 4,  [5:21 remaining] 5,  [4:56 remaining] 6,
+ [4:35 remaining] 7,  [4:17 remaining] 8,  [3:55 remaining] 9,
+ [3:34 remaining] 10,  [3:13 remaining] 11,  [2:51 remaining] 12,
+ [2:30 remaining] 13,  [2:09 remaining] 14,  [1:47 remaining] 15,
+ [1:26 remaining] 16,  [1:05 remaining] 17,  [43 sec remaining] 18,
+ [22 sec remaining] 
 19.
 
 Done.</code></pre>
@@ -774,13 +778,13 @@ Done.</code></pre>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 19 simulated realisations of CSR  ...
-1, 2,  [5:57 remaining] 3,
- [5:52 remaining] 4,  [5:22 remaining] 5,  [5:03 remaining] 6,
- [4:43 remaining] 7,  [4:22 remaining] 8,  [4:00 remaining] 9,
- [3:38 remaining] 10,  [3:15 remaining] 11,  [2:54 remaining] 12,
- [2:33 remaining] 13,  [2:12 remaining] 14,  [1:49 remaining] 15,
- [1:28 remaining] 16,  [1:07 remaining] 17,  [45 sec remaining] 18,
- [22 sec remaining] 
+1, 2,  [6:29 remaining] 3,
+ [6:09 remaining] 4,  [5:33 remaining] 5,  [5:12 remaining] 6,
+ [4:50 remaining] 7,  [4:29 remaining] 8,  [4:08 remaining] 9,
+ [3:48 remaining] 10,  [3:24 remaining] 11,  [3:02 remaining] 12,
+ [2:39 remaining] 13,  [2:16 remaining] 14,  [1:53 remaining] 15,
+ [1:30 remaining] 16,  [1:08 remaining] 17,  [45 sec remaining] 18,
+ [23 sec remaining] 
 19.
 
 Done.</code></pre>
