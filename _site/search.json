@@ -649,5 +649,82 @@
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "9.2 Computing and plotting the STKDE",
     "text": "9.2 Computing and plotting the STKDE\n\nst_kde &lt;- spattemp.density(fire_month_owin, lambda = 1.5)\nsummary(st_kde)\n\nSpatiotemporal Kernel Density Estimate\n\nBandwidths\n  h = 6421.054 (spatial)\n  lambda = 1.5 (temporal)\n\nNo. of observations\n  16189 \n\nSpatial bound\n  Type: polygonal\n  2D enclosure: [786387.1, 870787.5] x [9616111, 9829378]\n\nTemporal bound\n  [1, 9]\n\nEvaluation\n  128 x 128 x 9 trivariate lattice\n  Density range: [2.620588e-23, 2.68829e-10]\n\n\n\ntims &lt;- c(6, 7, 8, 9)\npar(mfcol = c(2, 2))\nfor (i in tims) {\n  plot(st_kde, i, override.par = FALSE, fix.range = TRUE,\n       main = paste(\"STKDE, month\", i))\n}\n\n\n\n\n\n\n\npar(mfrow = c(1, 1))\n\nThe monthly STKDE shows fire activity building up as the dry season advances rather than being spread evenly through the year. The high-density area stays broadly in the central-south peatland across the months rather than moving far, but it gets stronger over time. This adds a temporal side to the static KDE: the same core is at risk throughout, but the risk window is concentrated in a few months, so timing matters as much as location."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#contents",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#contents",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Contents",
+    "text": "Contents\n\nResearch question & study area\nData & study design\nAnalytical approach\nFirst-order: Clark-Evans & intensity\nSecond-order: L-function\nValue-added: inhomogeneous L\nValue-added: spatio-temporal KDE\nKey findings\nLimitations\nPublic-safety implications"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#where-do-fires-concentrate-and-do-they-cluster",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#where-do-fires-concentrate-and-do-they-cluster",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Where do fires concentrate — and do they cluster?",
+    "text": "Where do fires concentrate — and do they cluster?\n\nPeatland fires in Central Kalimantan cause haze, health and economic harm.\nQ1 Where does fire-detection intensity concentrate, and when?\nQ2 Are detections significantly clustered, beyond just being dense?\nStudy window: Kabupaten Pulang Pisau, a peat-dominated regency; 2026."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#data-definitions",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#data-definitions",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Data & definitions",
+    "text": "Data & definitions\n\nDetections — NASA FIRMS VIIRS 375 m (NOAA-20), 1 Jan – 23 Sep 2026.\nBoundary — GADM ADM2 (regency), projected to UTM 49S (EPSG:32749).\nPoint event = one detection; a detection is not a distinct fire, so repeats are de-duplicated to one point per pixel per day.\nCleaning: 370,354 → 351,822 national records; 16,189 inside the regency."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#methods-following-r4gdsa-ch.-46",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#methods-following-r4gdsa-ch.-46",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Methods (following r4gdsa Ch. 4–6)",
+    "text": "Methods (following r4gdsa Ch. 4–6)\n\n\n\n\n\n\n\n\nQuestion\nMethod\nCompared against\n\n\n\n\nIs it random?\nClark-Evans test\nCSR (Monte Carlo)\n\n\nWhere is intensity?\nKernel density (KDE)\n—\n\n\nDo points interact?\nG / F / K / L functions\nhomogeneous CSR\n\n\nRobustness\nInhomogeneous L\ninhomogeneous null\n\n\nTiming\nSpatio-temporal KDE (sparr)\n—"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#detections-are-clustered-and-concentrate-in-the-south",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#detections-are-clustered-and-concentrate-in-the-south",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Detections are clustered, and concentrate in the south",
+    "text": "Detections are clustered, and concentrate in the south\n\nClark-Evans R = 0.42 (p = 0.01) → clustered. The KDE shows the hotspot in the central-south peatland, stable across bandwidths."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#strong-clustering-vs-a-random-baseline",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#strong-clustering-vs-a-random-baseline",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Strong clustering vs a random baseline",
+    "text": "Strong clustering vs a random baseline\n\nThe observed L sits far above the CSR envelope up to ~20 km. G, F, K and L all agree: significant clustering at every scale."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#most-clustering-is-the-hotspot-not-interaction",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#most-clustering-is-the-hotspot-not-interaction",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Most clustering is the hotspot, not interaction",
+    "text": "Most clustering is the hotspot, not interaction\n\nUnder a homogeneous null, detections look strongly clustered.\nOnce intensity is allowed to vary (inhomogeneous L), the curve drops back near the baseline.\nReading: the clustering mostly reflects first-order heterogeneity — fires concentrate because the conditions for fire concentrate — not extra fire-to-fire interaction."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#activity-builds-up-through-the-dry-season",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#activity-builds-up-through-the-dry-season",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Activity builds up through the dry season",
+    "text": "Activity builds up through the dry season\n\nThe hotspot stays in the central-south peatland but gets stronger as the dry season advances — timing matters as much as location."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#what-we-learned",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#what-we-learned",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "What we learned",
+    "text": "What we learned\n\nFirst-order: Clark-Evans confirms clustering; intensity concentrates in the central-south peatland.\nSecond-order: G/F/K/L all show significant clustering vs CSR — but the inhomogeneous L shows it is mostly first-order heterogeneity.\nTiming: activity peaks in the dry-season months.\nFirst- and second-order evidence agree: a few peat-dominated areas drive the pattern."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#read-with-care",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#read-with-care",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "Read with care",
+    "text": "Read with care\n\nDetections ≠ fires; cloud cover and overpass timing leave observation gaps.\nConcentration of detections ≠ risk to people, without exposure data.\nCSR / KDE assumptions hold only partly; results read against more than one null.\nWindow stops in September — the later dry-season peak is not captured."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#from-evidence-to-action",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#from-evidence-to-action",
+    "title": "Forest-fire Point Patterns in Kab. Pulang Pisau",
+    "section": "From evidence to action",
+    "text": "From evidence to action\n\nWhere: prioritise monitoring, patrols and response resources in the central-south peatland.\nWhen: raise fire-danger readiness ahead of the dry-season peak.\nLonger term: peatland water management (maintaining levels, canal blocking) in the hotspot.\nDirectly supported: spatial concentration + timing. Needs more data: causation, who is exposed."
   }
 ]
