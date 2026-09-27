@@ -11,63 +11,63 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#research-question-study-area",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
     "section": "Research question & study area",
-    "text": "Research question & study area\n\n\nPeatland fires in Central Kalimantan cause haze, health and economic harm. This study asks two questions of the 2026 satellite record:\n\nQ1 — Where does fire-detection intensity concentrate, and when?\nQ2 — Are detections significantly clustered, beyond just being dense?\n\nStudy window: Kabupaten Pulang Pisau, a peat-dominated regency — chosen because it is an administrative unit and dominated by fire-prone peatland.\n\n\n\nThe regency boundary, used as the observation window for every analysis."
+    "text": "Research question & study area\n\n\nPeatland fires in Central Kalimantan cause haze, health and economic harm. This study asks two questions of the 2026 satellite record:\n\nQ1: Where does fire-detection intensity concentrate, and when?\nQ2: Are detections significantly clustered, beyond just being dense?\n\nStudy window: Kabupaten Pulang Pisau, a peat-dominated regency. It was chosen because it is an administrative unit and dominated by fire-prone peatland.\n\n\n\nThe regency boundary, used as the observation window for every analysis."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#data-study-design",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#data-study-design",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
     "section": "Data & study design",
-    "text": "Data & study design\n\n\n\n\n\n\n\nDetections\nNASA FIRMS VIIRS 375 m (NOAA-20), 1 Jan – 23 Sep 2026\n\n\nBoundary\nGADM ADM2 (regency), UTM 49S (EPSG:32749)\n\n\nPoint event\none detection ≠ one fire → de-duplicated to one point per pixel per day\n\n\nCleaning\n370,354 → 351,822 national → 16,189 inside the regency\n\n\n\n\n\n\nA detection is not a distinct fire — a fire burning over several days is picked up on several satellite overpasses, which inflates apparent clustering. De-duplication therefore comes first."
+    "text": "Data & study design\n\n\n\n\n\n\n\nDetections\nNASA FIRMS VIIRS 375 m (NOAA-20), 1 Jan to 23 Sep 2026\n\n\nBoundary\nGADM ADM2 (regency), UTM 49S (EPSG:32749)\n\n\nPoint event\none detection ≠ one fire → de-duplicated to one point per pixel per day\n\n\nCleaning\n370,354 → 351,822 national → 16,189 inside the regency\n\n\n\n\n\n\nA detection is not a distinct fire. A fire burning over several days is picked up on several satellite overpasses, which inflates apparent clustering, so de-duplication comes first."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#analytical-approach",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#analytical-approach",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
     "section": "Analytical approach",
-    "text": "Analytical approach\nThe two questions are answered separately, because intensity (how many events, and where) and interaction (whether events cluster beyond that) are different properties. Following r4gdsa Ch. 4–6:\n\n\n\nQuestion\nMethod\nCompared against\n\n\n\n\nIs it random?\nClark-Evans test\nCSR (Monte Carlo)\n\n\nWhere is intensity?\nKernel density (KDE)\n—\n\n\nDo points interact?\nG / F / K / L functions\nhomogeneous CSR\n\n\nRobustness\nInhomogeneous L\ninhomogeneous null\n\n\nTiming\nSpatio-temporal KDE (sparr)\n—"
+    "text": "Analytical approach\nThe two questions are answered separately, because intensity (how many events, and where) and interaction (whether events cluster beyond that) are different properties. Following r4gdsa Ch. 4 to 6:\n\n\n\n\n\n\n\n\nQuestion\nMethod\nCompared against\n\n\n\n\nIs it random?\nClark-Evans test\nCSR (Monte Carlo)\n\n\nWhere is intensity?\nKernel density (KDE)\n,\n\n\nDo points interact?\nG / F / K / L functions\nhomogeneous CSR\n\n\nRobustness\nInhomogeneous L\ninhomogeneous null\n\n\nTiming\nSpatio-temporal KDE (sparr)\n,"
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#first-order-intensity-concentrates-in-the-south",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#first-order-intensity-concentrates-in-the-south",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
-    "section": "First-order — intensity concentrates in the south",
-    "text": "First-order — intensity concentrates in the south\n\n\n\n\nThe map is a kernel density surface — darker/redder means more detections per km².\nClark-Evans R = 0.42 (p = 0.01): R below 1 means the points are clustered, not random.\nThe KDE hotspot sits in the central-south peatland, and stays there across all three bandwidths — so the peak is real, not an artefact of the smoothing choice. This matches the low-lying, fire-prone peat in that part of the regency."
+    "section": "First-order, intensity concentrates in the south",
+    "text": "First-order, intensity concentrates in the south\n\n\n\n\nThe map is a kernel density surface. Darker, redder areas mean more detections per km².\nClark-Evans R = 0.42 (p = 0.01): R below 1 means the points are clustered, not random.\nThe KDE hotspot sits in the central-south peatland, and stays there across all three bandwidths, so the peak is real rather than an artefact of the smoothing choice. This matches the low-lying, fire-prone peat in that part of the regency."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#second-order-strong-clustering-vs-csr",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#second-order-strong-clustering-vs-csr",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
-    "section": "Second-order — strong clustering vs CSR",
-    "text": "Second-order — strong clustering vs CSR\n\n\n\n\nHow to read it: the x-axis is distance; the grey band is what a random (CSR) pattern would look like. The observed curve (black) above the band means clustering at that distance.\nHere the observed L-curve sits far above the band across all scales up to ~20 km. G, F, K and L all agree — the detections are significantly more clustered than random, the signature of fires concentrated in a few active areas."
+    "section": "Second-order, strong clustering vs CSR",
+    "text": "Second-order, strong clustering vs CSR\n\n\n\n\nHow to read it: the x-axis is distance, and the grey band is what a random (CSR) pattern would look like. The observed curve (black) above the band means clustering at that distance.\nHere the observed L-curve sits far above the band across all scales up to ~20 km. G, F, K and L all agree: the detections are significantly more clustered than random, the signature of fires concentrated in a few active areas."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-1-is-the-clustering-real",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-1-is-the-clustering-real",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
-    "section": "Value-added 1 — is the clustering real?",
-    "text": "Value-added 1 — is the clustering real?\n\n\n\n\nThe CSR test above assumes intensity is the same everywhere, which is false. The inhomogeneous L allows intensity to vary and re-tests.\nReading it the same way: once intensity is allowed to vary, the curve now sits close to the baseline instead of far above it.\nKey result: the clustering mostly reflects first-order heterogeneity — fires concentrate because the conditions for fire concentrate — not extra fire-to-fire interaction."
+    "section": "Value-added 1, is the clustering real?",
+    "text": "Value-added 1, is the clustering real?\n\n\n\n\nThe CSR test above assumes intensity is the same everywhere, which is false. The inhomogeneous L allows intensity to vary and re-tests.\nReading it the same way: once intensity is allowed to vary, the curve now sits close to the baseline instead of far above it.\nKey result: the clustering mostly reflects first-order heterogeneity. Fires concentrate because the conditions for fire concentrate, not because fires trigger one another."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-2-activity-builds-up-in-time",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#value-added-2-activity-builds-up-in-time",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
-    "section": "Value-added 2 — activity builds up in time",
-    "text": "Value-added 2 — activity builds up in time\n\n\n\n\nEach panel is the fire-density surface for one month (Jun–Sep); brighter means more intense activity that month.\nThe spatio-temporal KDE shows the hotspot stays in the central-south peatland but grows stronger as the dry season advances.\nSo timing matters as much as location — the same core is at risk throughout, but the risk window concentrates in a few months."
+    "section": "Value-added 2, activity builds up in time",
+    "text": "Value-added 2, activity builds up in time\n\n\n\n\nEach panel is the fire-density surface for one month (Jun to Sep). Brighter means more intense activity that month.\nThe spatio-temporal KDE shows the hotspot stays in the central-south peatland but grows stronger as the dry season advances.\nSo timing matters as much as location. The same core is at risk throughout, but the risk window concentrates in a few months."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#key-findings",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#key-findings",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
     "section": "Key findings",
-    "text": "Key findings\n\nFirst-order. The Clark-Evans test (R = 0.42) confirms the detections are clustered rather than random, and the KDE shows this concentration sits firmly in the central-south peatland.\nSecond-order. All four distance functions (G, F, K, L) place the observed pattern well outside the CSR envelope, so the clustering is statistically significant, not just visible on a map.\nBut the source of that clustering matters. Once the inhomogeneous L allows intensity to vary, the signal largely disappears — meaning the clustering is driven by the uneven peatland, not by fires triggering one another.\nTiming. The monthly spatio-temporal KDE shows activity is not constant through the year; it builds up and peaks during the dry-season months.\n\n\n\n\nFirst- and second-order evidence point the same way: a few peat-dominated areas drive the whole pattern. In practical terms, where the peat is matters far more than any interaction between individual fires — which is what makes targeted, location-based management sensible."
+    "text": "Key findings\n\nFirst-order. The Clark-Evans test (R = 0.42) confirms the detections are clustered rather than random, and the KDE shows this concentration sits firmly in the central-south peatland.\nSecond-order. All four distance functions (G, F, K, L) place the observed pattern well outside the CSR envelope, so the clustering is statistically significant, not just visible on a map.\nBut the source of that clustering matters. Once the inhomogeneous L allows intensity to vary, the signal largely disappears, meaning the clustering is driven by the uneven peatland, not by fires triggering one another.\nTiming. The monthly spatio-temporal KDE shows activity is not constant through the year; it builds up and peaks during the dry-season months.\n\n\n\n\nFirst- and second-order evidence point the same way: a few peat-dominated areas drive the whole pattern. In practical terms, where the peat is matters far more than any interaction between individual fires, which is what makes targeted, location-based management sensible."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#limitations-implications",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#limitations-implications",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
     "section": "Limitations & implications",
-    "text": "Limitations & implications\n\n\nRead with care\n\nDetections ≠ fires; cloud/overpass gaps.\nConcentration ≠ risk without exposure data.\nCSR/KDE assumptions only partly hold.\nWindow stops in September.\n\n\nFrom evidence to action\n\nWhere — focus monitoring & patrols on the central-south peatland.\nWhen — raise readiness ahead of the dry-season peak.\nLonger term — peatland water management (levels, canal blocking).\n\n\n\n\n\nDirectly supported by the analysis: spatial concentration + timing. Needs more data before acting: causation, and who/what is exposed."
+    "text": "Limitations & implications\n\n\nRead with care\n\nDetections ≠ fires; cloud/overpass gaps.\nConcentration ≠ risk without exposure data.\nCSR/KDE assumptions only partly hold.\nWindow stops in September.\n\n\nFrom evidence to action\n\nWhere: focus monitoring and patrols on the central-south peatland.\nWhen: raise readiness ahead of the dry-season peak.\nLonger term: peatland water management (levels, canal blocking).\n\n\n\n\n\nDirectly supported by the analysis: spatial concentration + timing. Needs more data before acting: causation, and who/what is exposed."
   },
   {
     "objectID": "about.html",
@@ -466,7 +466,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "",
-    "text": "Peatland fires are a recurring public-safety problem in Central Kalimantan. Peat fires are hard to put out, they produce haze that spreads across the region, and they damage both health and the local economy. To support prevention and response, this exercise looks at the satellite fire record and asks two basic questions: where do fire detections concentrate, and are they really clustered or just densely scattered.\nThe study area is one regency, Kabupaten Pulang Pisau, and the data are VIIRS fire detections from 2026. Following the workflow taught in class (r4gdsa Chapters 4-6), the analysis separates first-order effects (how the intensity of detections varies across space) from second-order effects (whether detections interact - cluster, inhibit, or appear random). These two properties are measured with different tools, so they are reported separately."
+    "text": "Peatland fires are a recurring public-safety problem in Central Kalimantan. Peat fires are hard to put out, they produce haze that spreads across the region, and they damage both health and the local economy. To support prevention and response, this exercise looks at the satellite fire record and asks two basic questions: where do fire detections concentrate, and are they really clustered or just densely scattered.\nThe study area is one regency, Kabupaten Pulang Pisau, and the data are VIIRS fire detections from 2026. Following the workflow taught in class (r4gdsa Chapters 4-6), the analysis separates first-order effects (how the intensity of detections varies across space) from second-order effects (whether detections cluster, inhibit, or appear random). These two properties are measured with different tools, so they are reported separately."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#data-sources",
@@ -480,7 +480,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#point-event-definition",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "3.2 Point event definition",
-    "text": "3.2 Point event definition\nA point event is one VIIRS fire detection - a single 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.\nOne point to be clear about early: a detection is not a distinct fire. A fire that burns for several days is picked up on several overpasses, so the raw file contains the same fire many times. This inflates apparent clustering, so repeated detections are reduced to one point per pixel per day before analysis.\nThe remaining cleaning steps are routine: drop exact duplicate rows, remove records with missing or impossible coordinates, drop low-confidence detections, and keep only records inside the regency and inside the observation window."
+    "text": "3.2 Point event definition\nA point event is one VIIRS fire detection: a single 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.\nOne point to be clear about early: a detection is not a distinct fire. A fire that burns for several days is picked up on several overpasses, so the raw file contains the same fire many times. This inflates apparent clustering, so repeated detections are reduced to one point per pixel per day before analysis.\nThe remaining cleaning steps are routine: drop exact duplicate rows, remove records with missing or impossible coordinates, drop low-confidence detections, and keep only records inside the regency and inside the observation window."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#spatial-study-window",
@@ -501,7 +501,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#assumptions",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "3.5 Assumptions",
-    "text": "3.5 Assumptions\nKDE assumes a smooth underlying intensity surface, and the result depends heavily on the bandwidth, so more than one bandwidth is shown. The K and L functions compare the pattern against a homogeneous Poisson process (constant intensity everywhere). That assumption is almost certainly false here, because fire intensity is driven by where the peatland is, so a homogeneous test can read first-order heterogeneity as clustering. To separate the two, an inhomogeneous L is added as a value-added check. The tests also assume detections are independent, which is exactly what repeated detections break - hence the de-duplication."
+    "text": "3.5 Assumptions\nKDE assumes a smooth underlying intensity surface, and the result depends heavily on the bandwidth, so more than one bandwidth is shown. The K and L functions compare the pattern against a homogeneous Poisson process (constant intensity everywhere). That assumption is almost certainly false here, because fire intensity is driven by where the peatland is, so a homogeneous test can read first-order heterogeneity as clustering. To separate the two, an inhomogeneous L is added as a value-added check. The tests also assume detections are independent, which is exactly what repeated detections break, and this is why the de-duplication is done first."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#methodological-choices",
@@ -557,7 +557,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#clark-evans-test",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "6.1 Clark-Evans test",
-    "text": "6.1 Clark-Evans test\nFollowing Chapter 4, the Clark-Evans test is used first to check whether the pattern is clustered, random, or regular. The Clark-Evans index R is below 1 for clustering and above 1 for regularity.\n\nH0: the detections are randomly distributed.\nH1: the detections are not randomly distributed.\n\n\nclarkevans.test(fire_ppp.km, correction = \"none\",\n                clipregion = fire_owin,\n                alternative = \"clustered\",\n                method = \"MonteCarlo\", nsim = 99)\n\n\n    Clark-Evans test\n    No edge correction\n    Monte Carlo test based on 99 simulations of CSR with fixed n\n\ndata:  fire_ppp.km\nR = 0.41914, p-value = 0.01\nalternative hypothesis: clustered (R &lt; 1)\n\n\nThe Monte Carlo Clark-Evans test gives R well below 1 with a very small p-value, so the null of random distribution is rejected: the detections are clustered. This is a first-order signal - it tells us the pattern is not random, and the KDE below shows where the intensity is highest."
+    "text": "6.1 Clark-Evans test\nFollowing Chapter 4, the Clark-Evans test is used first to check whether the pattern is clustered, random, or regular. The Clark-Evans index R is below 1 for clustering and above 1 for regularity.\n\nH0: the detections are randomly distributed.\nH1: the detections are not randomly distributed.\n\n\nclarkevans.test(fire_ppp.km, correction = \"none\",\n                clipregion = fire_owin,\n                alternative = \"clustered\",\n                method = \"MonteCarlo\", nsim = 99)\n\n\n    Clark-Evans test\n    No edge correction\n    Monte Carlo test based on 99 simulations of CSR with fixed n\n\ndata:  fire_ppp.km\nR = 0.41986, p-value = 0.01\nalternative hypothesis: clustered (R &lt; 1)\n\n\nThe Monte Carlo Clark-Evans test gives R well below 1 with a very small p-value, so the null of random distribution is rejected: the detections are clustered. This is a first-order signal. It tells us the pattern is not random, and the KDE below shows where the intensity is highest."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#kernel-density-with-different-bandwidths",
@@ -578,35 +578,35 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#cartographic-quality-kde-map",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "6.4 Cartographic-quality KDE map",
-    "text": "6.4 Cartographic-quality KDE map\nFollowing Chapter 4.9, the im output is converted to a SpatRaster with terra::rast(), the CRS is assigned, and the map is drawn with tmap.\n\nkde_terra &lt;- rast(kde_ppl)\ncrs(kde_terra) &lt;- \"EPSG:32749\"\n\ntm_shape(kde_terra) +\n  tm_raster(palette = \"YlOrRd\", title = \"Intensity\") +\n  tm_shape(study_area) + tm_borders(col = \"grey30\") +\n  tm_layout(main.title = \"Fire-detection intensity\", legend.outside = TRUE)\n\n\n\n\n\n\n\n\nThe KDE shows detections concentrated in the central and southern parts of the regency, with little activity in the north. The same hotspot shows up under all three bandwidths, so the location of the peak does not depend on the smoothing choice (the smaller bandwidths just show more local detail). This southern concentration matches the low-lying peatland that dominates that part of Pulang Pisau and burns easily in the dry season. The map shows where intensity is high, not why - it reflects where detections happen, which depends on both fire activity and what the satellite could observe."
+    "text": "6.4 Cartographic-quality KDE map\nFollowing Chapter 4.9, the im output is converted to a SpatRaster with terra::rast(), the CRS is assigned, and the map is drawn with tmap.\n\nkde_terra &lt;- rast(kde_ppl)\ncrs(kde_terra) &lt;- \"EPSG:32749\"\n\ntm_shape(kde_terra) +\n  tm_raster(palette = \"YlOrRd\", title = \"Intensity\") +\n  tm_shape(study_area) + tm_borders(col = \"grey30\") +\n  tm_layout(main.title = \"Fire-detection intensity\", legend.outside = TRUE)\n\n\n\n\n\n\n\n\nThe KDE shows detections concentrated in the central and southern parts of the regency, with little activity in the north. The same hotspot shows up under all three bandwidths, so the location of the peak does not depend on the smoothing choice (the smaller bandwidths just show more local detail). This southern concentration matches the low-lying peatland that dominates that part of Pulang Pisau and burns easily in the dry season. The map shows where intensity is high, not why. It reflects where detections happen, which depends on both fire activity and what the satellite could observe."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#g-function-nearest-neighbour-distances",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#g-function-nearest-neighbour-distances",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "7.1 G-function (nearest-neighbour distances)",
-    "text": "7.1 G-function (nearest-neighbour distances)\n\nG_csr &lt;- envelope(fire_sub, Gest, nsim = 19, rank = 1, glocal = TRUE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, \n19.\n\nDone.\n\nplot(G_csr, main = \"G-function vs CSR envelope\")\n\n\n\n\n\n\n\n\nThe observed G rises above the envelope, meaning nearest-neighbour distances are shorter than expected under CSR - a sign of clustering."
+    "text": "7.1 G-function (nearest-neighbour distances)\n\nG_csr &lt;- envelope(fire_sub, Gest, nsim = 19, rank = 1, glocal = TRUE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, \n19.\n\nDone.\n\nplot(G_csr, main = \"G-function vs CSR envelope\")\n\n\n\n\n\n\n\n\nThe observed G rises above the envelope, meaning nearest-neighbour distances are shorter than expected under CSR. This is a sign of clustering."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#f-function-empty-space-distances",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#f-function-empty-space-distances",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "7.2 F-function (empty-space distances)",
-    "text": "7.2 F-function (empty-space distances)\n\nF_csr &lt;- envelope(fire_sub, Fest, nsim = 19, rank = 1, glocal = TRUE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, \n19.\n\nDone.\n\nplot(F_csr, main = \"F-function vs CSR envelope\")\n\n\n\n\n\n\n\n\nThe observed F sits below the envelope, meaning there is more empty space than expected under CSR - again consistent with clustering."
+    "text": "7.2 F-function (empty-space distances)\n\nF_csr &lt;- envelope(fire_sub, Fest, nsim = 19, rank = 1, glocal = TRUE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, \n19.\n\nDone.\n\nplot(F_csr, main = \"F-function vs CSR envelope\")\n\n\n\n\n\n\n\n\nThe observed F sits below the envelope, meaning there is more empty space than expected under CSR. This is again consistent with clustering."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#k-function",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#k-function",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "7.3 K-function",
-    "text": "7.3 K-function\n\nK_csr &lt;- envelope(fire_sub, Kest, nsim = 19, rank = 1, glocal = TRUE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2,  [5:52 remaining] 3,\n [5:34 remaining] 4,  [5:11 remaining] 5,  [4:57 remaining] 6,\n [4:37 remaining] 7,  [4:17 remaining] 8,  [3:56 remaining] 9,\n [3:35 remaining] 10,  [3:12 remaining] 11,  [2:51 remaining] 12,\n [2:30 remaining] 13,  [2:08 remaining] 14,  [1:48 remaining] 15,\n [1:27 remaining] 16,  [1:05 remaining] 17,  [43 sec remaining] 18,\n [22 sec remaining] \n19.\n\nDone.\n\nplot(K_csr, . - r ~ r, xlab = \"d (km)\", ylab = \"K(d)-r\", main = \"K-function vs CSR envelope\")"
+    "text": "7.3 K-function\n\nK_csr &lt;- envelope(fire_sub, Kest, nsim = 19, rank = 1, glocal = TRUE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2,  [5:48 remaining] 3,\n [5:32 remaining] 4,  [5:14 remaining] 5,  [5:05 remaining] 6,\n [4:42 remaining] 7,  [4:21 remaining] 8,  [4:01 remaining] 9,\n [3:40 remaining] 10,  [3:16 remaining] 11,  [2:56 remaining] 12,\n [2:35 remaining] 13,  [2:12 remaining] 14,  [1:50 remaining] 15,\n [1:28 remaining] 16,  [1:06 remaining] 17,  [44 sec remaining] 18,\n [22 sec remaining] \n19.\n\nDone.\n\nplot(K_csr, . - r ~ r, xlab = \"d (km)\", ylab = \"K(d)-r\", main = \"K-function vs CSR envelope\")\n\n\n\n\n\n\n\n\nThe observed K also lies above the envelope, consistent with the G and F results. More points fall within a given distance than a random pattern would produce."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#l-function",
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#l-function",
     "title": "Take-home Exercise 1: Forest-fire Point Patterns in Central Kalimantan",
     "section": "7.4 L-function",
-    "text": "7.4 L-function\nThe L-function is the clearest of the four because it shows clustering as a function of distance. It is plotted centred, so the CSR baseline is the horizontal line and any curve above it means clustering at that distance.\n\nL_csr &lt;- envelope(fire_sub, Lest, nsim = 19, rank = 1, glocal = TRUE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2,  [6:18 remaining] 3,\n [5:48 remaining] 4,  [5:21 remaining] 5,  [4:56 remaining] 6,\n [4:35 remaining] 7,  [4:17 remaining] 8,  [3:55 remaining] 9,\n [3:34 remaining] 10,  [3:13 remaining] 11,  [2:51 remaining] 12,\n [2:30 remaining] 13,  [2:09 remaining] 14,  [1:47 remaining] 15,\n [1:26 remaining] 16,  [1:05 remaining] 17,  [43 sec remaining] 18,\n [22 sec remaining] \n19.\n\nDone.\n\nplot(L_csr, . - r ~ r, xlab = \"d (km)\", ylab = \"L(d)-r\", main = \"L-function vs CSR envelope\")\n\n\n\n\n\n\n\n\nThe observed L is far above the envelope across the whole distance range up to about 20 km. So the detections are significantly more clustered than CSR at every scale, which is the expected pattern for fires concentrated in a few active areas rather than spread out independently. Together, G, F, K and L all point the same way: clear clustering."
+    "text": "7.4 L-function\nThe L-function is the clearest of the four because it shows clustering as a function of distance. It is plotted centred, so the CSR baseline is the horizontal line and any curve above it means clustering at that distance.\n\nL_csr &lt;- envelope(fire_sub, Lest, nsim = 19, rank = 1, glocal = TRUE)\n\nGenerating 19 simulated realisations of CSR  ...\n1, 2,  [6:03 remaining] 3,\n [5:29 remaining] 4,  [5:11 remaining] 5,  [4:49 remaining] 6,\n [4:30 remaining] 7,  [4:13 remaining] 8,  [3:52 remaining] 9,\n [3:32 remaining] 10,  [3:11 remaining] 11,  [2:50 remaining] 12,\n [2:29 remaining] 13,  [2:07 remaining] 14,  [1:46 remaining] 15,\n [1:25 remaining] 16,  [1:04 remaining] 17,  [42 sec remaining] 18,\n [21 sec remaining] \n19.\n\nDone.\n\nplot(L_csr, . - r ~ r, xlab = \"d (km)\", ylab = \"L(d)-r\", main = \"L-function vs CSR envelope\")\n\n\n\n\n\n\n\n\nThe observed L is far above the envelope across the whole distance range up to about 20 km. So the detections are significantly more clustered than CSR at every scale, which is the expected pattern for fires concentrated in a few active areas rather than spread out independently. Together, G, F, K and L all point the same way: clear clustering."
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#building-the-marked-ppp",
@@ -634,6 +634,6 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.html#contents",
     "title": "Forest-fire Point Patterns in Kabupaten Pulang Pisau",
     "section": "Contents",
-    "text": "Contents\n\nResearch question & study area\nData & study design\nAnalytical approach\nFirst-order — Clark-Evans & intensity\nSecond-order — L-function\nValue-added 1 — inhomogeneous L\nValue-added 2 — spatio-temporal KDE\nKey findings\nLimitations & implications"
+    "text": "Contents\n\nResearch question & study area\nData & study design\nAnalytical approach\nFirst-order, Clark-Evans & intensity\nSecond-order, L-function\nValue-added 1, inhomogeneous L\nValue-added 2, spatio-temporal KDE\nKey findings\nLimitations & implications"
   }
 ]

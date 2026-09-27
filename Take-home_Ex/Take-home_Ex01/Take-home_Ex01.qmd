@@ -24,7 +24,7 @@ execute:
 
 Peatland fires are a recurring public-safety problem in Central Kalimantan. Peat fires are hard to put out, they produce haze that spreads across the region, and they damage both health and the local economy. To support prevention and response, this exercise looks at the satellite fire record and asks two basic questions: where do fire detections concentrate, and are they really clustered or just densely scattered.
 
-The study area is one regency, Kabupaten Pulang Pisau, and the data are VIIRS fire detections from 2026. Following the workflow taught in class (r4gdsa Chapters 4-6), the analysis separates first-order effects (how the intensity of detections varies across space) from second-order effects (whether detections interact - cluster, inhibit, or appear random). These two properties are measured with different tools, so they are reported separately.
+The study area is one regency, Kabupaten Pulang Pisau, and the data are VIIRS fire detections from 2026. Following the workflow taught in class (r4gdsa Chapters 4-6), the analysis separates first-order effects (how the intensity of detections varies across space) from second-order effects (whether detections cluster, inhibit, or appear random). These two properties are measured with different tools, so they are reported separately.
 
 # Research questions
 
@@ -45,7 +45,7 @@ FIRMS returned the export as two files: a standard (science-quality) file for th
 
 ## Point event definition
 
-A point event is one VIIRS fire detection - a single 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.
+A point event is one VIIRS fire detection: a single 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.
 
 One point to be clear about early: a detection is not a distinct fire. A fire that burns for several days is picked up on several overpasses, so the raw file contains the same fire many times. This inflates apparent clustering, so repeated detections are reduced to one point per pixel per day before analysis.
 
@@ -61,7 +61,7 @@ The data cover 1 January 2026 to 23 September 2026, the full range available at 
 
 ## Assumptions
 
-KDE assumes a smooth underlying intensity surface, and the result depends heavily on the bandwidth, so more than one bandwidth is shown. The K and L functions compare the pattern against a homogeneous Poisson process (constant intensity everywhere). That assumption is almost certainly false here, because fire intensity is driven by where the peatland is, so a homogeneous test can read first-order heterogeneity as clustering. To separate the two, an inhomogeneous L is added as a value-added check. The tests also assume detections are independent, which is exactly what repeated detections break - hence the de-duplication.
+KDE assumes a smooth underlying intensity surface, and the result depends heavily on the bandwidth, so more than one bandwidth is shown. The K and L functions compare the pattern against a homogeneous Poisson process (constant intensity everywhere). That assumption is almost certainly false here, because fire intensity is driven by where the peatland is, so a homogeneous test can read first-order heterogeneity as clustering. To separate the two, an inhomogeneous L is added as a value-added check. The tests also assume detections are independent, which is exactly what repeated detections break, and this is why the de-duplication is done first.
 
 ## Methodological choices
 
@@ -217,7 +217,7 @@ clarkevans.test(fire_ppp.km, correction = "none",
                 method = "MonteCarlo", nsim = 99)
 ```
 
-The Monte Carlo Clark-Evans test gives R well below 1 with a very small p-value, so the null of random distribution is rejected: the detections are clustered. This is a first-order signal - it tells us the pattern is not random, and the KDE below shows where the intensity is highest.
+The Monte Carlo Clark-Evans test gives R well below 1 with a very small p-value, so the null of random distribution is rejected: the detections are clustered. This is a first-order signal. It tells us the pattern is not random, and the KDE below shows where the intensity is highest.
 
 ## Kernel density with different bandwidths
 
@@ -261,11 +261,11 @@ tm_shape(kde_terra) +
   tm_layout(main.title = "Fire-detection intensity", legend.outside = TRUE)
 ```
 
-The KDE shows detections concentrated in the central and southern parts of the regency, with little activity in the north. The same hotspot shows up under all three bandwidths, so the location of the peak does not depend on the smoothing choice (the smaller bandwidths just show more local detail). This southern concentration matches the low-lying peatland that dominates that part of Pulang Pisau and burns easily in the dry season. The map shows where intensity is high, not why - it reflects where detections happen, which depends on both fire activity and what the satellite could observe.
+The KDE shows detections concentrated in the central and southern parts of the regency, with little activity in the north. The same hotspot shows up under all three bandwidths, so the location of the peak does not depend on the smoothing choice (the smaller bandwidths just show more local detail). This southern concentration matches the low-lying peatland that dominates that part of Pulang Pisau and burns easily in the dry season. The map shows where intensity is high, not why. It reflects where detections happen, which depends on both fire activity and what the satellite could observe.
 
 # Second-order analysis: interaction
 
-The four functions below all test the same idea - are detections closer together than random - from different angles, so they are run together and read as a set. Each test uses the 3,000-point subsample and `envelope()` with `rank = 1, glocal = TRUE` as in Chapter 5.
+G, F, K and L each measure clustering in a slightly different way, so I run all four and check whether they agree. Each test uses the 3,000-point subsample and `envelope()` with `rank = 1, glocal = TRUE`, following Chapter 5.
 
 For each test:
 
@@ -281,7 +281,7 @@ G_csr <- envelope(fire_sub, Gest, nsim = 19, rank = 1, glocal = TRUE)
 plot(G_csr, main = "G-function vs CSR envelope")
 ```
 
-The observed G rises above the envelope, meaning nearest-neighbour distances are shorter than expected under CSR - a sign of clustering.
+The observed G rises above the envelope, meaning nearest-neighbour distances are shorter than expected under CSR. This is a sign of clustering.
 
 ## F-function (empty-space distances)
 
@@ -291,7 +291,7 @@ F_csr <- envelope(fire_sub, Fest, nsim = 19, rank = 1, glocal = TRUE)
 plot(F_csr, main = "F-function vs CSR envelope")
 ```
 
-The observed F sits below the envelope, meaning there is more empty space than expected under CSR - again consistent with clustering.
+The observed F sits below the envelope, meaning there is more empty space than expected under CSR. This is again consistent with clustering.
 
 ## K-function
 
@@ -300,6 +300,8 @@ The observed F sits below the envelope, meaning there is more empty space than e
 K_csr <- envelope(fire_sub, Kest, nsim = 19, rank = 1, glocal = TRUE)
 plot(K_csr, . - r ~ r, xlab = "d (km)", ylab = "K(d)-r", main = "K-function vs CSR envelope")
 ```
+
+The observed K also lies above the envelope, consistent with the G and F results. More points fall within a given distance than a random pattern would produce.
 
 ## L-function
 
@@ -366,7 +368,7 @@ The monthly STKDE shows fire activity building up as the dry season advances rat
 
 # Integrated findings and discussion
 
-The first-order and second-order results agree. The Clark-Evans test and the KDE show intensity is strongly uneven and concentrated in the central-south peatland. The G, F, K and L functions all confirm the detections are far more clustered than CSR. But the inhomogeneous L shows this clustering mainly reflects the uneven intensity rather than independent interaction between fires - fires are concentrated because the conditions for fire are concentrated. The monthly STKDE adds that this concentration also peaks in time, during the dry season.
+The first-order and second-order results agree. The Clark-Evans test and the KDE show intensity is strongly uneven and concentrated in the central-south peatland. The G, F, K and L functions all confirm the detections are far more clustered than CSR. But the inhomogeneous L shows this clustering mainly reflects the uneven intensity rather than independent interaction between fires: fires are concentrated because the conditions for fire are concentrated. The monthly STKDE adds that this concentration also peaks in time, during the dry season.
 
 As a robustness check, the hotspot location is stable across the three KDE bandwidths, and the homogeneous-vs-inhomogeneous L comparison shows the clustering signal is driven by first-order heterogeneity rather than one modelling choice. Alternative explanations still remain: repeated detections of the same fire, cloud cover and overpass timing, and the fact that detection intensity is not the same as risk to people or assets.
 

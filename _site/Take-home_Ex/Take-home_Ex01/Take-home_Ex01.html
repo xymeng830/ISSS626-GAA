@@ -290,7 +290,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 26, 2026</p>
+      <p class="date-modified">September 27, 2026</p>
     </div>
   </div>
     
@@ -304,7 +304,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="overview" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Overview</h1>
 <p>Peatland fires are a recurring public-safety problem in Central Kalimantan. Peat fires are hard to put out, they produce haze that spreads across the region, and they damage both health and the local economy. To support prevention and response, this exercise looks at the satellite fire record and asks two basic questions: where do fire detections concentrate, and are they really clustered or just densely scattered.</p>
-<p>The study area is one regency, Kabupaten Pulang Pisau, and the data are VIIRS fire detections from 2026. Following the workflow taught in class (r4gdsa Chapters 4-6), the analysis separates first-order effects (how the intensity of detections varies across space) from second-order effects (whether detections interact - cluster, inhibit, or appear random). These two properties are measured with different tools, so they are reported separately.</p>
+<p>The study area is one regency, Kabupaten Pulang Pisau, and the data are VIIRS fire detections from 2026. Following the workflow taught in class (r4gdsa Chapters 4-6), the analysis separates first-order effects (how the intensity of detections varies across space) from second-order effects (whether detections cluster, inhibit, or appear random). These two properties are measured with different tools, so they are reported separately.</p>
 </section>
 <section id="research-questions" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Research questions</h1>
@@ -352,7 +352,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="point-event-definition" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="point-event-definition"><span class="header-section-number">3.2</span> Point event definition</h2>
-<p>A point event is one VIIRS fire detection - a single 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.</p>
+<p>A point event is one VIIRS fire detection: a single 375 m pixel flagged as an active fire at one satellite overpass, placed at the pixel centroid.</p>
 <p>One point to be clear about early: a detection is not a distinct fire. A fire that burns for several days is picked up on several overpasses, so the raw file contains the same fire many times. This inflates apparent clustering, so repeated detections are reduced to one point per pixel per day before analysis.</p>
 <p>The remaining cleaning steps are routine: drop exact duplicate rows, remove records with missing or impossible coordinates, drop low-confidence detections, and keep only records inside the regency and inside the observation window.</p>
 </section>
@@ -366,7 +366,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="assumptions" class="level2" data-number="3.5">
 <h2 data-number="3.5" class="anchored" data-anchor-id="assumptions"><span class="header-section-number">3.5</span> Assumptions</h2>
-<p>KDE assumes a smooth underlying intensity surface, and the result depends heavily on the bandwidth, so more than one bandwidth is shown. The K and L functions compare the pattern against a homogeneous Poisson process (constant intensity everywhere). That assumption is almost certainly false here, because fire intensity is driven by where the peatland is, so a homogeneous test can read first-order heterogeneity as clustering. To separate the two, an inhomogeneous L is added as a value-added check. The tests also assume detections are independent, which is exactly what repeated detections break - hence the de-duplication.</p>
+<p>KDE assumes a smooth underlying intensity surface, and the result depends heavily on the bandwidth, so more than one bandwidth is shown. The K and L functions compare the pattern against a homogeneous Poisson process (constant intensity everywhere). That assumption is almost certainly false here, because fire intensity is driven by where the peatland is, so a homogeneous test can read first-order heterogeneity as clustering. To separate the two, an inhomogeneous L is added as a value-added check. The tests also assume detections are independent, which is exactly what repeated detections break, and this is why the de-duplication is done first.</p>
 </section>
 <section id="methodological-choices" class="level2" data-number="3.6">
 <h2 data-number="3.6" class="anchored" data-anchor-id="methodological-choices"><span class="header-section-number">3.6</span> Methodological choices</h2>
@@ -595,11 +595,11 @@ enclosing rectangle: [786.3871, 870.7875] x [9616.111, 9829.378] km</code></pre>
     Monte Carlo test based on 99 simulations of CSR with fixed n
 
 data:  fire_ppp.km
-R = 0.41914, p-value = 0.01
+R = 0.41986, p-value = 0.01
 alternative hypothesis: clustered (R &lt; 1)</code></pre>
 </div>
 </div>
-<p>The Monte Carlo Clark-Evans test gives R well below 1 with a very small p-value, so the null of random distribution is rejected: the detections are clustered. This is a first-order signal - it tells us the pattern is not random, and the KDE below shows where the intensity is highest.</p>
+<p>The Monte Carlo Clark-Evans test gives R well below 1 with a very small p-value, so the null of random distribution is rejected: the detections are clustered. This is a first-order signal. It tells us the pattern is not random, and the KDE below shows where the intensity is highest.</p>
 </section>
 <section id="kernel-density-with-different-bandwidths" class="level2" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="kernel-density-with-different-bandwidths"><span class="header-section-number">6.2</span> Kernel density with different bandwidths</h2>
@@ -657,12 +657,12 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 </div>
 </div>
 </div>
-<p>The KDE shows detections concentrated in the central and southern parts of the regency, with little activity in the north. The same hotspot shows up under all three bandwidths, so the location of the peak does not depend on the smoothing choice (the smaller bandwidths just show more local detail). This southern concentration matches the low-lying peatland that dominates that part of Pulang Pisau and burns easily in the dry season. The map shows where intensity is high, not why - it reflects where detections happen, which depends on both fire activity and what the satellite could observe.</p>
+<p>The KDE shows detections concentrated in the central and southern parts of the regency, with little activity in the north. The same hotspot shows up under all three bandwidths, so the location of the peak does not depend on the smoothing choice (the smaller bandwidths just show more local detail). This southern concentration matches the low-lying peatland that dominates that part of Pulang Pisau and burns easily in the dry season. The map shows where intensity is high, not why. It reflects where detections happen, which depends on both fire activity and what the satellite could observe.</p>
 </section>
 </section>
 <section id="second-order-analysis-interaction" class="level1" data-number="7">
 <h1 data-number="7"><span class="header-section-number">7</span> Second-order analysis: interaction</h1>
-<p>The four functions below all test the same idea - are detections closer together than random - from different angles, so they are run together and read as a set. Each test uses the 3,000-point subsample and <code>envelope()</code> with <code>rank = 1, glocal = TRUE</code> as in Chapter 5.</p>
+<p>G, F, K and L each measure clustering in a slightly different way, so I run all four and check whether they agree. Each test uses the 3,000-point subsample and <code>envelope()</code> with <code>rank = 1, glocal = TRUE</code>, following Chapter 5.</p>
 <p>For each test:</p>
 <ul>
 <li>H0: the detections are randomly distributed (CSR).</li>
@@ -689,7 +689,7 @@ Done.</code></pre>
 </div>
 </div>
 </div>
-<p>The observed G rises above the envelope, meaning nearest-neighbour distances are shorter than expected under CSR - a sign of clustering.</p>
+<p>The observed G rises above the envelope, meaning nearest-neighbour distances are shorter than expected under CSR. This is a sign of clustering.</p>
 </section>
 <section id="f-function-empty-space-distances" class="level2" data-number="7.2">
 <h2 data-number="7.2" class="anchored" data-anchor-id="f-function-empty-space-distances"><span class="header-section-number">7.2</span> F-function (empty-space distances)</h2>
@@ -711,7 +711,7 @@ Done.</code></pre>
 </div>
 </div>
 </div>
-<p>The observed F sits below the envelope, meaning there is more empty space than expected under CSR - again consistent with clustering.</p>
+<p>The observed F sits below the envelope, meaning there is more empty space than expected under CSR. This is again consistent with clustering.</p>
 </section>
 <section id="k-function" class="level2" data-number="7.3">
 <h2 data-number="7.3" class="anchored" data-anchor-id="k-function"><span class="header-section-number">7.3</span> K-function</h2>
@@ -719,12 +719,12 @@ Done.</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>K_csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(fire_sub, Kest, <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 19 simulated realisations of CSR  ...
-1, 2,  [5:52 remaining] 3,
- [5:34 remaining] 4,  [5:11 remaining] 5,  [4:57 remaining] 6,
- [4:37 remaining] 7,  [4:17 remaining] 8,  [3:56 remaining] 9,
- [3:35 remaining] 10,  [3:12 remaining] 11,  [2:51 remaining] 12,
- [2:30 remaining] 13,  [2:08 remaining] 14,  [1:48 remaining] 15,
- [1:27 remaining] 16,  [1:05 remaining] 17,  [43 sec remaining] 18,
+1, 2,  [5:48 remaining] 3,
+ [5:32 remaining] 4,  [5:14 remaining] 5,  [5:05 remaining] 6,
+ [4:42 remaining] 7,  [4:21 remaining] 8,  [4:01 remaining] 9,
+ [3:40 remaining] 10,  [3:16 remaining] 11,  [2:56 remaining] 12,
+ [2:35 remaining] 13,  [2:12 remaining] 14,  [1:50 remaining] 15,
+ [1:28 remaining] 16,  [1:06 remaining] 17,  [44 sec remaining] 18,
  [22 sec remaining] 
 19.
 
@@ -739,6 +739,7 @@ Done.</code></pre>
 </div>
 </div>
 </div>
+<p>The observed K also lies above the envelope, consistent with the G and F results. More points fall within a given distance than a random pattern would produce.</p>
 </section>
 <section id="l-function" class="level2" data-number="7.4">
 <h2 data-number="7.4" class="anchored" data-anchor-id="l-function"><span class="header-section-number">7.4</span> L-function</h2>
@@ -747,13 +748,13 @@ Done.</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>L_csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(fire_sub, Lest, <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 19 simulated realisations of CSR  ...
-1, 2,  [6:18 remaining] 3,
- [5:48 remaining] 4,  [5:21 remaining] 5,  [4:56 remaining] 6,
- [4:35 remaining] 7,  [4:17 remaining] 8,  [3:55 remaining] 9,
- [3:34 remaining] 10,  [3:13 remaining] 11,  [2:51 remaining] 12,
- [2:30 remaining] 13,  [2:09 remaining] 14,  [1:47 remaining] 15,
- [1:26 remaining] 16,  [1:05 remaining] 17,  [43 sec remaining] 18,
- [22 sec remaining] 
+1, 2,  [6:03 remaining] 3,
+ [5:29 remaining] 4,  [5:11 remaining] 5,  [4:49 remaining] 6,
+ [4:30 remaining] 7,  [4:13 remaining] 8,  [3:52 remaining] 9,
+ [3:32 remaining] 10,  [3:11 remaining] 11,  [2:50 remaining] 12,
+ [2:29 remaining] 13,  [2:07 remaining] 14,  [1:46 remaining] 15,
+ [1:25 remaining] 16,  [1:04 remaining] 17,  [42 sec remaining] 18,
+ [21 sec remaining] 
 19.
 
 Done.</code></pre>
@@ -778,13 +779,13 @@ Done.</code></pre>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">nsim =</span> <span class="dv">19</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 19 simulated realisations of CSR  ...
-1, 2,  [6:29 remaining] 3,
- [6:09 remaining] 4,  [5:33 remaining] 5,  [5:12 remaining] 6,
- [4:50 remaining] 7,  [4:29 remaining] 8,  [4:08 remaining] 9,
- [3:48 remaining] 10,  [3:24 remaining] 11,  [3:02 remaining] 12,
- [2:39 remaining] 13,  [2:16 remaining] 14,  [1:53 remaining] 15,
- [1:30 remaining] 16,  [1:08 remaining] 17,  [45 sec remaining] 18,
- [23 sec remaining] 
+1, 2,  [6:04 remaining] 3,
+ [5:55 remaining] 4,  [5:24 remaining] 5,  [5:07 remaining] 6,
+ [4:46 remaining] 7,  [4:25 remaining] 8,  [4:02 remaining] 9,
+ [3:40 remaining] 10,  [3:17 remaining] 11,  [2:56 remaining] 12,
+ [2:35 remaining] 13,  [2:13 remaining] 14,  [1:51 remaining] 15,
+ [1:29 remaining] 16,  [1:07 remaining] 17,  [45 sec remaining] 18,
+ [22 sec remaining] 
 19.
 
 Done.</code></pre>
@@ -881,7 +882,7 @@ Evaluation
 </section>
 <section id="integrated-findings-and-discussion" class="level1" data-number="10">
 <h1 data-number="10"><span class="header-section-number">10</span> Integrated findings and discussion</h1>
-<p>The first-order and second-order results agree. The Clark-Evans test and the KDE show intensity is strongly uneven and concentrated in the central-south peatland. The G, F, K and L functions all confirm the detections are far more clustered than CSR. But the inhomogeneous L shows this clustering mainly reflects the uneven intensity rather than independent interaction between fires - fires are concentrated because the conditions for fire are concentrated. The monthly STKDE adds that this concentration also peaks in time, during the dry season.</p>
+<p>The first-order and second-order results agree. The Clark-Evans test and the KDE show intensity is strongly uneven and concentrated in the central-south peatland. The G, F, K and L functions all confirm the detections are far more clustered than CSR. But the inhomogeneous L shows this clustering mainly reflects the uneven intensity rather than independent interaction between fires: fires are concentrated because the conditions for fire are concentrated. The monthly STKDE adds that this concentration also peaks in time, during the dry season.</p>
 <p>As a robustness check, the hotspot location is stable across the three KDE bandwidths, and the homogeneous-vs-inhomogeneous L comparison shows the clustering signal is driven by first-order heterogeneity rather than one modelling choice. Alternative explanations still remain: repeated detections of the same fire, cloud cover and overpass timing, and the fact that detection intensity is not the same as risk to people or assets.</p>
 </section>
 <section id="implications-for-public-safety-planning" class="level1" data-number="11">
