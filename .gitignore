@@ -12,3 +12,6 @@ _freeze/
 *_files/
 .Rproj.user
 *.rmarkdown
+
+.DS_Store
+*.zip
