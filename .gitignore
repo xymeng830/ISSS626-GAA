@@ -9,7 +9,6 @@
 **/data/
 **/rawdata/
 _freeze/
-*_files/
 .Rproj.user
 *.rmarkdown
 
