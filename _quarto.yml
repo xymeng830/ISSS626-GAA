@@ -42,6 +42,10 @@ website:
             text: "Take-home Ex01 — Report"
           - href: Take-home_Ex/Take-home_Ex01/Take-home_Ex01_Summary.qmd
             text: "Take-home Ex01 — Summary"
+          - href: Take-home_Ex/Take-home_Ex02/Take-home_Ex02.qmd
+            text: "Take-home Ex02 — Report"
+          - href: Take-home_Ex/Take-home_Ex02/Take-home_Ex02_Summary.qmd
+            text: "Take-home Ex02 — Summary"
     right:
       - href: about.qmd
         text: About
