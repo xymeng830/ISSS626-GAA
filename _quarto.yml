@@ -27,7 +27,9 @@ website:
           - href: Hands-on_Ex/Hands-on_Ex07/Hands-on_Ex07.qmd
             text: "Hands-on Ex07"  
           - href: Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08.qmd
-            text: "Hands-on Ex08"  
+            text: "Hands-on Ex08"
+          - href: Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.qmd
+            text: "Hands-on Ex09"
       - text: "In-class Exercises"
         menu:
           - href: In-class_Ex/In-class_Ex01/In-class_Ex01.qmd
