@@ -1,5 +1,5 @@
 ---
-title: "Hands-on Exercise 09: Modelling Geographical Accessibility"
+title: "Hands-on Exercise 09: Calibrating Hedonic Pricing Model for Private Highrise Property with GWR Method"
 author: "Meng Xinyu"
 date: "`r Sys.Date()`"
 date-modified: "last-modified"
@@ -12,284 +12,476 @@ execute:
 editor: visual
 ---
 
-# **17  Modelling Geographical Accessibility**
-
-## **17.1 Getting Started**
+# 13.1 Getting Started
 
 ```{r}
-pacman::p_load(tmap, SpatialAcc, sf, 
-               ggstatsplot, reshape2,
-               tidyverse)
+pacman::p_load(olsrr, corrplot, ggpubr, 
+               sf, sfdep, GWmodel, tmap, 
+               tidyverse, gtsummary,
+               performance, see, RColorBrewer)
 ```
 
-## **17.2 Geospatial Data Wrangling**
+# 13.2 Geospatial Data Wrangling
 
-### **17.2.1 Importing geospatial data**
+## 13.2.1 Importing geospatial data
 
 ```{r}
-mpsz <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_NO_SEA_PL")
+mpsz = st_read(dsn = "data/geospatial", 
+               layer = "MP14_SUBZONE_WEB_PL")
 ```
 
-```{r}
-hexagons <- st_read(dsn = "data/geospatial", layer = "hexagons")
-```
+## 13.2.2 Updating CRS information
 
 ```{r}
-eldercare <- st_read(dsn = "data/geospatial", layer = "ELDERCARE")
-```
-
-### **17.2.2 Updating CRS information**
-
-```{r}
-mpsz <- st_transform(mpsz, 3414)
-eldercare <- st_transform(eldercare, 3414)
-hexagons <- st_transform(hexagons, 3414)
+mpsz_svy21 <- st_transform(mpsz, 3414)
 ```
 
 ```{r}
-st_crs(mpsz)
-```
-
-### **17.2.3 Cleaning and updating attribute fields of the geospatial data**
-
-```{r}
-eldercare <- eldercare %>%
-  select(fid, ADDRESSPOS) %>%
-  mutate(capacity = 100)
+st_crs(mpsz_svy21)
 ```
 
 ```{r}
-hexagons <- hexagons %>%
-  select(fid) %>%
-  mutate(demand = 100)
+st_bbox(mpsz_svy21)
 ```
 
-## **17.3 Apsaital Data Handling and Wrangling**
+# 13.3 Aspatial Data Wrangling
 
-### **17.3.1 Importing Distance Matrix**
-
-```{r}
-ODMatrix <- read_csv("data/aspatial/OD_Matrix.csv", skip = 0)
-```
-
-### **17.3.2 Tidying distance matrix**
+## 13.3.1 Importing the aspatial data
 
 ```{r}
-distmat <- ODMatrix %>%
-  select(origin_id, destination_id, total_cost) %>%
-  spread(destination_id, total_cost)%>%
-  select(c(-c('origin_id')))
+condo_resale = read_csv("data/aspatial/Condo_resale_2015.csv")
 ```
 
 ```{r}
-head(ODMatrix, 10)
+glimpse(condo_resale)
 ```
 
 ```{r}
-distmat_km <- as.matrix(distmat/1000)
+head(condo_resale$LONGITUDE)
 ```
 
 ```{r}
-distmat[1:10, 1:12]
+head(condo_resale$LATITUDE)
 ```
 
-## **17.4 Modelling and Visualising Accessibility using Hansen Method**
+```{r}
+summary(condo_resale)
+```
 
-### **17.4.1 Computing Hansen’s accessibility**
+## 13.3.2 Converting aspatial data frame into a sf object
+
+```{r}
+condo_resale.sf <- st_as_sf(condo_resale,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs = 4326) %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+head(condo_resale.sf)
+```
+
+# 13.4 Exploratory Data Analysis (EDA)
+
+## 13.4.1 EDA using statistical graphics
+
+```{r}
+ggplot(data = condo_resale.sf, 
+       aes(x = `SELLING_PRICE`)) +
+  geom_histogram(bins = 20, 
+                 color = "black", 
+                 fill = "light blue")
+```
+
+```{r}
+condo_resale.sf <- condo_resale.sf %>%
+  mutate(`LOG_SELLING_PRICE` = log(SELLING_PRICE))
+```
+
+```{r}
+ggplot(data = condo_resale.sf, 
+       aes(x = `LOG_SELLING_PRICE`)) +
+  geom_histogram(bins = 20, 
+                 color = "black", 
+                 fill = "light blue")
+```
+
+## 13.4.2 Multiple Histogram Plots distribution of variables
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+AREA_SQM <- ggplot(data = condo_resale.sf, aes(x = `AREA_SQM`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+AGE <- ggplot(data = condo_resale.sf, aes(x = `AGE`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_CBD <- ggplot(data = condo_resale.sf, aes(x = `PROX_CBD`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_CHILDCARE <- ggplot(data = condo_resale.sf, aes(x = `PROX_CHILDCARE`)) + 
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_ELDERLYCARE <- ggplot(data = condo_resale.sf, aes(x = `PROX_ELDERLYCARE`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_URA_GROWTH_AREA <- ggplot(data = condo_resale.sf, aes(x = `PROX_URA_GROWTH_AREA`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_HAWKER_MARKET <- ggplot(data = condo_resale.sf, aes(x = `PROX_HAWKER_MARKET`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_KINDERGARTEN <- ggplot(data = condo_resale.sf, aes(x = `PROX_KINDERGARTEN`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_MRT <- ggplot(data = condo_resale.sf, aes(x = `PROX_MRT`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_PARK <- ggplot(data = condo_resale.sf, aes(x = `PROX_PARK`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_PRIMARY_SCH <- ggplot(data = condo_resale.sf, aes(x = `PROX_PRIMARY_SCH`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+PROX_TOP_PRIMARY_SCH <- ggplot(data = condo_resale.sf, aes(x = `PROX_TOP_PRIMARY_SCH`)) +
+  geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+ggarrange(AREA_SQM, AGE, PROX_CBD, PROX_CHILDCARE, 
+          PROX_ELDERLYCARE, PROX_URA_GROWTH_AREA,
+          PROX_HAWKER_MARKET, PROX_KINDERGARTEN, PROX_MRT,
+          PROX_PARK, PROX_PRIMARY_SCH, PROX_TOP_PRIMARY_SCH,  
+          ncol = 3, nrow = 4)
+```
+
+## 13.4.3 Drawing Statistical Point Map
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+tm_shape(mpsz_svy21) +
+  tm_polygons() +
+tm_shape(condo_resale.sf) +  
+  tm_dots(fill = "SELLING_PRICE",
+          fill_alpha = 0.6,
+          size = 0.5,
+          fill.scale = tm_scale_intervals(
+            style = "quantile")) +
+  tm_view(set_zoom_limits = c(11, 14))
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+# 13.5 Hedonic Pricing Modelling in R
+
+## 13.5.1 Simple Linear Regression Method
+
+```{r}
+condo.slr <- lm(formula = SELLING_PRICE ~ AREA_SQM, 
+                data = condo_resale.sf)
+```
+
+```{r}
+summary(condo.slr)
+```
+
+```{r}
+ggplot(data = condo_resale.sf,  
+       aes(x = `AREA_SQM`, y = `SELLING_PRICE`)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+## 13.5.2 Multiple Linear Regression Method
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+corrplot(cor(condo_resale[, 5:23]), 
+         diag = FALSE, 
+         order = "AOE",
+         tl.pos = "td", 
+         tl.cex = 0.5, 
+         method = "number", 
+         type = "upper")
+```
+
+## 13.5.3 Building a hedonic pricing model using multiple linear regression method
+
+```{r}
+condo.mlr <- lm(
+  formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+    PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+    PROX_URA_GROWTH_AREA + PROX_HAWKER_MARKET +
+    PROX_KINDERGARTEN + PROX_MRT + PROX_PARK +
+    PROX_PRIMARY_SCH + PROX_TOP_PRIMARY_SCH +
+    PROX_SHOPPING_MALL + PROX_SUPERMARKET + 
+    PROX_BUS_STOP + NO_Of_UNITS + 
+    FAMILY_FRIENDLY + FREEHOLD, 
+  data = condo_resale.sf)
+summary(condo.mlr)
+```
+
+## 13.5.4 Revising the model
+
+```{r}
+condo.mlr1 <- lm(
+  formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+    PROX_CBD + PROX_CHILDCARE + PROX_MRT +
+    PROX_ELDERLYCARE + PROX_URA_GROWTH_AREA +
+    PROX_PARK + PROX_PRIMARY_SCH + 
+    PROX_SHOPPING_MALL + PROX_BUS_STOP + 
+    NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD,
+  data = condo_resale.sf)
+summary(condo.mlr1)
+```
+
+## 13.5.5 Preparing Publication Quality Table: gtsummary method
+
+```{r}
+tbl_regression(condo.mlr1, intercept = TRUE)
+```
+
+```{r}
+tbl_regression(condo.mlr1, 
+               intercept = TRUE) %>% 
+  add_glance_source_note(
+    label = list(sigma ~ "\U03C3"),
+    include = c(r.squared, adj.r.squared, 
+                AIC, statistic,
+                p.value, sigma))
+```
+
+## 13.5.6 Regression Diagnostics
+
+### Checking for multicollinearity
+
+```{r}
+check_collinearity(condo.mlr1)
+```
+
+```{r}
+mlr.vif <- check_collinearity(condo.mlr1)
+plot(mlr.vif)
+```
+
+### Test for non-linearity
+
+```{r}
+check_model(condo.mlr1,
+            check = "linearity")
+```
+
+### Test for normality assumption
+
+```{r}
+check_normality(condo.mlr1)
+```
+
+```{r}
+plot(check_normality(condo.mlr1), 
+     type = "qq")
+```
+
+```{r}
+check_model(condo.mlr1,
+            check = "normality")
+```
+
+### Testing for spatial autocorrelation
+
+```{r}
+mlr.output <- as.data.frame(condo.mlr1$residuals)
+```
+
+```{r}
+condo_resale.sf <- cbind(condo_resale.sf, 
+                         condo.mlr1$residuals) %>%
+  rename(`MLR_RES` = `condo.mlr1.residuals`)
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+tm_shape(mpsz_svy21) +
+  tm_polygons(fill_alpha = 0.4) +
+tm_shape(condo_resale.sf) +  
+  tm_dots(
+    fill = "MLR_RES",
+    size = 0.7,
+    col = "black",
+    fill.scale = tm_scale(
+      n = 10,
+      values = rev(brewer.pal(11, "RdBu")),
+      style = "quantile",
+      midpoint = NA),
+    fill.legend = tm_legend(title = "Residuals")) + 
+  tm_title("LM Residuals (Quantile Classification)") +
+  tm_layout(legend.outside = TRUE) +
+  tm_view(set_zoom_limits = c(11, 14))
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+condo_resale.sf <- condo_resale.sf %>% 
+  mutate(
+    nb = st_dist_band(st_geometry(geometry), 
+                      upper = 1500),
+    wt = st_weights(nb, style = "W"),
+    .before = 1) 
+```
 
 ```{r}
 #| cache: true
-acc_Hansen <- data.frame(ac(hexagons$demand,
-                            eldercare$capacity,
-                            distmat_km, 
-                            #d0 = 50,
-                            power = 2, 
-                            family = "Hansen"))
+set.seed(1234)
+global_moran_perm(
+  condo_resale.sf$MLR_RES, 
+  nb = condo_resale.sf$nb, 
+  wt = condo_resale.sf$wt,
+  alternative = "two.sided", 
+  nsim = 499)
 ```
 
+# 13.6 Building Hedonic Pricing Models using GWmodel
+
+## 13.6.1 Building Fixed Bandwidth GWR Model
+
 ```{r}
-colnames(acc_Hansen) <- "accHansen"
+#| cache: true
+bw.fixed <- bw.gwr(
+  formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+    PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+    PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK + 
+    PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + 
+    PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + 
+    FREEHOLD, 
+  data = condo_resale.sf, 
+  approach = "CV", 
+  kernel = "gaussian", 
+  adaptive = FALSE, 
+  longlat = FALSE)
 ```
 
 ```{r}
 #| cache: true
-acc_Hansen <- as_tibble(acc_Hansen)
+gwr.fixed <- gwr.basic(
+  formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+    PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+    PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+    PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + 
+    PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + 
+    FREEHOLD, 
+  data = condo_resale.sf, 
+  bw = bw.fixed, 
+  kernel = "gaussian", 
+  longlat = FALSE)
 ```
 
 ```{r}
-hexagon_Hansen <- bind_cols(hexagons, acc_Hansen)
+gwr.fixed
+```
+
+## 13.6.2 Building Adaptive Bandwidth GWR Model
+
+```{r}
+#| cache: true
+bw.adaptive <- bw.gwr(
+  formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+    PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+    PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+    PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + 
+    PROX_BUS_STOP + NO_Of_UNITS + 
+    FAMILY_FRIENDLY + FREEHOLD, 
+  data = condo_resale.sf, 
+  approach = "CV", 
+  kernel = "gaussian", 
+  adaptive = TRUE, 
+  longlat = FALSE)
 ```
 
 ```{r}
 #| cache: true
-acc_Hansen <- data.frame(ac(hexagons$demand,
-                            eldercare$capacity,
-                            distmat_km, 
-                            #d0 = 50,
-                            power = 0.5, 
-                            family = "Hansen"))
-
-colnames(acc_Hansen) <- "accHansen"
-acc_Hansen <- as_tibble(acc_Hansen)
-hexagon_Hansen <- bind_cols(hexagons, acc_Hansen)
-```
-
-### **17.4.2 Visualising Hansen’s accessibility**
-
-```{r}
-#17.4.2.1 Extracting map extend
-mapex <- st_bbox(hexagons)
+gwr.adaptive <- gwr.basic(
+  formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+    PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+    PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+    PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_BUS_STOP +
+    NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD,
+  data = condo_resale.sf, 
+  bw = bw.adaptive, 
+  kernel = "gaussian", 
+  adaptive = TRUE, 
+  longlat = FALSE)
 ```
 
 ```{r}
-tm_shape(hexagon_Hansen,
-         bbox = mapex) + 
-  tm_polygons(fill = "accHansen", 
-              fill.scale = tm_scale_intervals(
-                style = "quantile",
-                n = 10,
-                values = "brewer.blues")) +
-tm_shape(eldercare) +
-  tm_dots(size = 0.3,
-          fill = "red",
-          col = "black") +
-  tm_title("Accessibility to eldercare: Hansen method") +
-  tm_layout(frame = TRUE) +
-  tm_compass(type="8star", size = 2) +
-  tm_scalebar() +
-  tm_grid(alpha = 0.2)
+gwr.adaptive
 ```
 
-### **17.4.3 Statistical graphic visualisation**
+## 13.6.3 Converting SDF into sf data.frame
 
 ```{r}
-hexagon_Hansen <- st_join(hexagon_Hansen, mpsz, 
-                          join = st_intersects)
+condo_resale.sf.adaptive <- st_as_sf(gwr.adaptive$SDF) %>%
+  st_transform(crs = 3414)
 ```
 
 ```{r}
-ggplot(data=hexagon_Hansen, 
-       aes(y = log(accHansen), 
-           x= REGION_N)) +
-  geom_boxplot() +
-  geom_point(stat="summary", 
-             fun.y="mean", 
-             colour ="red", 
-             size=2)
-```
-
-## **17.5 Modelling and Visualising Accessibility using KD2SFCA Method**
-
-### **17.5.1 Computing KD2SFCA’s accessibility**
-
-```{r}
-acc_KD2SFCA <- data.frame(ac(hexagons$demand,
-                            eldercare$capacity,
-                            distmat_km, 
-                            d0 = 5,
-                            power = 2, 
-                            family = "KD2SFCA"))
-
-colnames(acc_KD2SFCA) <- "accKD2SFCA"
-acc_KD2SFCA <- as_tibble(acc_KD2SFCA)
-hexagon_KD2SFCA <- bind_cols(hexagons, acc_KD2SFCA)
-```
-
-### **17.5.2 Visualising KD2SFCA’s accessibility**
-
-```{r}
-tm_shape(hexagon_KD2SFCA,
-         bbox = mapex) + 
-  tm_polygons(fill = "accKD2SFCA", 
-              fill.scale = tm_scale_intervals(
-                style = "quantile",
-                n = 10,
-                values = "brewer.blues")) +
-tm_shape(eldercare) +
-  tm_dots(size = 0.3,
-          fill = "red",
-          col = "black") +
-  tm_title("Accessibility to eldercare: KD2SFCA method") +
-  tm_layout(frame = TRUE) +
-  tm_compass(type="8star", size = 2) +
-  tm_scalebar() +
-  tm_grid(alpha = 0.2)
-```
-
-### **17.5.3 Statistical graphic visualisation**
-
-```{r}
-hexagon_KD2SFCA <- st_join(hexagon_KD2SFCA, mpsz, 
-                          join = st_intersects)
+glimpse(condo_resale.sf.adaptive)
 ```
 
 ```{r}
-ggplot(data=hexagon_KD2SFCA, 
-       aes(y = accKD2SFCA, 
-           x= REGION_N)) +
-  geom_boxplot() +
-  geom_point(stat="summary", 
-             fun.y="mean", 
-             colour ="red", 
-             size=2)
+summary(gwr.adaptive$SDF$yhat)
 ```
 
-## **17.6 Modelling and Visualising Accessibility using Spatial Accessibility Measure (SAM) Method**
-
-### **17.6.1 Computing SAM accessibility**
+## 13.6.4 Visualising local R2
 
 ```{r}
-acc_SAM <- data.frame(ac(hexagons$demand,
-                         eldercare$capacity,
-                         distmat_km, 
-                         d0 = 5,
-                         power = 2, 
-                         family = "SAM"))
-
-colnames(acc_SAM) <- "accSAM"
-acc_SAM <- as_tibble(acc_SAM)
-hexagon_SAM <- bind_cols(hexagons, acc_SAM)
+tmap_mode("plot")
+tm_shape(mpsz_svy21) +
+  tm_polygons(fill_alpha = 0.1) +
+tm_shape(condo_resale.sf.adaptive) +  
+  tm_dots(fill = "Local_R2",
+          col = "gray60",
+          lwd = 1) +
+  tm_view(set_zoom_limits = c(11, 14))
+tmap_mode("plot")
 ```
 
-### **17.6.2 Visualising SAM’s accessibility**
+## 13.6.5 Visualising coefficient estimates
 
 ```{r}
-tm_shape(hexagon_SAM,
-         bbox = mapex) + 
-  tm_polygons(fill = "accSAM", 
-              fill.scale = tm_scale_intervals(
-                style = "quantile",
-                n = 10,
-                values = "brewer.blues")) +
-tm_shape(eldercare) +
-  tm_dots(size = 0.3,
-          fill = "red",
-          col = "black") +
-  tm_title("Accessibility to eldercare: SAM method") +
-  tm_layout(frame = TRUE) +
-  tm_compass(type="8star", size = 2) +
-  tm_scalebar() +
-  tm_grid(alpha = 0.2)
-```
+tmap_mode("plot")
+AREA_SQM_SE <- tm_shape(mpsz_svy21) +
+  tm_polygons(fill_alpha = 0.1) +
+tm_shape(condo_resale.sf.adaptive) +  
+  tm_dots(fill = "AREA_SQM_SE",
+          col = "gray60",
+          lwd = 1) +
+  tm_view(set_zoom_limits = c(11, 14))
 
-### **17.6.3 Statistical graphic visualisation**
+AREA_SQM_TV <- tm_shape(mpsz_svy21) +
+  tm_polygons(fill_alpha = 0.1) +
+tm_shape(condo_resale.sf.adaptive) +  
+  tm_dots(fill = "AREA_SQM_TV",
+          col = "gray60",
+          lwd = 1) +
+  tm_view(set_zoom_limits = c(11, 14))
 
-```{r}
-hexagon_SAM <- st_join(hexagon_SAM, mpsz, 
-                       join = st_intersects)
-```
-
-```{r}
-ggplot(data=hexagon_SAM, 
-       aes(y = accSAM, 
-           x= REGION_N)) +
-  geom_boxplot() +
-  geom_point(stat="summary", 
-             fun.y="mean", 
-             colour ="red", 
-             size=2)
+tmap_arrange(AREA_SQM_SE, AREA_SQM_TV, 
+             asp = 1, ncol = 2,
+             sync = TRUE)
+tmap_mode("plot")
 ```
 
 # What I Learned
 
-This exercise introduced geographical accessibility modelling — measuring how easy it is to reach a service, in this case eldercare centres across Singapore, from every hexagonal demand location. The workflow hinged on reshaping an origin-destination cost table from long format into a wide distance matrix, which is the form the SpatialAcc modelling functions expect; this reshaping step, rather than the modelling itself, was where most of the care was needed. I calibrated three accessibility measures with the same ac() function by changing only the family argument: the Hansen potential model, the Kernel Density Two-Step Floating Catchment Area (KD2SFCA) method, and the Spatial Accessibility Measure (SAM). Comparing their mapped outputs made clear that the choice of model is not cosmetic — each embeds different assumptions about distance decay and supply competition, so the same demand, supply, and distances can yield noticeably different accessibility surfaces. Binding the computed values back onto the hexagon geometry and mapping them with tmap, alongside boxplots grouped by planning region, showed that accessibility is spatially uneven: central areas score consistently higher than peripheral ones. The broader lesson is that an accessibility score is only interpretable together with the model that produced it, and that presenting results as both a choropleth and a distributional plot gives a fuller picture than either alone.
+This exercise built a hedonic pricing model for condominium resale prices in Singapore, starting with a global multiple linear regression and then calibrating geographically weighted regression (GWR) models with GWmodel. The global model explained about 65% of the variation in price, but the residuals showed significant spatial autocorrelation under a Moran's I permutation test, which indicates that the relationship between price and its drivers is not constant across space. GWR addressed this by estimating a separate set of coefficients at each location, and the adaptive-bandwidth model raised the adjusted R-squared to roughly 0.86 while letting the effect of factors such as floor area, proximity to the CBD or MRT vary by neighbourhood. Along the way I learned to check regression assumptions with the performance package, including multicollinearity, linearity and normality of residuals, and to map local R-squared and coefficient estimates to see where the model fits well and where each variable matters most.

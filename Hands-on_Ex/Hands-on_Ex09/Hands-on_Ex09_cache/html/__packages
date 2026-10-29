@@ -13,3 +13,15 @@ dplyr
 stringr
 forcats
 lubridate
+olsrr
+corrplot
+ggpubr
+sfdep
+robustbase
+sp
+Rcpp
+GWmodel
+gtsummary
+performance
+see
+RColorBrewer
