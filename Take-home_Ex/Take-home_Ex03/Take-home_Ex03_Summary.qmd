@@ -125,7 +125,7 @@ Constrained models give every station its own term, so they fit better but canno
 
 ::: {.columns}
 ::: {.column width="55%"}
-![](Take-home_Ex03_files/figure-html/map-catchment-1.png)
+![](Take-home_Ex03_files/figure-html/map-catchment-1.png){style="margin-top:-45px; mix-blend-mode:multiply;"}
 :::
 ::: {.column width="45%"}
 *Each dot is an HDB block. Black dots are the new stations.*
@@ -140,7 +140,7 @@ Constrained models give every station its own term, so they fit better but canno
 
 ::: {.columns}
 ::: {.column width="55%"}
-![](Take-home_Ex03_files/figure-html/map-competition-1.png)
+![](Take-home_Ex03_files/figure-html/map-competition-1.png){style="margin-top:-45px; mix-blend-mode:multiply;"}
 :::
 ::: {.column width="45%"}
 *Share of today's morning arrivals at each existing station that would go to a new station instead. Crosses mark the new stations.*
@@ -155,7 +155,7 @@ Constrained models give every station its own term, so they fit better but canno
 
 ::: {.columns}
 ::: {.column width="55%"}
-![](Take-home_Ex03_files/figure-html/map-local-decay-1.png)
+![](Take-home_Ex03_files/figure-html/map-local-decay-1.png){style="margin-top:-45px; mix-blend-mode:multiply;"}
 :::
 ::: {.column width="45%"}
 *A separate distance coefficient is estimated for every origin station. Red means passengers are strongly put off by distance.*
