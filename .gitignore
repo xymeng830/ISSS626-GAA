@@ -14,3 +14,4 @@ _freeze/
 
 .DS_Store
 *.zip
+*_cache/
