@@ -812,6 +812,132 @@
     "text": "coords &lt;- st_coordinates(fire_sf)\n\n\nfire_df &lt;- data.frame(\n  x = coords[, 1],  \n  y = coords[, 2],\n  t = fire_sf$`DayofYear`)\n\n\nfire_stpp &lt;- as.3dpoints(fire_df)\n\n\nclass(fire_stpp)\n\n[1] \"stpp\"\n\n\n\nplot(fire_stpp)\n\n\n\n\n\n\n\n\n\n\n\n\n   fire_sf &lt;- fire_sf[kbb_sf, ]\n   nrow(fire_sf)  \n\n[1] 905\n\n\n\nkbb_sf &lt;- st_read(dsn = \"data/rawdata\", layer = \"Kepulauan_Bangka_Belitung\") %&gt;%\n  st_union() %&gt;%\n  st_zm(drop = TRUE, what = \"ZM\") %&gt;%\n  st_transform(crs = 32748)\n\nReading layer `Kepulauan_Bangka_Belitung' from data source \n  `/Users/mengxinyu/ISSS626-GAA/Hands-on_Ex/Hands-on_Ex03/data/rawdata' \n  using driver `ESRI Shapefile'\nSimple feature collection with 391 features and 36 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 105.1084 ymin: -3.416903 xmax: 108.848 ymax: -1.501757\nGeodetic CRS:  WGS 84\n\n\n\nfire_sf &lt;- read_csv(\"data/rawdata/fire_archive_M-C61_800295.csv\") %&gt;%\n  st_as_sf(coords = c(\"longitude\", \"latitude\"), crs = 4326) %&gt;%\n  st_transform(crs = 32748)\n\nfire_sf &lt;- fire_sf[kbb_sf, ]              \nnrow(fire_sf)                             \n\n[1] 905\n\nfire_sf &lt;- fire_sf %&gt;%\n  mutate(DayofYear = yday(acq_date),\n         Month_num = month(acq_date),\n         Month_fac = month(acq_date, label = TRUE, abbr = FALSE))\n\n\n# Step 1: extract coordinates from the fire point events\ncoords &lt;- st_coordinates(fire_sf)\n\n# Step 2: build a data frame of x, y, and time (t must be integer)\nfire_df &lt;- data.frame(\n  x = coords[, 1],\n  y = coords[, 2],\n  t = fire_sf$DayofYear)\n\n# Step 3: create the stpp spatio-temporal object\nfire_stpp &lt;- as.3dpoints(fire_df)\n\nclass(fire_stpp)\n\n[1] \"stpp\"\n\n\n\nplot(fire_stpp)\n\n\n\n\n\n\n\nkbb_stik &lt;- STIKhat(fire_stpp)\n\nplotK(kbb_stik)"
   },
   {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "",
+    "text": "This exercise follows Chapter 14 of R for Geospatial Data Science and Analytics: building predictive models for property resale prices with a non-spatial multiple linear regression, a geographically weighted regression (GWR), a random forest and a geographical random forest (GRF), and comparing how well each predicts unseen data.\n\n\n\n\n\n\nNoteAbout the data\n\n\n\nThe textbook uses mdata.rds, a prepared HDB resale data set that was not made available for this exercise. The same workflow is therefore applied to the 2015 private condominium resale data (Condo_resale_2015.csv) used in Hands-on Exercise 9. It contains the same kinds of variables: the resale price, structural attributes (floor area, age) and proximity measures to amenities, together with the coordinates of each transaction. Variable names in the models below are adapted accordingly."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#importing-the-data-and-converting-it-to-sf",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#importing-the-data-and-converting-it-to-sf",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.3.1 Importing the data and converting it to sf",
+    "text": "14.3.1 Importing the data and converting it to sf\n\ncondo_resale &lt;- read_csv(\"data/aspatial/Condo_resale_2015.csv\")\n\n\nmdata &lt;- condo_resale %&gt;%\n  st_as_sf(coords = c(\"LONGITUDE\", \"LATITUDE\"),\n           crs = 4326) %&gt;%\n  st_transform(crs = 3414) %&gt;%\n  select(SELLING_PRICE, AREA_SQM, AGE,\n         PROX_CBD, PROX_CHILDCARE, PROX_ELDERLYCARE,\n         PROX_URA_GROWTH_AREA, PROX_HAWKER_MARKET,\n         PROX_KINDERGARTEN, PROX_MRT, PROX_PARK,\n         PROX_PRIMARY_SCH, PROX_TOP_PRIMARY_SCH,\n         PROX_SHOPPING_MALL, PROX_SUPERMARKET,\n         PROX_BUS_STOP, NO_Of_UNITS,\n         FAMILY_FRIENDLY, FREEHOLD)\n\n\nwrite_rds(mdata, \"data/model/mdata.rds\")\n\n\nglimpse(mdata)\n\nRows: 1,436\nColumns: 20\n$ SELLING_PRICE        &lt;dbl&gt; 3000000, 3880000, 3325000, 4250000, 1400000, 1320…\n$ AREA_SQM             &lt;dbl&gt; 309, 290, 248, 127, 145, 139, 218, 141, 165, 168,…\n$ AGE                  &lt;dbl&gt; 30, 32, 33, 7, 28, 22, 24, 24, 27, 31, 17, 22, 6,…\n$ PROX_CBD             &lt;dbl&gt; 7.941259, 6.609797, 6.898000, 4.038861, 11.783402…\n$ PROX_CHILDCARE       &lt;dbl&gt; 0.16597932, 0.28027246, 0.42922669, 0.39473543, 0…\n$ PROX_ELDERLYCARE     &lt;dbl&gt; 2.5198118, 1.9333338, 0.5021395, 1.9910316, 1.121…\n$ PROX_URA_GROWTH_AREA &lt;dbl&gt; 6.618741, 7.505109, 6.463887, 4.906512, 6.410632,…\n$ PROX_HAWKER_MARKET   &lt;dbl&gt; 1.76542207, 0.54507614, 0.37789301, 1.68259969, 0…\n$ PROX_KINDERGARTEN    &lt;dbl&gt; 0.05835552, 0.61592412, 0.14120309, 0.38200076, 0…\n$ PROX_MRT             &lt;dbl&gt; 0.5607188, 0.6584461, 0.3053433, 0.6910183, 0.528…\n$ PROX_PARK            &lt;dbl&gt; 1.1710446, 0.1992269, 0.2779886, 0.9832843, 0.116…\n$ PROX_PRIMARY_SCH     &lt;dbl&gt; 1.6340256, 0.9747834, 1.4715016, 1.4546324, 0.709…\n$ PROX_TOP_PRIMARY_SCH &lt;dbl&gt; 3.3273195, 0.9747834, 1.4715016, 2.3006394, 0.709…\n$ PROX_SHOPPING_MALL   &lt;dbl&gt; 2.2102717, 2.9374279, 1.2256850, 0.3525671, 1.307…\n$ PROX_SUPERMARKET     &lt;dbl&gt; 0.9103958, 0.5900617, 0.4135583, 0.4162219, 0.581…\n$ PROX_BUS_STOP        &lt;dbl&gt; 0.10336166, 0.28673408, 0.28504777, 0.29872340, 0…\n$ NO_Of_UNITS          &lt;dbl&gt; 18, 20, 27, 30, 30, 31, 32, 32, 32, 32, 34, 34, 3…\n$ FAMILY_FRIENDLY      &lt;dbl&gt; 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0…\n$ FREEHOLD             &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1…\n$ geometry             &lt;POINT [m]&gt; POINT (22085.12 29951.54), POINT (25656.84 …"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#checking-for-overlapping-points",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#checking-for-overlapping-points",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.3.2 Checking for overlapping points",
+    "text": "14.3.2 Checking for overlapping points\n\noverlapping_points &lt;- mdata %&gt;%\n  mutate(overlap = lengths(st_equals(., .)) &gt; 1)\nsummary(overlapping_points$overlap)\n\n   Mode   FALSE    TRUE \nlogical    1332     104 \n\n\nMany transactions share exactly the same coordinates because units in the same development have the same location. Identical locations make the local distance matrices used by GWR and GRF degenerate, so the points are jittered slightly."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#spatial-jitter",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#spatial-jitter",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.3.3 Spatial jitter",
+    "text": "14.3.3 Spatial jitter\n\nset.seed(1234)\nmdata &lt;- mdata %&gt;%\n  st_jitter(amount = 1)\n\n\nmdata %&gt;%\n  mutate(overlap = lengths(st_equals(., .)) &gt; 1) %&gt;%\n  pull(overlap) %&gt;%\n  summary()\n\n   Mode   FALSE \nlogical    1436"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#data-sampling",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#data-sampling",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.3.4 Data sampling",
+    "text": "14.3.4 Data sampling\n\nset.seed(1234)\nresale_split &lt;- initial_split(mdata,\n                              prop = 7.5/10)\ntrain_data &lt;- training(resale_split)\ntest_data &lt;- testing(resale_split)\n\n\nwrite_rds(train_data, \"data/model/train_data.rds\")\nwrite_rds(test_data, \"data/model/test_data.rds\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#computing-adaptive-bandwidth",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#computing-adaptive-bandwidth",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.7.1 Computing adaptive bandwidth",
+    "text": "14.7.1 Computing adaptive bandwidth\n\nif (!file.exists(\"data/model/bw_adaptive.rds\")) {\n  bw_adaptive &lt;- bw.gwr(\n    formula = SELLING_PRICE ~ AREA_SQM + AGE +\n      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +\n      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +\n      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +\n      PROX_BUS_STOP + NO_Of_UNITS +\n      FAMILY_FRIENDLY + FREEHOLD,\n    data = train_data,\n    approach = \"CV\",\n    kernel = \"gaussian\",\n    adaptive = TRUE,\n    longlat = FALSE)\n  write_rds(bw_adaptive, \"data/model/bw_adaptive.rds\")\n}\nbw_adaptive &lt;- read_rds(\"data/model/bw_adaptive.rds\")\nbw_adaptive\n\n[1] 19"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#constructing-the-adaptive-bandwidth-gwr-model",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#constructing-the-adaptive-bandwidth-gwr-model",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.7.2 Constructing the adaptive bandwidth GWR model",
+    "text": "14.7.2 Constructing the adaptive bandwidth GWR model\n\nif (!file.exists(\"data/model/gwr_adaptive.rds\")) {\n  gwr_adaptive &lt;- gwr.basic(\n    formula = SELLING_PRICE ~ AREA_SQM + AGE +\n      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +\n      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +\n      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +\n      PROX_BUS_STOP + NO_Of_UNITS +\n      FAMILY_FRIENDLY + FREEHOLD,\n    data = train_data,\n    bw = bw_adaptive,\n    kernel = \"gaussian\",\n    adaptive = TRUE,\n    longlat = FALSE)\n  write_rds(gwr_adaptive, \"data/model/gwr_adaptive.rds\")\n}"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#retrieving-the-gwr-output-object",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#retrieving-the-gwr-output-object",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.7.3 Retrieving the GWR output object",
+    "text": "14.7.3 Retrieving the GWR output object\n\ngwr_adaptive &lt;- read_rds(\"data/model/gwr_adaptive.rds\")\ngwr_adaptive\n\n   ***********************************************************************\n   *                       Package   GWmodel                             *\n   ***********************************************************************\n   Program starts at: 2026-11-05 20:07:18.432568 \n   Call:\n   gwr.basic(formula = SELLING_PRICE ~ AREA_SQM + AGE + PROX_CBD + \n    PROX_CHILDCARE + PROX_ELDERLYCARE + PROX_URA_GROWTH_AREA + \n    PROX_MRT + PROX_PARK + PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + \n    PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, \n    data = train_data, bw = bw_adaptive, kernel = \"gaussian\", \n    adaptive = TRUE, longlat = FALSE)\n\n   Dependent (y) variable:  SELLING_PRICE\n   Independent variables:  AREA_SQM AGE PROX_CBD PROX_CHILDCARE PROX_ELDERLYCARE PROX_URA_GROWTH_AREA PROX_MRT PROX_PARK PROX_PRIMARY_SCH PROX_SHOPPING_MALL PROX_BUS_STOP NO_Of_UNITS FAMILY_FRIENDLY FREEHOLD\n   Number of data points: 1077\n   ***********************************************************************\n   *                    Results of Global Regression                     *\n   ***********************************************************************\n\n   Call:\n    lm(formula = formula, data = data)\n\n   Residuals:\n     Min       1Q   Median       3Q      Max \n-3137780  -263427   -28092   224188  5314473 \n\n   Coefficients:\n                          Estimate Std. Error t value Pr(&gt;|t|)    \n   (Intercept)           683286.15   98634.14   6.927 7.41e-12 ***\n   AREA_SQM               11372.47     337.28  33.718  &lt; 2e-16 ***\n   AGE                   -17031.81    2609.40  -6.527 1.04e-10 ***\n   PROX_CBD              -77343.30    5357.13 -14.437  &lt; 2e-16 ***\n   PROX_CHILDCARE       -234251.98  100132.71  -2.339 0.019499 *  \n   PROX_ELDERLYCARE      150522.05   37215.45   4.045 5.62e-05 ***\n   PROX_URA_GROWTH_AREA   42340.35   11035.85   3.837 0.000132 ***\n   PROX_MRT             -236561.73   52836.31  -4.477 8.38e-06 ***\n   PROX_PARK             512017.80   61599.25   8.312 2.85e-16 ***\n   PROX_PRIMARY_SCH       43429.64   55923.67   0.777 0.437575    \n   PROX_SHOPPING_MALL   -179717.54   33812.66  -5.315 1.30e-07 ***\n   PROX_BUS_STOP         616862.34  122837.58   5.022 6.00e-07 ***\n   NO_Of_UNITS             -204.22      80.45  -2.538 0.011278 *  \n   FAMILY_FRIENDLY        55895.02   43972.00   1.271 0.203954    \n   FREEHOLD              325534.26   44326.14   7.344 4.12e-13 ***\n\n   ---Significance stars\n   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 \n   Residual standard error: 602200 on 1062 degrees of freedom\n   Multiple R-squared: 0.7025\n   Adjusted R-squared: 0.6986 \n   F-statistic: 179.1 on 14 and 1062 DF,  p-value: &lt; 2.2e-16 \n   ***Extra Diagnostic information\n   Residual sum of squares: 3.850976e+14\n   Sigma(hat): 598523.5\n   AIC:  31739.38\n   AICc:  31739.89\n   BIC:  30853.8\n   ***********************************************************************\n   *          Results of Geographically Weighted Regression              *\n   ***********************************************************************\n\n   *********************Model calibration information*********************\n   Kernel function: gaussian \n   Adaptive bandwidth: 19 (number of nearest neighbours)\n   Regression points: the same locations as observations are used.\n   Distance metric: Euclidean distance metric is used.\n\n   ****************Summary of GWR coefficient estimates:******************\n                               Min.     1st Qu.      Median     3rd Qu.\n   Intercept            -5.9487e+08 -1.2183e+05  9.9517e+05  2.2210e+06\n   AREA_SQM              2.5995e+03  6.0405e+03  7.4973e+03  1.1193e+04\n   AGE                  -8.9524e+04 -2.7714e+04 -1.2972e+04 -6.2649e+03\n   PROX_CBD             -1.6820e+07 -3.6339e+05 -1.0908e+05 -3.7184e+04\n   PROX_CHILDCARE       -3.6606e+06 -2.8977e+05 -2.1638e+04  3.4673e+05\n   PROX_ELDERLYCARE     -5.8673e+06 -1.2615e+05  5.2178e+04  3.2460e+05\n   PROX_URA_GROWTH_AREA -6.8697e+07 -4.6848e+03  8.6109e+04  3.7327e+05\n   PROX_MRT             -2.2590e+08 -8.1816e+05 -2.0396e+05  4.4128e+04\n   PROX_PARK            -3.3019e+06 -2.1611e+05  1.7856e+05  5.9350e+05\n   PROX_PRIMARY_SCH     -4.0902e+06 -2.2369e+05 -2.6867e+04  2.6395e+05\n   PROX_SHOPPING_MALL   -1.9604e+07 -1.8762e+05 -1.1318e+04  1.7460e+05\n   PROX_BUS_STOP        -3.6686e+06 -1.0827e+05  4.1316e+05  1.6581e+06\n   NO_Of_UNITS          -2.9907e+03 -2.3847e+02 -4.2665e+01  1.3772e+02\n   FAMILY_FRIENDLY      -8.4758e+06 -7.4778e+04  1.8327e+04  1.3480e+05\n   FREEHOLD             -1.0766e+06  3.6167e+04  1.8188e+05  3.9395e+05\n                              Max.\n   Intercept            1.1958e+08\n   AREA_SQM             1.7818e+04\n   AGE                  3.4436e+05\n   PROX_CBD             7.7132e+07\n   PROX_CHILDCARE       2.8785e+06\n   PROX_ELDERLYCARE     1.4978e+07\n   PROX_URA_GROWTH_AREA 4.4143e+07\n   PROX_MRT             2.2261e+07\n   PROX_PARK            3.2066e+06\n   PROX_PRIMARY_SCH     1.0409e+07\n   PROX_SHOPPING_MALL   2.2824e+08\n   PROX_BUS_STOP        6.6595e+06\n   NO_Of_UNITS          5.1805e+03\n   FAMILY_FRIENDLY      2.0924e+06\n   FREEHOLD             1.8360e+06\n   ************************Diagnostic information*************************\n   Number of data points: 1077 \n   Effective number of parameters (2trace(S) - trace(S'S)): 402.5439 \n   Effective degrees of freedom (n-2trace(S) + trace(S'S)): 674.4561 \n   AICc (GWR book, Fotheringham, et al. 2002, p. 61, eq 2.33): 31151.92 \n   AIC (GWR book, Fotheringham, et al. 2002,GWR p. 96, eq. 4.22): 30491.83 \n   BIC (GWR book, Fotheringham, et al. 2002,GWR p. 61, eq. 2.34): 31450.05 \n   Residual sum of squares: 9.082704e+13 \n   R-square value:  0.9298397 \n   Adjusted R-square value:  0.8879028 \n\n   ***********************************************************************\n   Program stops at: 2026-11-05 20:07:19.413328"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#computing-adaptive-bandwidth-for-the-test-data",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#computing-adaptive-bandwidth-for-the-test-data",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.7.4 Computing adaptive bandwidth for the test data",
+    "text": "14.7.4 Computing adaptive bandwidth for the test data\n\nif (!file.exists(\"data/model/gwr_bw_test_adaptive.rds\")) {\n  gwr_bw_test_adaptive &lt;- bw.gwr(\n    formula = SELLING_PRICE ~ AREA_SQM + AGE +\n      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +\n      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +\n      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +\n      PROX_BUS_STOP + NO_Of_UNITS +\n      FAMILY_FRIENDLY + FREEHOLD,\n    data = test_data,\n    approach = \"CV\",\n    kernel = \"gaussian\",\n    adaptive = TRUE,\n    longlat = FALSE)\n  write_rds(gwr_bw_test_adaptive, \"data/model/gwr_bw_test_adaptive.rds\")\n}\ngwr_bw_test_adaptive &lt;- read_rds(\"data/model/gwr_bw_test_adaptive.rds\")\ngwr_bw_test_adaptive\n\n[1] 50"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#computing-predicted-values-of-the-test-data",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#computing-predicted-values-of-the-test-data",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.7.5 Computing predicted values of the test data",
+    "text": "14.7.5 Computing predicted values of the test data\nThe textbook predicts with a fixed bandwidth of 200 neighbours, which suits its much larger HDB data set. With about a thousand training points here, the bandwidth calibrated on the training data in 14.7.1 is used instead.\n\nif (!file.exists(\"data/model/gwr_pred.rds\")) {\n  gwr_pred &lt;- gwr.predict(\n    formula = SELLING_PRICE ~ AREA_SQM + AGE +\n      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +\n      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +\n      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +\n      PROX_BUS_STOP + NO_Of_UNITS +\n      FAMILY_FRIENDLY + FREEHOLD,\n    data = train_data,\n    predictdata = test_data,\n    bw = bw_adaptive,\n    kernel = \"gaussian\",\n    adaptive = TRUE,\n    longlat = FALSE)\n  write_rds(gwr_pred, \"data/model/gwr_pred.rds\")\n}\ngwr_pred &lt;- read_rds(\"data/model/gwr_pred.rds\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#preparing-coordinates-data",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#preparing-coordinates-data",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.8.1 Preparing coordinates data",
+    "text": "14.8.1 Preparing coordinates data\n\ncoords &lt;- st_coordinates(mdata)\ncoords_train &lt;- st_coordinates(train_data)\ncoords_test &lt;- st_coordinates(test_data)\n\n\nwrite_rds(coords_train, \"data/model/coords_train.rds\")\nwrite_rds(coords_test, \"data/model/coords_test.rds\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#dropping-the-geometry-field",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#dropping-the-geometry-field",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.8.2 Dropping the geometry field",
+    "text": "14.8.2 Dropping the geometry field\n\ntrain_data_nogeom &lt;- train_data %&gt;%\n  st_drop_geometry()\n\ntest_data_nogeom &lt;- test_data %&gt;%\n  st_drop_geometry()"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#calibrating-a-non-spatial-random-forest-model",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#calibrating-a-non-spatial-random-forest-model",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.8.3 Calibrating a non-spatial random forest model",
+    "text": "14.8.3 Calibrating a non-spatial random forest model\n\nset.seed(1234)\nrf &lt;- ranger(\n  formula = SELLING_PRICE ~ AREA_SQM + AGE +\n    PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +\n    PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +\n    PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +\n    PROX_BUS_STOP + NO_Of_UNITS +\n    FAMILY_FRIENDLY + FREEHOLD,\n  data = train_data_nogeom)\nrf\n\nRanger result\n\nCall:\n ranger(formula = SELLING_PRICE ~ AREA_SQM + AGE + PROX_CBD +      PROX_CHILDCARE + PROX_ELDERLYCARE + PROX_URA_GROWTH_AREA +      PROX_MRT + PROX_PARK + PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +      PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD,      data = train_data_nogeom) \n\nType:                             Regression \nNumber of trees:                  500 \nSample size:                      1077 \nNumber of independent variables:  14 \nMtry:                             3 \nTarget node size:                 5 \nVariable importance mode:         none \nSplitrule:                        variance \nOOB prediction error (MSE):       262117281290 \nR squared (OOB):                  0.7821365 \n\n\n\nwrite_rds(rf, \"data/model/rf.rds\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#calibrating-using-training-data",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#calibrating-using-training-data",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.9.1 Calibrating using training data",
+    "text": "14.9.1 Calibrating using training data\n\nif (!file.exists(\"data/model/gwRF_adaptive.rds\")) {\n  set.seed(1234)\n  gwRF_adaptive &lt;- grf(\n    formula = SELLING_PRICE ~ AREA_SQM + AGE +\n      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +\n      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +\n      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +\n      PROX_BUS_STOP + NO_Of_UNITS +\n      FAMILY_FRIENDLY + FREEHOLD,\n    dframe = train_data_nogeom,\n    bw = 40,\n    kernel = \"adaptive\",\n    coords = coords_train,\n    print.results = FALSE)\n  write_rds(gwRF_adaptive, \"data/model/gwRF_adaptive.rds\")\n}\ngwRF_adaptive &lt;- read_rds(\"data/model/gwRF_adaptive.rds\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#predicting-by-using-test-data",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#predicting-by-using-test-data",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.9.2 Predicting by using test data",
+    "text": "14.9.2 Predicting by using test data\n\n14.9.2.1 Preparing the test data\n\ntest_data_nogeom &lt;- cbind(\n  test_data, coords_test) %&gt;%\n  st_drop_geometry()\n\n\n\n14.9.2.2 Predicting with test data\n\nif (!file.exists(\"data/model/GRF_pred.rds\")) {\n  gwRF_pred &lt;- predict(gwRF_adaptive,\n                       test_data_nogeom,\n                       x.var.name = \"X\",\n                       y.var.name = \"Y\",\n                       local.w = 1,\n                       global.w = 0)\n  write_rds(gwRF_pred, \"data/model/GRF_pred.rds\")\n}\n\n\n\n14.9.2.3 Converting the predicting output into a data frame\n\nGRF_pred &lt;- read_rds(\"data/model/GRF_pred.rds\")\nGRF_pred_df &lt;- as.data.frame(GRF_pred)\n\n\ntest_data_p &lt;- cbind(\n  test_data, GRF_pred_df) %&gt;%\n  select(SELLING_PRICE, GRF_pred)\n\n\nwrite_rds(test_data_p, \"data/model/test_data_p.rds\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#calculating-root-mean-square-error",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#calculating-root-mean-square-error",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.9.3 Calculating Root Mean Square Error",
+    "text": "14.9.3 Calculating Root Mean Square Error\n\nrmse(test_data_p$SELLING_PRICE,\n     test_data_p$GRF_pred)\n\n[1] 1084255"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#visualising-the-predicted-values",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#visualising-the-predicted-values",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.9.4 Visualising the predicted values",
+    "text": "14.9.4 Visualising the predicted values\n\nggplot(data = test_data_p,\n       aes(x = GRF_pred,\n           y = SELLING_PRICE)) +\n  geom_point() +\n  geom_abline(intercept = 0, slope = 1, colour = \"red\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#comparing-the-four-models",
+    "href": "Hands-on_Ex/Hands-on_Ex10/Hands-on_Ex10.html#comparing-the-four-models",
+    "title": "Hands-on Exercise 10: Geographically Weighted Predictive Models",
+    "section": "14.9.5 Comparing the four models",
+    "text": "14.9.5 Comparing the four models\n\nmodel_rmse &lt;- tibble(\n  Model = c(\"Multiple linear regression\",\n            \"GWR\",\n            \"Random forest\",\n            \"Geographical random forest\"),\n  RMSE = c(\n    rmse(test_data$SELLING_PRICE,\n         predict(price_mlr, newdata = test_data_nogeom)),\n    rmse(test_data$SELLING_PRICE,\n         gwr_pred$SDF$prediction),\n    rmse(test_data$SELLING_PRICE,\n         predict(rf, data = test_data_nogeom)$predictions),\n    rmse(test_data_p$SELLING_PRICE,\n         test_data_p$GRF_pred))) %&gt;%\n  arrange(RMSE)\nmodel_rmse\n\n# A tibble: 4 × 2\n  Model                          RMSE\n  &lt;chr&gt;                         &lt;dbl&gt;\n1 GWR                         839356.\n2 Random forest              1059523.\n3 Geographical random forest 1084255.\n4 Multiple linear regression 1116643."
+  },
+  {
     "objectID": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04.html",
     "href": "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04.html",
     "title": "Hands-on Exercise 04: Spatial Weights and Applications",

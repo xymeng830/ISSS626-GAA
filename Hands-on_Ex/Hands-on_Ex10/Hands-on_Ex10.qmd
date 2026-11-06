@@ -1,0 +1,398 @@
+---
+title: "Hands-on Exercise 10: Geographically Weighted Predictive Models"
+author: "Meng Xinyu"
+date: "`r Sys.Date()`"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+editor: visual
+---
+
+# 14.1 Overview
+
+This exercise follows Chapter 14 of *R for Geospatial Data Science and Analytics*: building predictive models for property resale prices with a non-spatial multiple linear regression, a geographically weighted regression (GWR), a random forest and a geographical random forest (GRF), and comparing how well each predicts unseen data.
+
+::: callout-note
+## About the data
+
+The textbook uses `mdata.rds`, a prepared HDB resale data set that was not made available for this exercise. The same workflow is therefore applied to the 2015 private condominium resale data (`Condo_resale_2015.csv`) used in Hands-on Exercise 9. It contains the same kinds of variables: the resale price, structural attributes (floor area, age) and proximity measures to amenities, together with the coordinates of each transaction. Variable names in the models below are adapted accordingly.
+:::
+
+# 14.2 Getting Started
+
+```{r}
+pacman::p_load(sf, spdep, GWmodel, SpatialML,
+               tmap, rsample, Metrics,
+               ranger, tidyverse)
+```
+
+The model-fitting steps in this exercise (bandwidth search, GWR prediction and the geographical random forest) are slow, so each one saves its result to `data/model/` the first time it runs and reads it back afterwards.
+
+```{r}
+dir.create("data/model", recursive = TRUE, showWarnings = FALSE)
+```
+
+# 14.3 Preparing Data
+
+## 14.3.1 Importing the data and converting it to sf
+
+```{r}
+condo_resale <- read_csv("data/aspatial/Condo_resale_2015.csv")
+```
+
+```{r}
+mdata <- condo_resale %>%
+  st_as_sf(coords = c("LONGITUDE", "LATITUDE"),
+           crs = 4326) %>%
+  st_transform(crs = 3414) %>%
+  select(SELLING_PRICE, AREA_SQM, AGE,
+         PROX_CBD, PROX_CHILDCARE, PROX_ELDERLYCARE,
+         PROX_URA_GROWTH_AREA, PROX_HAWKER_MARKET,
+         PROX_KINDERGARTEN, PROX_MRT, PROX_PARK,
+         PROX_PRIMARY_SCH, PROX_TOP_PRIMARY_SCH,
+         PROX_SHOPPING_MALL, PROX_SUPERMARKET,
+         PROX_BUS_STOP, NO_Of_UNITS,
+         FAMILY_FRIENDLY, FREEHOLD)
+```
+
+```{r}
+write_rds(mdata, "data/model/mdata.rds")
+```
+
+```{r}
+glimpse(mdata)
+```
+
+## 14.3.2 Checking for overlapping points
+
+```{r}
+overlapping_points <- mdata %>%
+  mutate(overlap = lengths(st_equals(., .)) > 1)
+summary(overlapping_points$overlap)
+```
+
+Many transactions share exactly the same coordinates because units in the same development have the same location. Identical locations make the local distance matrices used by GWR and GRF degenerate, so the points are jittered slightly.
+
+## 14.3.3 Spatial jitter
+
+```{r}
+set.seed(1234)
+mdata <- mdata %>%
+  st_jitter(amount = 1)
+```
+
+```{r}
+mdata %>%
+  mutate(overlap = lengths(st_equals(., .)) > 1) %>%
+  pull(overlap) %>%
+  summary()
+```
+
+## 14.3.4 Data sampling
+
+```{r}
+set.seed(1234)
+resale_split <- initial_split(mdata,
+                              prop = 7.5/10)
+train_data <- training(resale_split)
+test_data <- testing(resale_split)
+```
+
+```{r}
+write_rds(train_data, "data/model/train_data.rds")
+write_rds(test_data, "data/model/test_data.rds")
+```
+
+# 14.4 Computing Correlation Matrix
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+mdata_nogeo <- mdata %>%
+  st_drop_geometry()
+corrplot::corrplot(cor(mdata_nogeo[, 2:19]),
+                   diag = FALSE,
+                   order = "AOE",
+                   tl.pos = "td",
+                   tl.cex = 0.5,
+                   method = "number",
+                   type = "upper")
+```
+
+Following Hands-on Exercise 9, the variables that were not significant in the global model (hawker market, kindergarten, top primary school and supermarket proximity) are left out of the models below.
+
+# 14.5 Retrieving the Stored Data
+
+```{r}
+train_data <- read_rds("data/model/train_data.rds")
+test_data <- read_rds("data/model/test_data.rds")
+```
+
+# 14.6 Building a non-spatial multiple linear regression
+
+```{r}
+price_mlr <- lm(SELLING_PRICE ~ AREA_SQM + AGE +
+                  PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+                  PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+                  PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +
+                  PROX_BUS_STOP + NO_Of_UNITS +
+                  FAMILY_FRIENDLY + FREEHOLD,
+                data = train_data)
+summary(price_mlr)
+```
+
+```{r}
+write_rds(price_mlr, "data/model/price_mlr.rds")
+```
+
+# 14.7 GWR predictive method
+
+## 14.7.1 Computing adaptive bandwidth
+
+```{r}
+if (!file.exists("data/model/bw_adaptive.rds")) {
+  bw_adaptive <- bw.gwr(
+    formula = SELLING_PRICE ~ AREA_SQM + AGE +
+      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +
+      PROX_BUS_STOP + NO_Of_UNITS +
+      FAMILY_FRIENDLY + FREEHOLD,
+    data = train_data,
+    approach = "CV",
+    kernel = "gaussian",
+    adaptive = TRUE,
+    longlat = FALSE)
+  write_rds(bw_adaptive, "data/model/bw_adaptive.rds")
+}
+bw_adaptive <- read_rds("data/model/bw_adaptive.rds")
+bw_adaptive
+```
+
+## 14.7.2 Constructing the adaptive bandwidth GWR model
+
+```{r}
+if (!file.exists("data/model/gwr_adaptive.rds")) {
+  gwr_adaptive <- gwr.basic(
+    formula = SELLING_PRICE ~ AREA_SQM + AGE +
+      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +
+      PROX_BUS_STOP + NO_Of_UNITS +
+      FAMILY_FRIENDLY + FREEHOLD,
+    data = train_data,
+    bw = bw_adaptive,
+    kernel = "gaussian",
+    adaptive = TRUE,
+    longlat = FALSE)
+  write_rds(gwr_adaptive, "data/model/gwr_adaptive.rds")
+}
+```
+
+## 14.7.3 Retrieving the GWR output object
+
+```{r}
+gwr_adaptive <- read_rds("data/model/gwr_adaptive.rds")
+gwr_adaptive
+```
+
+## 14.7.4 Computing adaptive bandwidth for the test data
+
+```{r}
+if (!file.exists("data/model/gwr_bw_test_adaptive.rds")) {
+  gwr_bw_test_adaptive <- bw.gwr(
+    formula = SELLING_PRICE ~ AREA_SQM + AGE +
+      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +
+      PROX_BUS_STOP + NO_Of_UNITS +
+      FAMILY_FRIENDLY + FREEHOLD,
+    data = test_data,
+    approach = "CV",
+    kernel = "gaussian",
+    adaptive = TRUE,
+    longlat = FALSE)
+  write_rds(gwr_bw_test_adaptive, "data/model/gwr_bw_test_adaptive.rds")
+}
+gwr_bw_test_adaptive <- read_rds("data/model/gwr_bw_test_adaptive.rds")
+gwr_bw_test_adaptive
+```
+
+## 14.7.5 Computing predicted values of the test data
+
+The textbook predicts with a fixed bandwidth of 200 neighbours, which suits its much larger HDB data set. With about a thousand training points here, the bandwidth calibrated on the training data in 14.7.1 is used instead.
+
+```{r}
+if (!file.exists("data/model/gwr_pred.rds")) {
+  gwr_pred <- gwr.predict(
+    formula = SELLING_PRICE ~ AREA_SQM + AGE +
+      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +
+      PROX_BUS_STOP + NO_Of_UNITS +
+      FAMILY_FRIENDLY + FREEHOLD,
+    data = train_data,
+    predictdata = test_data,
+    bw = bw_adaptive,
+    kernel = "gaussian",
+    adaptive = TRUE,
+    longlat = FALSE)
+  write_rds(gwr_pred, "data/model/gwr_pred.rds")
+}
+gwr_pred <- read_rds("data/model/gwr_pred.rds")
+```
+
+# 14.8 Calibrating Random Forest Model
+
+## 14.8.1 Preparing coordinates data
+
+```{r}
+coords <- st_coordinates(mdata)
+coords_train <- st_coordinates(train_data)
+coords_test <- st_coordinates(test_data)
+```
+
+```{r}
+write_rds(coords_train, "data/model/coords_train.rds")
+write_rds(coords_test, "data/model/coords_test.rds")
+```
+
+## 14.8.2 Dropping the geometry field
+
+```{r}
+train_data_nogeom <- train_data %>%
+  st_drop_geometry()
+
+test_data_nogeom <- test_data %>%
+  st_drop_geometry()
+```
+
+## 14.8.3 Calibrating a non-spatial random forest model
+
+```{r}
+set.seed(1234)
+rf <- ranger(
+  formula = SELLING_PRICE ~ AREA_SQM + AGE +
+    PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+    PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+    PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +
+    PROX_BUS_STOP + NO_Of_UNITS +
+    FAMILY_FRIENDLY + FREEHOLD,
+  data = train_data_nogeom)
+rf
+```
+
+```{r}
+write_rds(rf, "data/model/rf.rds")
+```
+
+# 14.9 Calibrating Geographical Random Forest Model
+
+## 14.9.1 Calibrating using training data
+
+```{r}
+if (!file.exists("data/model/gwRF_adaptive.rds")) {
+  set.seed(1234)
+  gwRF_adaptive <- grf(
+    formula = SELLING_PRICE ~ AREA_SQM + AGE +
+      PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+      PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+      PROX_PRIMARY_SCH + PROX_SHOPPING_MALL +
+      PROX_BUS_STOP + NO_Of_UNITS +
+      FAMILY_FRIENDLY + FREEHOLD,
+    dframe = train_data_nogeom,
+    bw = 40,
+    kernel = "adaptive",
+    coords = coords_train,
+    print.results = FALSE)
+  write_rds(gwRF_adaptive, "data/model/gwRF_adaptive.rds")
+}
+gwRF_adaptive <- read_rds("data/model/gwRF_adaptive.rds")
+```
+
+## 14.9.2 Predicting by using test data
+
+### 14.9.2.1 Preparing the test data
+
+```{r}
+test_data_nogeom <- cbind(
+  test_data, coords_test) %>%
+  st_drop_geometry()
+```
+
+### 14.9.2.2 Predicting with test data
+
+```{r}
+if (!file.exists("data/model/GRF_pred.rds")) {
+  gwRF_pred <- predict(gwRF_adaptive,
+                       test_data_nogeom,
+                       x.var.name = "X",
+                       y.var.name = "Y",
+                       local.w = 1,
+                       global.w = 0)
+  write_rds(gwRF_pred, "data/model/GRF_pred.rds")
+}
+```
+
+### 14.9.2.3 Converting the predicting output into a data frame
+
+```{r}
+GRF_pred <- read_rds("data/model/GRF_pred.rds")
+GRF_pred_df <- as.data.frame(GRF_pred)
+```
+
+```{r}
+test_data_p <- cbind(
+  test_data, GRF_pred_df) %>%
+  select(SELLING_PRICE, GRF_pred)
+```
+
+```{r}
+write_rds(test_data_p, "data/model/test_data_p.rds")
+```
+
+## 14.9.3 Calculating Root Mean Square Error
+
+```{r}
+rmse(test_data_p$SELLING_PRICE,
+     test_data_p$GRF_pred)
+```
+
+## 14.9.4 Visualising the predicted values
+
+```{r}
+ggplot(data = test_data_p,
+       aes(x = GRF_pred,
+           y = SELLING_PRICE)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, colour = "red")
+```
+
+## 14.9.5 Comparing the four models
+
+```{r}
+model_rmse <- tibble(
+  Model = c("Multiple linear regression",
+            "GWR",
+            "Random forest",
+            "Geographical random forest"),
+  RMSE = c(
+    rmse(test_data$SELLING_PRICE,
+         predict(price_mlr, newdata = test_data_nogeom)),
+    rmse(test_data$SELLING_PRICE,
+         gwr_pred$SDF$prediction),
+    rmse(test_data$SELLING_PRICE,
+         predict(rf, data = test_data_nogeom)$predictions),
+    rmse(test_data_p$SELLING_PRICE,
+         test_data_p$GRF_pred))) %>%
+  arrange(RMSE)
+model_rmse
+```
+
+# What I Learned
+
+This exercise moved from explaining resale prices to predicting them, comparing a global multiple linear regression, a geographically weighted regression (GWR), a random forest and a geographical random forest (GRF). Because the textbook's prepared HDB data set was not available, I applied the same workflow to the 2015 condominium resale data, which also showed that the method transfers to any point data with a price, its drivers and coordinates. Before modelling, I learned to check for overlapping points and apply a small spatial jitter, since many units in the same development share identical coordinates and that breaks the local distance calculations in GWR and GRF, and to split the data into training and test sets with rsample so that accuracy is judged on unseen transactions. GWR lets each coefficient vary across space, while GRF fits a local random forest around every location using an adaptive bandwidth of nearby neighbours, capturing both spatial variation and non-linear relationships. Comparing the test-set RMSE of the four models gave a result I did not expect: GWR predicted best (RMSE of about 0.84 million), while the random forest and the geographical random forest performed similarly to each other (about 1.07 and 1.08 million) and only slightly better than the linear model (about 1.12 million). With only about a thousand training transactions, each local forest in GRF is trained on just 40 neighbours, which is too little data for a random forest to learn much, whereas GWR's local linear fits remain stable. The more flexible model is not automatically the more accurate one, and the size of the data matters when choosing between them. A practical lesson was that these models are computationally heavy, so saving fitted models as rds files and reading them back is essential for keeping a Quarto site renderable.
